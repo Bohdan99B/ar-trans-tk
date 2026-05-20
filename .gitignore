@@ -41,3 +41,14 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+
+Create or reset the first ADMIN locally:
+
+```bash
+npm run admin:create -- director@example.com "strong-password" "Director Name"
+```
+
+Only an authenticated `ADMIN` can open `/{locale}/admin/employees`, create employee invitations, or delete employees. New employees are created without a plaintext password. The ADMIN creates an invitation, shares the generated invite link, and the employee sets their own password on `/{locale}/accept-invite?token=...`.
+
+Deleting an employee removes the `User`; Prisma cascades related `Account`, `Session`, and `EmployeeInvitation` records. Current business tables do not have owner/author/assignee relations to `User`, so there are no business records to transfer or delete with the employee account.

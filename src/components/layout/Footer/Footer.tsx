@@ -1,14 +1,19 @@
+import { getServerSession } from "next-auth";
 import Link from "next/link";
 
 import { Logo } from "@/components/brand/Logo";
+import { authOptions } from "@/lib/auth";
 
+import { EmployeeAuthAction } from "./EmployeeAuthAction";
 import styles from "./Footer.module.css";
 
 type FooterProps = {
   locale: string;
 };
 
-export function Footer({ locale }: FooterProps) {
+export async function Footer({ locale }: FooterProps) {
+  const session = await getServerSession(authOptions);
+
   return (
     <footer className={styles.footer}>
       <div className={styles.brandBlock}>
@@ -22,6 +27,7 @@ export function Footer({ locale }: FooterProps) {
         <Link href={`/${locale}/order`}>Отримати розрахунок</Link>
         <Link href={`/${locale}/status`}>Статус заявки</Link>
         <Link href={`/${locale}/privacy-policy`}>Політика конфіденційності</Link>
+        <EmployeeAuthAction isAuthenticated={Boolean(session?.user)} locale={locale} />
       </nav>
       <div className={styles.contactLine}>
         <a href="tel:+380671204588">+380 (67) 120-45-88</a>

@@ -11,18 +11,26 @@ enum UserRole {
   MANAGER
 }
 
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+}
+
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  passwordHash  String?
-  role          UserRole  @default(ADMIN)
-  accounts      Account[]
-  sessions      Session[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                         String               @id @default(cuid())
+  name                       String?
+  email                      String               @unique
+  emailVerified              DateTime?
+  image                      String?
+  passwordHash               String?
+  role                       UserRole             @default(MANAGER)
+  accounts                   Account[]
+  sessions                   Session[]
+  employeeInvitations        EmployeeInvitation[]
+  createdEmployeeInvitations EmployeeInvitation[] @relation("CreatedEmployeeInvitations")
+  createdAt                  DateTime             @default(now())
+  updatedAt                  DateTime             @updatedAt
 }
 
 model Account {
@@ -57,6 +65,26 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model EmployeeInvitation {
+  id          String           @id @default(cuid())
+  email       String
+  tokenHash   String           @unique
+  role        UserRole         @default(MANAGER)
+  status      InvitationStatus @default(PENDING)
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdById String?
+  createdBy   User?            @relation("CreatedEmployeeInvitations", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([email])
+  @@index([userId])
+  @@index([createdById])
 }
 
 model RequestStatus {

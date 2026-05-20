@@ -1,11 +1,11 @@
-# AR Trans TK
+# AR-Trans TC
 
-Next.js full-stack застосунок для транспортної компанії, що спеціалізується на рефрижераторних перевезеннях фурами до 22 тонн.
+Web app for transport company " AR-Trans "
 
-## Стек
+## Stack
 
 - Next.js App Router, TypeScript
-- CSS Modules без Tailwind
+- CSS Modules
 - PostgreSQL, Prisma
 - Auth.js / NextAuth з Prisma Adapter
 - Nodemailer
@@ -13,17 +13,9 @@ Next.js full-stack застосунок для транспортної комп
 - Cloudinary helpers
 - Docker
 
-## Запуск локально
+## Local run
 
-```bash
-npm install
-npx prisma migrate dev
-npx prisma generate
-npm run dev
-npx prisma studio
-```
-
-Сайт відкриється на `http://localhost:3000/uk`.
+    npm run dev
 
 ## Docker
 
@@ -31,14 +23,18 @@ npx prisma studio
 docker compose up --build
 ```
 
-PostgreSQL у Docker доступний на `localhost:5433`.
+PostgreSQL is available on `localhost:5433`.
 
 ## Env
 
-Скопіюйте `.env.example` у `.env` та заповніть `DATABASE_URL`, `NEXTAUTH_SECRET`, SMTP і Cloudinary змінні за потреби.
+Setup environment variables
+DATABASE_URL=postgresql...
 
-Cloudinary змінні необов'язкові для публічних сторінок. Якщо SMTP не налаштований, заявки все одно зберігаються в базі.
+## Prisma migration
 
-## Адмін
+In source of project:
 
-Адмінка доступна за `/uk/admin` після входу через NextAuth Credentials provider. Створіть адміністратора в базі з `passwordHash` bcrypt.
+```bash
+npx prisma migrate deploy
+npx prisma generate
+```

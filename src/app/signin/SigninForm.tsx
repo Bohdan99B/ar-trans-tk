@@ -1,0 +1,82 @@
+"use client";
+
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+import { getPostLoginPath } from "@/lib/auth-redirects";
+
+import styles from "./Signin.module.css";
+
+type SigninFormProps = {
+  callbackUrl?: string;
+};
+
+type SessionPayload = {
+  user?: {
+    role?: "ADMIN" | "MANAGER";
+  };
+};
+
+export function SigninForm({ callbackUrl }: SigninFormProps) {
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get("email") ?? "").trim();
+    const password = String(formData.get("password") ?? "");
+
+    if (!email || !password) {
+      setError("Вкажіть email і пароль.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+
+    if (!result?.ok) {
+      setIsSubmitting(false);
+      setError("Неправильний email або пароль.");
+      return;
+    }
+
+    const sessionResponse = await fetch("/api/auth/session", { cache: "no-store" });
+    const session = (await sessionResponse.json().catch(() => null)) as SessionPayload | null;
+    const role = session?.user?.role;
+
+    setIsSubmitting(false);
+    if (!role) {
+      setError("Вхід лише для співробітників компанії.");
+      return;
+    }
+
+    router.replace(getPostLoginPath(role, callbackUrl));
+    router.refresh();
+  }
+
+  return (
+    <form className={styles.form} onSubmit={handleSubmit}>
+      <label>
+        Email
+        <input autoComplete="email" inputMode="email" name="email" required type="email" />
+      </label>
+      <label>
+        Пароль
+        <input autoComplete="current-password" name="password" required type="password" />
+      </label>
+      {error ? <p className={styles.error}>{error}</p> : null}
+      <button disabled={isSubmitting} type="submit">
+        {isSubmitting ? "Вхід..." : "Увійти"}
+      </button>
+    </form>
+  );
+}

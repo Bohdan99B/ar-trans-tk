@@ -2,13 +2,14 @@ import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { authOptions } from "@/lib/auth";
+import { authOptions, getCurrentUser } from "@/lib/auth";
 
 import styles from "../Site.module.css";
 
 const adminLinks = [
   ["requests", "Заявки"],
   ["statuses", "Статуси"],
+  ["employees", "Співробітники"],
   ["managers", "Менеджери"],
   ["services", "Послуги"],
   ["fleet", "Автопарк"],
@@ -30,7 +31,12 @@ export default async function AdminLayout({ children, params }: AdminLayoutProps
   const { locale } = await params;
 
   if (!session?.user) {
-    redirect(`/api/auth/signin?callbackUrl=/${locale}/admin`);
+    redirect(`/signin?callbackUrl=/${locale}/admin`);
+  }
+
+  const user = await getCurrentUser();
+  if (user?.role !== "ADMIN") {
+    redirect(`/${locale}`);
   }
 
   return (

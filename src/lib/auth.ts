@@ -1,5 +1,7 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
+import type { UserRole } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { getServerSession } from "next-auth";
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
@@ -8,15 +10,26 @@ import { prisma } from "@/lib/prisma";
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as NextAuthOptions["adapter"],
   callbacks: {
+    async jwt({ token, user }) {
+      if (user?.id) {
+        const dbUser = await prisma.user.findUnique({
+          select: { role: true },
+          where: { id: user.id },
+        });
+        token.role = dbUser?.role;
+      }
+      return token;
+    },
     session({ session, token }) {
       if (session.user) {
         session.user.id = token.sub ?? "";
+        session.user.role = token.role as UserRole | undefined;
       }
       return session;
     },
   },
   pages: {
-    signIn: "/api/auth/signin",
+    signIn: "/signin",
   },
   providers: [
     CredentialsProvider({
@@ -47,6 +60,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           id: user.id,
           name: user.name,
+          role: user.role,
         };
       },
     }),
@@ -56,3 +70,24 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
 };
+
+export async function getCurrentUser() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return null;
+  }
+
+  return prisma.user.findUnique({
+    select: { email: true, id: true, name: true, role: true },
+    where: { id: session.user.id },
+  });
+}
+
+export async function requireAdmin() {
+  const user = await getCurrentUser();
+  if (!user || user.role !== "ADMIN") {
+    return null;
+  }
+
+  return user;
+}
