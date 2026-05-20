@@ -1,0 +1,25 @@
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://transport_user:transport_password@postgres:5432/transport_company_db?schema=public
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: transport_company_db
+      POSTGRES_USER: transport_user
+      POSTGRES_PASSWORD: transport_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - transport_pg_data:/var/lib/postgresql/data
+
+volumes:
+  transport_pg_data:

@@ -1,0 +1,45 @@
+.logo {
+  align-items: center;
+  display: inline-flex;
+  gap: 12px;
+  min-width: 0;
+}
+
+.mark {
+  flex: 0 0 auto;
+  height: 42px;
+  width: 80px;
+}
+
+.word {
+  display: grid;
+  gap: 1px;
+  line-height: 1;
+}
+
+.word strong {
+  color: var(--color-text);
+  font-family: var(--font-heading), var(--font-inter), sans-serif;
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+}
+
+.word small {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 420px) {
+  .mark {
+    height: 36px;
+    width: 68px;
+  }
+
+  .word small {
+    display: none;
+  }
+}

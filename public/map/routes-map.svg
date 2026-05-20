@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title desc">
+  <title id="title">Routes map placeholder</title>
+  <desc id="desc">A simplified placeholder map for transport routes.</desc>
+  <rect width="640" height="360" fill="#f8fafc"/>
+  <path d="M92 240 C190 125 292 210 382 112 S522 115 560 62" fill="none" stroke="#2563eb" stroke-width="8" stroke-linecap="round"/>
+  <path d="M118 278 C230 260 312 305 430 230 S520 204 575 170" fill="none" stroke="#16a34a" stroke-width="6" stroke-linecap="round"/>
+  <g fill="#111827">
+    <circle cx="92" cy="240" r="10"/>
+    <circle cx="382" cy="112" r="10"/>
+    <circle cx="560" cy="62" r="10"/>
+    <circle cx="118" cy="278" r="8"/>
+    <circle cx="575" cy="170" r="8"/>
+  </g>
+</svg>
