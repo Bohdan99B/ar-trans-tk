@@ -2,9 +2,12 @@ import Link from "next/link";
 
 import { OrderForm } from "@/components/forms/OrderForm";
 import { ContactCallbackForm } from "@/components/forms/ContactCallbackForm";
-import { RouteMap } from "@/components/sections/RouteMap";
+import { EuropeMap } from "@/components/sections/EuropeMap";
+import { SectionIcon } from "@/components/sections/Icons";
+import { ReviewsCarousel } from "@/components/sections/ReviewsCarousel";
+import { TemperatureDashboard } from "@/components/sections/TemperatureDashboard";
 import { TruckIllustration } from "@/components/sections/TruckIllustration";
-import { faqs, fleet, managers, reviews, routes, services } from "@/lib/content";
+import { faqs, fleet, managers, routes, services } from "@/lib/content";
 
 import buttonStyles from "@/components/ui/Buttons.module.css";
 import styles from "./Site.module.css";
@@ -43,12 +46,12 @@ export default async function HomePage({ params }: HomePageProps) {
             </div>
             <div className={styles.stats}>
               <div className={styles.stat}>
-                <b>10+</b>
+                <b>20+</b>
                 <span>років досвіду</span>
               </div>
               <div className={styles.stat}>
-                <b>25+</b>
-                <span>напрямків</span>
+                <b>50+</b>
+                <span>вантажівок</span>
               </div>
               <div className={styles.stat}>
                 <b>24/7</b>
@@ -72,9 +75,9 @@ export default async function HomePage({ params }: HomePageProps) {
             <p className={styles.eyebrow}>Про компанію</p>
             <h2 className={styles.heading}>Преміальна логістика без зайвої театральності</h2>
             <p className={styles.lead}>
-              Працюємо з бізнесом, якому потрібні прогнозовані терміни, зрозуміла ставка,
-              контроль доставки й менеджер, який тримає маршрут у фокусі від заявки до
-              розвантаження.
+              ПП «АР-Транс» засноване у 2002 році в Трускавці. Компанія працює з бізнесом,
+              якому потрібні прогнозовані терміни, CMR-страхування, GPS-контроль,
+              температурна дисципліна й менеджер, який тримає маршрут у фокусі.
             </p>
           </div>
           <OrderForm compact />
@@ -88,7 +91,7 @@ export default async function HomePage({ params }: HomePageProps) {
           <div className={styles.grid}>
             {services.map((service) => (
               <Link className={styles.card} href={`/${locale}/services/${service.slug}`} key={service.slug}>
-                <span className={styles.icon}>{service.icon}</span>
+                <span className={styles.icon}><SectionIcon label={service.icon} /></span>
                 <h3>{service.titleUk}</h3>
                 <p>{service.summaryUk}</p>
               </Link>
@@ -115,7 +118,7 @@ export default async function HomePage({ params }: HomePageProps) {
               ))}
             </ul>
           </div>
-          <RouteMap />
+          <EuropeMap />
         </div>
       </section>
 
@@ -124,7 +127,7 @@ export default async function HomePage({ params }: HomePageProps) {
           <p className={styles.eyebrow}>Автопарк</p>
           <h2 className={styles.heading}>Червоний тягач і білий рефрижератор як робочий стандарт</h2>
           <div className={styles.split}>
-            <TruckIllustration compact />
+            <TemperatureDashboard />
             <div className={styles.grid}>
               {fleet.map((vehicle) => (
                 <article className={styles.card} key={vehicle.title}>
@@ -176,14 +179,20 @@ export default async function HomePage({ params }: HomePageProps) {
               <h3>Кредитування</h3>
               <p>Відстрочка платежу для постійних клієнтів після погодження умов.</p>
             </article>
-            {reviews.map((review) => (
-              <article className={styles.card} key={review.author}>
-                <span className={styles.icon}>“</span>
-                <h3>{review.author}</h3>
-                <p>{review.body}</p>
-              </article>
-            ))}
+            <article className={styles.card}>
+              <span className={styles.icon}>CMR</span>
+              <h3>Страхування до 550 000$</h3>
+              <p>Документи, CMR-покриття та контроль ризиків для міжнародних перевезень.</p>
+            </article>
           </div>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <div className={styles.container}>
+          <p className={styles.eyebrow}>Відгуки</p>
+          <h2 className={styles.heading}>Довіра клієнтів — показник якості рейсу</h2>
+          <ReviewsCarousel />
         </div>
       </section>
 

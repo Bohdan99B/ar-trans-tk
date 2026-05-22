@@ -1,5 +1,5 @@
 import { PageHero } from "@/components/sections/PageHero";
-import { RouteMap } from "@/components/sections/RouteMap";
+import { EuropeMap } from "@/components/sections/EuropeMap";
 import { routes } from "@/lib/content";
 
 import styles from "../Site.module.css";
@@ -9,12 +9,12 @@ export default function GeographyPage() {
     <>
       <PageHero
         eyebrow="Географія"
-        text="Статична схема напрямків показує ключові внутрішні та міжнародні маршрути без підключення Google Maps API."
-        title="Напрямки перевезень"
+        text="ПП «АР-Транс» здійснює перевезення по всій території Європи. Основний акцент — Італія, а також Німеччина, Франція, Іспанія, Бельгія, Нідерланди, Чехія, Австрія та інші країни."
+        title="Європейська географія з фокусом на Італію"
       />
       <section className={styles.sectionAlt}>
         <div className={`${styles.container} ${styles.split}`}>
-          <RouteMap />
+          <EuropeMap />
           <ul className={styles.routeList}>
             {routes.map((route) => (
               <li key={route.country}>

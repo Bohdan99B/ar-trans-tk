@@ -1,5 +1,5 @@
 import { PageHero } from "@/components/sections/PageHero";
-import { RouteMap } from "@/components/sections/RouteMap";
+import { EuropeMap } from "@/components/sections/EuropeMap";
 import { routes } from "@/lib/content";
 
 import styles from "../../Site.module.css";
@@ -9,14 +9,14 @@ export default function InternationalTransportPage() {
     <>
       <PageHero
         eyebrow="Експорт та імпорт"
-        text="Працюємо з температурними вантажами між Україною та країнами Європи без Google Maps API: маршрути представлені статичною схемою."
+        text="Оптимальні маршрути, митний супровід, документація, страхування та контроль доставки між Україною та країнами Європи."
         title="Міжнародні рефрижераторні перевезення"
       />
       <section className={styles.sectionAlt}>
         <div className={`${styles.container} ${styles.split}`}>
-          <RouteMap />
+          <EuropeMap />
           <ul className={styles.routeList}>
-            {routes.slice(1).map((route) => (
+            {routes.map((route) => (
               <li key={route.country}>
                 <strong>{route.country}</strong>
                 <span>{route.destination}</span>

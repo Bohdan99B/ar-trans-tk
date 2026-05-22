@@ -1,27 +1,26 @@
 import { QuestionForm } from "@/components/forms/QuestionForm";
+import { FaqAccordion } from "@/components/sections/FaqAccordion";
 import { PageHero } from "@/components/sections/PageHero";
-import { faqs } from "@/lib/content";
 
 import styles from "../Site.module.css";
 
-export default function FaqPage() {
+type FaqPageProps = {
+  params: Promise<{ locale: string }>;
+};
+
+export default async function FaqPage({ params }: FaqPageProps) {
+  const { locale } = await params;
+
   return (
     <>
       <PageHero
         eyebrow="FAQ"
-        text="Відповіді на базові питання про температурні перевезення, статус заявки та регулярну співпрацю."
+        text="Клікабельні відповіді на базові питання про вантажі, країни, страхування та терміни доставки."
         title="Питання / відповіді"
       />
       <section className={styles.sectionAlt}>
         <div className={`${styles.container} ${styles.split}`}>
-          <div className={styles.grid}>
-            {faqs.map((faq) => (
-              <article className={styles.card} key={faq.q}>
-                <h2>{faq.q}</h2>
-                <p>{faq.a}</p>
-              </article>
-            ))}
-          </div>
+          <FaqAccordion locale={locale} />
           <QuestionForm />
         </div>
       </section>

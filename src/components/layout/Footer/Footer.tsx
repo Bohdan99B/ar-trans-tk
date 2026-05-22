@@ -21,8 +21,12 @@ export async function Footer({ locale }: FooterProps) {
         <p>Вантажні, міжнародні та рефрижераторні перевезення для бізнесу по Україні та Європі.</p>
       </div>
       <nav className={styles.links} aria-label="Footer navigation">
+        <Link href={`/${locale}/about-company`}>Про компанію</Link>
         <Link href={`/${locale}/services`}>Послуги</Link>
         <Link href={`/${locale}/fleet`}>Автопарк</Link>
+        <Link href={`/${locale}/geography`}>Географія</Link>
+        <Link href={`/${locale}/reviews`}>Відгуки</Link>
+        <Link href={`/${locale}/faq`}>FAQ</Link>
         <Link href={`/${locale}/contacts`}>Контакти</Link>
         <Link href={`/${locale}/order`}>Отримати розрахунок</Link>
         <Link href={`/${locale}/status`}>Статус заявки</Link>

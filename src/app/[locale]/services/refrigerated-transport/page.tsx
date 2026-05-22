@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { PageHero } from "@/components/sections/PageHero";
+import { TemperatureDashboard } from "@/components/sections/TemperatureDashboard";
 import buttonStyles from "@/components/ui/Buttons.module.css";
 
 import styles from "../../Site.module.css";
@@ -13,18 +14,32 @@ export default async function RefrigeratedTransportPage({ params }: PageProps) {
     <>
       <PageHero
         eyebrow="Ключова послуга"
-        text="Фури-рефрижератори до 22 тонн для вантажів, яким потрібен стабільний температурний режим, чистий кузов, контроль маршруту та зрозуміла комунікація."
-        title="Рефрижераторні перевезення до 22 т"
+        text="Професійні перевезення вантажів, що потребують дотримання температурного режиму. Рефрижератори забезпечують стабільну температуру під час усього маршруту."
+        title="Рефрижераторні перевезення 20-23 т"
       />
       <section className={styles.sectionAlt}>
         <div className={`${styles.container} ${styles.split}`}>
+          <TemperatureDashboard />
           <div className={styles.card}>
             <h2>Що перевозимо</h2>
-            <p>Охолоджені та заморожені продукти, напої, фармацевтичні товари, сировину та інші температурні вантажі.</p>
+            <ul>
+              <li>продукти харчування;</li>
+              <li>молочну продукцію;</li>
+              <li>м&apos;ясо та рибу;</li>
+              <li>медикаменти;</li>
+              <li>фармацевтичну продукцію;</li>
+              <li>інші чутливі вантажі.</li>
+            </ul>
           </div>
           <div className={styles.card}>
-            <h2>Як контролюємо</h2>
-            <p>Погоджуємо режим до виїзду, фіксуємо вимоги до завантаження, тримаємо менеджерський супровід під час рейсу.</p>
+            <h2>Можливості</h2>
+            <ul>
+              <li>двокамерні рефрижератори;</li>
+              <li>температурний контроль;</li>
+              <li>моніторинг у режимі поточного часу;</li>
+              <li>звітність по температурі;</li>
+              <li>GPS-контроль маршруту.</li>
+            </ul>
           </div>
           <div className={buttonStyles.row}>
             <Link className={buttonStyles.primary} href={`/${locale}/order`}>

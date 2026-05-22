@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { PageHero } from "@/components/sections/PageHero";
+import { SectionIcon } from "@/components/sections/Icons";
 import { services } from "@/lib/content";
 
 import styles from "../Site.module.css";
@@ -16,16 +17,22 @@ export default async function ServicesPage({ params }: ServicesPageProps) {
     <>
       <PageHero
         eyebrow="Наші послуги"
-        text="Компанія фокусується на рефрижераторних перевезеннях фурами до 22 тонн, міжнародних маршрутах, збірних вантажах для постійних клієнтів та гнучких умовах оплати."
-        title="Температурна логістика для бізнесу"
+        text="Рефрижераторні, міжнародні та внутрішні перевезення з GPS-контролем, температурною звітністю, CMR-страхуванням і менеджерським супроводом."
+        title="Логістичні сервіси для контрольованої доставки"
       />
       <section className={styles.sectionAlt}>
-        <div className={`${styles.container} ${styles.grid}`}>
+        <div className={`${styles.container} ${styles.grid} ${styles.gridThree}`}>
           {services.map((service) => (
             <Link className={styles.card} href={`/${locale}/services/${service.slug}`} key={service.slug}>
-              <span className={styles.icon}>{service.icon}</span>
+              <span className={styles.icon}><SectionIcon label={service.icon} /></span>
               <h2>{service.titleUk}</h2>
               <p>{service.summaryUk}</p>
+              <ul>
+                {service.bulletsUk.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+              <span className={styles.cardCta}>Детальніше</span>
             </Link>
           ))}
         </div>
