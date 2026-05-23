@@ -13,10 +13,9 @@ export default function FleetPage() {
         title="Сучасний автопарк для Європи"
       />
       <section className={styles.sectionAlt}>
-        <div className={`${styles.container} ${styles.grid}`}>
+        <div className={`${styles.container} ${styles.fleetGrid}`}>
           {fleet.map((vehicle) => (
-            <article className={styles.card} key={vehicle.title}>
-              <span className={styles.icon}>50+</span>
+            <article className={`${styles.card} ${styles.fleetCard}`} key={vehicle.title}>
               <h2>{vehicle.title}</h2>
               <p>{vehicle.details}</p>
               <p>{vehicle.temp}</p>

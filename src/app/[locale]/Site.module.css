@@ -58,6 +58,11 @@
   width: 8px;
 }
 
+.heroEyebrow {
+  display: flex;
+  width: fit-content;
+}
+
 .title {
   font-size: clamp(36px, 7vw, 72px);
   letter-spacing: 0;
@@ -84,6 +89,14 @@
   font-size: clamp(16px, 2vw, 18px);
   line-height: 1.72;
   max-width: 760px;
+}
+
+.sectionIntro {
+  color: var(--color-text-soft);
+  font-size: 16px;
+  line-height: 1.7;
+  margin: 0 0 24px;
+  max-width: 680px;
 }
 
 .richText {
@@ -184,7 +197,7 @@
   color: var(--color-text-soft);
   display: inline-flex;
   gap: 10px;
-  margin-bottom: 24px;
+  margin: 4px 0 24px;
   padding: 8px 14px 8px 8px;
 }
 
@@ -236,6 +249,17 @@
   gap: 16px;
 }
 
+.fleetPreview {
+  align-items: stretch;
+  display: grid;
+  gap: clamp(20px, 4vw, 36px);
+}
+
+.fleetGrid {
+  display: grid;
+  gap: 16px;
+}
+
 .card {
   backdrop-filter: blur(18px);
   background:
@@ -280,6 +304,30 @@
 
 .grid > .card {
   height: 100%;
+}
+
+.fleetCard {
+  display: flex;
+  flex-direction: column;
+  min-height: 230px;
+  overflow-wrap: break-word;
+}
+
+.fleetCard h2,
+.fleetCard h3 {
+  margin-top: 0;
+}
+
+.fleetCard .icon + h2,
+.fleetCard .icon + h3 {
+  margin-top: 14px;
+}
+
+.fleetCard p:last-child {
+  color: var(--color-secondary);
+  font-weight: 900;
+  margin-top: auto;
+  padding-top: 16px;
 }
 
 .featureGrid > .card {
@@ -360,6 +408,29 @@ a.card:hover,
 .split {
   display: grid;
   gap: clamp(24px, 5vw, 56px);
+}
+
+.homeFaqLayout {
+  align-items: start;
+  display: grid;
+  gap: clamp(24px, 5vw, 56px);
+}
+
+.homeFaqContent {
+  min-width: 0;
+}
+
+.homeFaqGrid {
+  display: grid;
+  gap: 16px;
+}
+
+.homeFaqCard {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 230px;
+  overflow-wrap: break-word;
 }
 
 .map {
@@ -648,9 +719,10 @@ a.card:hover,
 .tempZones strong {
   color: var(--color-secondary);
   display: block;
-  font-size: clamp(40px, 6vw, 64px);
+  font-size: clamp(30px, 4.4vw, 50px);
   line-height: 1;
   margin: 8px 0;
+  white-space: nowrap;
 }
 
 .tempZones em {
@@ -714,6 +786,7 @@ a.card:hover,
   background: transparent;
   border: 0;
   color: var(--color-text);
+  cursor: pointer;
   display: flex;
   font-weight: 900;
   justify-content: space-between;
@@ -727,13 +800,40 @@ a.card:hover,
   color: var(--color-secondary);
   font-size: 28px;
   line-height: 1;
+  transition: transform 180ms ease;
+}
+
+.accordionItem button[aria-expanded="true"] b {
+  transform: rotate(180deg);
 }
 
 .accordionBody {
-  animation: fadeSlide 220ms ease both;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid transparent;
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    border-color 180ms ease,
+    grid-template-rows 240ms ease,
+    opacity 180ms ease;
+}
+
+.accordionBody[data-open="true"] {
+  border-color: var(--color-border);
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.accordionBodyInner {
   display: grid;
   gap: 12px;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0 20px;
+  transition: padding 240ms ease;
+}
+
+.accordionBody[data-open="true"] .accordionBodyInner {
   padding: 18px 20px 22px;
 }
 
@@ -745,6 +845,37 @@ a.card:hover,
 .accordionBody a {
   color: var(--color-secondary);
   font-weight: 900;
+}
+
+.faqLayout {
+  display: grid;
+  gap: clamp(28px, 5vw, 52px);
+}
+
+.faqGrid {
+  align-items: stretch;
+  gap: clamp(14px, 2vw, 18px);
+  grid-template-columns: 1fr;
+}
+
+.faqGrid .accordionItem {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.faqGrid .accordionItem button {
+  flex: 0 0 auto;
+}
+
+.faqGrid .accordionBody {
+  flex: 1;
+}
+
+.faqForm {
+  justify-self: center;
+  max-width: 620px;
+  width: 100%;
 }
 
 .carousel {
@@ -1071,6 +1202,15 @@ a.card:hover,
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .faqGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .fleetGrid,
+  .homeFaqGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .section,
   .sectionAlt {
     padding-left: 28px;
@@ -1099,13 +1239,29 @@ a.card:hover,
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .fleetGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .gridThree {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .faqGrid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   }
 
   .split {
     align-items: start;
     grid-template-columns: minmax(0, 1.02fr) minmax(340px, 0.98fr);
+  }
+
+  .fleetPreview {
+    grid-template-columns: minmax(320px, 0.78fr) minmax(0, 1.22fr);
+  }
+
+  .homeFaqLayout {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.42fr);
   }
 
   .carousel {

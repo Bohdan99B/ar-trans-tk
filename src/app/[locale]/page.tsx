@@ -24,11 +24,11 @@ export default async function HomePage({ params }: HomePageProps) {
       <section className={styles.hero}>
         <div className={styles.heroInner}>
           <div className={styles.heroText}>
+            <p className={`${styles.eyebrow} ${styles.heroEyebrow}`}>Логістика для бізнесу</p>
             <div className={styles.heroBadge}>
               <span>AR-TRANS</span>
-              Україна • Європа • температурний контроль
+              Україна • Європа
             </div>
-            <p className={styles.eyebrow}>Логістика для бізнесу</p>
             <h1 className={styles.title}>
               Надійна логістика для бізнесу по Україні та Європі
             </h1>
@@ -70,17 +70,14 @@ export default async function HomePage({ params }: HomePageProps) {
       </section>
 
       <section className={styles.section}>
-        <div className={`${styles.container} ${styles.split}`}>
-          <div>
-            <p className={styles.eyebrow}>Про компанію</p>
-            <h2 className={styles.heading}>Преміальна логістика без зайвої театральності</h2>
-            <p className={styles.lead}>
-              ПП «АР-Транс» засноване у 2002 році в Трускавці. Компанія працює з бізнесом,
-              якому потрібні прогнозовані терміни, CMR-страхування, GPS-контроль,
-              температурна дисципліна й менеджер, який тримає маршрут у фокусі.
-            </p>
-          </div>
-          <OrderForm compact />
+        <div className={styles.container}>
+          <p className={styles.eyebrow}>Про компанію</p>
+          <h2 className={styles.heading}>Преміальна логістика без зайвої театральності</h2>
+          <p className={styles.lead}>
+            ПП «АР-Транс» засноване у 2002 році в Трускавці. Компанія працює з бізнесом,
+            якому потрібні прогнозовані терміни, CMR-страхування, GPS-контроль,
+            температурна дисципліна й менеджер, який тримає маршрут у фокусі.
+          </p>
         </div>
       </section>
 
@@ -125,13 +122,12 @@ export default async function HomePage({ params }: HomePageProps) {
       <section className={styles.sectionAlt}>
         <div className={styles.container}>
           <p className={styles.eyebrow}>Автопарк</p>
-          <h2 className={styles.heading}>Червоний тягач і білий рефрижератор як робочий стандарт</h2>
-          <div className={styles.split}>
+          <h2 className={styles.heading}>Сучасний автопарк для міжнародних рефрижераторних перевезень</h2>
+          <div className={styles.fleetPreview}>
             <TemperatureDashboard />
-            <div className={styles.grid}>
+            <div className={styles.fleetGrid}>
               {fleet.map((vehicle) => (
-                <article className={styles.card} key={vehicle.title}>
-                  <span className={styles.icon}>22T</span>
+                <article className={`${styles.card} ${styles.fleetCard}`} key={vehicle.title}>
                   <h3>{vehicle.title}</h3>
                   <p>{vehicle.details}</p>
                   <p>{vehicle.temp}</p>
@@ -197,13 +193,13 @@ export default async function HomePage({ params }: HomePageProps) {
       </section>
 
       <section className={styles.section}>
-        <div className={`${styles.container} ${styles.split}`}>
-          <div>
+        <div className={`${styles.container} ${styles.homeFaqLayout}`}>
+          <div className={styles.homeFaqContent}>
             <p className={styles.eyebrow}>FAQ</p>
             <h2 className={styles.heading}>Питання / відповіді</h2>
-            <div className={styles.grid}>
+            <div className={styles.homeFaqGrid}>
               {faqs.map((faq) => (
-                <article className={styles.card} key={faq.q}>
+                <article className={`${styles.card} ${styles.homeFaqCard}`} key={faq.q}>
                   <h3>{faq.q}</h3>
                   <p>{faq.a}</p>
                 </article>

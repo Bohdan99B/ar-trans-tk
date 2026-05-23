@@ -166,8 +166,12 @@ export default async function AboutCompanyPage({ params }: AboutCompanyPageProps
       <section className={styles.section}>
         <div className={`${styles.container} ${styles.split}`}>
           <div>
-            <p className={styles.eyebrow}>CTA</p>
-            <h2 className={styles.heading}>Підберемо транспорт, маршрут і температурний режим</h2>
+            <p className={styles.eyebrow}>Консультація з менеджером</p>
+            <h2 className={styles.heading}>Організуємо перевезення з контролем умов доставки</h2>
+            <p className={styles.sectionIntro}>
+              Ознайомтесь із відповідями на найпоширеніші запитання щодо перевезень, маршрутів,
+              страхування та логістичних умов.
+            </p>
             <FaqAccordion locale={locale} />
           </div>
           <ContactCallbackForm />

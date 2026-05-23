@@ -4,7 +4,11 @@ import { FormEvent, useState } from "react";
 
 import styles from "./Forms.module.css";
 
-export function QuestionForm() {
+type QuestionFormProps = {
+  className?: string;
+};
+
+export function QuestionForm({ className }: QuestionFormProps) {
   const [message, setMessage] = useState("");
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -19,7 +23,7 @@ export function QuestionForm() {
   }
 
   return (
-    <form className={styles.form} onSubmit={onSubmit}>
+    <form className={`${styles.form}${className ? ` ${className}` : ""}`} onSubmit={onSubmit}>
       <label className={styles.field}>
         <span>Ваш контакт *</span>
         <input name="contact" required />

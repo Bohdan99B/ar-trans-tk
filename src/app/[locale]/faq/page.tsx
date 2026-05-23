@@ -15,13 +15,13 @@ export default async function FaqPage({ params }: FaqPageProps) {
     <>
       <PageHero
         eyebrow="FAQ"
-        text="Клікабельні відповіді на базові питання про вантажі, країни, страхування та терміни доставки."
-        title="Питання / відповіді"
+        text="Зібрали найпоширеніші питання клієнтів щодо перевезень, географії доставки, страхування та логістичних процесів."
+        title="Найчастіші запитання"
       />
       <section className={styles.sectionAlt}>
-        <div className={`${styles.container} ${styles.split}`}>
-          <FaqAccordion locale={locale} />
-          <QuestionForm />
+        <div className={`${styles.container} ${styles.faqLayout}`}>
+          <FaqAccordion className={styles.faqGrid} locale={locale} />
+          <QuestionForm className={styles.faqForm} />
         </div>
       </section>
     </>

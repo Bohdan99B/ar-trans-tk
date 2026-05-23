@@ -19,6 +19,10 @@
   gap: 6px;
 }
 
+.dateField {
+  position: relative;
+}
+
 .field span {
   color: var(--color-text-soft);
   font-size: 13px;
@@ -49,6 +53,114 @@
   resize: vertical;
 }
 
+.fieldHint {
+  color: #fb923c;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateY(-2px);
+  transition:
+    max-height 180ms ease,
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.fieldHint[data-visible="true"] {
+  max-height: 28px;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.datePicker {
+  backdrop-filter: blur(20px);
+  background: rgba(10, 18, 31, 0.98);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 18px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.36);
+  display: grid;
+  gap: 12px;
+  left: auto;
+  min-width: 286px;
+  padding: 14px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 10;
+}
+
+.datePickerHeader {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.datePickerHeader strong {
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.datePickerHeader button,
+.datePickerGrid button {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  color: var(--color-text);
+  cursor: pointer;
+  display: inline-flex;
+  font-weight: 900;
+  justify-content: center;
+  min-height: 34px;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+.datePickerHeader button {
+  font-size: 22px;
+  width: 38px;
+}
+
+.datePickerGrid {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.datePickerGrid span {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+.datePickerGrid i {
+  min-height: 34px;
+}
+
+.datePickerGrid button {
+  color: var(--color-text-soft);
+  min-width: 0;
+  padding: 0;
+}
+
+.datePickerGrid button:disabled {
+  cursor: not-allowed;
+  opacity: 0.34;
+}
+
+.datePickerHeader button:hover,
+.datePickerGrid button:not(:disabled):hover,
+.selectedDate {
+  background: linear-gradient(135deg, var(--color-secondary), var(--color-accent));
+  border-color: transparent;
+  color: #111b26;
+}
+
 .button {
   background: linear-gradient(135deg, var(--color-secondary), var(--color-accent));
   border: 0;
@@ -77,5 +189,19 @@
 
   .wide {
     grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 1100px) {
+  .datePicker {
+    right: 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .datePicker {
+    left: 0;
+    min-width: 0;
+    right: 0;
   }
 }

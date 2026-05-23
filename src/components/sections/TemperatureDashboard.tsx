@@ -9,7 +9,7 @@ export function TemperatureDashboard() {
       <div className={styles.tempZones}>
         <div>
           <span>Камера</span>
-          <strong>-20 - +20</strong>
+          <strong>-20 . . . +20</strong>
         </div>
       </div>
     </div>
