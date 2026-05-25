@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Logo } from "@/components/brand/Logo";
+import { getCurrentUser } from "@/lib/auth";
 import { navItems } from "@/lib/content";
 
 import styles from "./Header.module.css";
@@ -9,7 +10,15 @@ type HeaderProps = {
   locale: string;
 };
 
-export function Header({ locale }: HeaderProps) {
+export async function Header({ locale }: HeaderProps) {
+  const user = await getCurrentUser();
+  const managementHref =
+    user?.role === "ADMIN"
+      ? `/${locale}/admin`
+      : user?.role === "MANAGER"
+        ? `/${locale}/manager`
+        : null;
+
   return (
     <header className={styles.header}>
       <Link className={styles.logo} href={`/${locale}`}>
@@ -27,6 +36,7 @@ export function Header({ locale }: HeaderProps) {
               {locale === "en" ? item.en : item.uk}
             </Link>
           ))}
+          {managementHref ? <Link href={managementHref}>Місце керування</Link> : null}
         </nav>
       </details>
       <nav className={styles.navDesktop} aria-label="Primary navigation">
@@ -35,6 +45,7 @@ export function Header({ locale }: HeaderProps) {
             {locale === "en" ? item.en : item.uk}
           </Link>
         ))}
+        {managementHref ? <Link href={managementHref}>Місце керування</Link> : null}
       </nav>
       <div className={styles.actions}>
         <a href="tel:+380671204588">+380 (67) 120-45-88</a>

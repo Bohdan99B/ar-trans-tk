@@ -1,12 +1,20 @@
 .footer {
-  align-items: start;
   background:
     radial-gradient(circle at 85% 0%, rgba(255, 211, 77, 0.12), transparent 24rem),
     linear-gradient(180deg, rgba(17, 24, 39, 0.95), #07101c);
   border-top: 1px solid var(--color-border);
-  display: grid;
-  gap: 24px;
   padding: 34px 18px;
+}
+
+.footerInner {
+  align-items: start;
+  display: grid;
+  gap: 28px;
+  grid-template-columns: 1fr;
+  margin: 0 auto;
+  max-width: var(--max-width);
+  position: relative;
+  z-index: 1;
 }
 
 .brandBlock {
@@ -20,13 +28,26 @@
   line-height: 1.7;
 }
 
+.linkGroup,
+.contactGroup {
+  display: grid;
+}
+
 .links {
   display: grid;
   gap: 10px;
 }
 
+.navLinks {
+  align-items: start;
+  column-gap: 28px;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(4, auto);
+}
+
 .links a,
-.links button {
+.contactLine button,
+.contactLine .employeeLogin {
   background: transparent;
   border: 0;
   color: var(--color-text-soft);
@@ -34,29 +55,30 @@
   text-align: left;
 }
 
-.links .employeeLogin {
+.contactLine .employeeLogin {
   border: 1px solid var(--color-border-strong);
   border-radius: 8px;
   color: var(--color-secondary);
-  margin-top: 4px;
+  margin-top: 2px;
   padding: 9px 12px;
   width: fit-content;
 }
 
 .links a:hover,
-.links button:hover,
+.contactLine button:hover,
+.contactLine .employeeLogin:hover,
 .contactLine a:hover {
   color: var(--color-secondary);
 }
 
-.links button:disabled {
+.contactLine button:disabled {
   cursor: wait;
   opacity: 0.7;
 }
 
 .contactLine {
   display: grid;
-  gap: 8px;
+  gap: 10px;
 }
 
 .contactLine a {
@@ -64,9 +86,48 @@
   font-weight: 900;
 }
 
-@media (min-width: 800px) {
+.contactLine a:last-child {
+  color: var(--color-text-soft);
+  font-weight: 700;
+}
+
+@media (min-width: 560px) {
   .footer {
-    grid-template-columns: 1fr auto auto;
+    padding: 38px 24px;
+  }
+
+  .footerInner {
+    grid-template-columns: minmax(0, 1.25fr) minmax(150px, 0.75fr);
+  }
+
+  .brandBlock {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 1120px) {
+  .footer {
     padding: 46px clamp(28px, 5vw, 72px);
+  }
+
+  .footerInner {
+    grid-template-columns: minmax(230px, 1.1fr) minmax(320px, 1.4fr) minmax(145px, 0.65fr) minmax(205px, 1fr);
+  }
+
+  .brandBlock {
+    grid-column: auto;
+  }
+
+  .navLinks {
+    column-gap: 32px;
+    grid-template-rows: repeat(3, auto);
+  }
+}
+
+@media (max-width: 420px) {
+  .navLinks {
+    grid-auto-flow: row;
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
   }
 }

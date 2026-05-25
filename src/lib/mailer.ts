@@ -6,12 +6,19 @@ type MailOptions = {
   to?: string;
 };
 
-function hasSmtpConfig() {
-  return Boolean(process.env.SMTP_HOST && process.env.SMTP_FROM);
+type MailResult = { skipped: true } | { skipped: false };
+
+function getFromAddress(email: string) {
+  const name = process.env.SMTP_FROM_NAME ?? "AR Trans TK";
+
+  return `"${name.replaceAll('"', "'")}" <${email}>`;
 }
 
-export async function sendMail(options: MailOptions) {
-  if (!hasSmtpConfig()) {
+export async function sendMail(options: MailOptions): Promise<MailResult> {
+  const host = process.env.SMTP_HOST;
+  const fromEmail = process.env.SMTP_FROM;
+
+  if (!host || !fromEmail) {
     return { skipped: true };
   }
 
@@ -23,16 +30,18 @@ export async function sendMail(options: MailOptions) {
             user: process.env.SMTP_USER,
           }
         : undefined,
-    host: process.env.SMTP_HOST,
+    host,
     port: Number(process.env.SMTP_PORT ?? 587),
     secure: process.env.SMTP_SECURE === "true",
   });
-  const from = process.env.SMTP_FROM as string;
+  const from = getFromAddress(fromEmail);
 
-  return transporter.sendMail({
+  await transporter.sendMail({
     from,
-    to: options.to ?? process.env.MANAGER_EMAIL ?? from,
+    to: options.to ?? process.env.MANAGER_EMAIL ?? fromEmail,
     subject: options.subject,
     text: options.text,
   });
+
+  return { skipped: false };
 }

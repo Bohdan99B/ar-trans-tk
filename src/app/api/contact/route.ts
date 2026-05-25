@@ -10,7 +10,7 @@ export async function POST(request: Request) {
   }
 
   await sendMail({
-    subject: "Контакт у неробочий час",
+    subject: "Зворотній зв'язок для клієнта",
     text: `Контакт: ${parsed.data.contact}\nЗручний час: ${parsed.data.time ?? "-"}`,
   }).catch(() => null);
 

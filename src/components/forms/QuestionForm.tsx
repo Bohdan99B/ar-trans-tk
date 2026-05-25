@@ -13,13 +13,16 @@ export function QuestionForm({ className }: QuestionFormProps) {
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
     const response = await fetch("/api/questions", {
-      body: JSON.stringify(Object.fromEntries(new FormData(event.currentTarget))),
+      body: JSON.stringify(Object.fromEntries(formData)),
       headers: { "Content-Type": "application/json" },
       method: "POST",
     });
     setMessage(response.ok ? "Питання надіслано менеджеру." : "Не вдалося надіслати питання.");
-    if (response.ok) event.currentTarget.reset();
+    if (response.ok) form.reset();
   }
 
   return (

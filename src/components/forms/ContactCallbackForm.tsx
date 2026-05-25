@@ -9,13 +9,15 @@ export function ContactCallbackForm() {
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
     const response = await fetch("/api/contact", {
-      body: JSON.stringify(Object.fromEntries(new FormData(event.currentTarget))),
+      body: JSON.stringify(Object.fromEntries(formData)),
       headers: { "Content-Type": "application/json" },
       method: "POST",
     });
     setMessage(response.ok ? "Контакти отримано. Менеджер зв'яжеться з вами." : "Не вдалося надіслати форму.");
-    if (response.ok) event.currentTarget.reset();
+    if (response.ok) form.reset();
   }
 
   return (

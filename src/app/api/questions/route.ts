@@ -10,7 +10,7 @@ export async function POST(request: Request) {
   }
 
   await sendMail({
-    subject: "Питання з сайту",
+    subject: "Питання з FAQ",
     text: `Контакт: ${parsed.data.contact}\nПитання: ${parsed.data.question}`,
   }).catch(() => null);
 

@@ -55,7 +55,7 @@ export async function POST(request: Request) {
   });
 
   try {
-    await sendMail({
+    const mailResult = await sendMail({
       subject: `Нова заявка ${transportRequest.requestNumber}`,
       text: [
         `Номер: ${transportRequest.requestNumber}`,
@@ -68,10 +68,12 @@ export async function POST(request: Request) {
         `Вага: ${transportRequest.weight}`,
       ].join("\n"),
     });
-    await prisma.transportRequest.update({
-      data: { emailSent: true },
-      where: { id: transportRequest.id },
-    });
+    if (!mailResult.skipped) {
+      await prisma.transportRequest.update({
+        data: { emailSent: true },
+        where: { id: transportRequest.id },
+      });
+    }
   } catch (error) {
     await prisma.transportRequest.update({
       data: {
