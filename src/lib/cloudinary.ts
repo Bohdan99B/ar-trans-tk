@@ -27,6 +27,20 @@ export async function uploadFleetPhoto(filePath: string, publicId?: string) {
   });
 }
 
+export async function uploadCmsFile(file: File, folder: string, publicId?: string, resourceType: "image" | "raw" = "image") {
+  if (!isCloudinaryConfigured) {
+    throw new Error("Cloudinary is not configured");
+  }
+
+  const contents = Buffer.from(await file.arrayBuffer()).toString("base64");
+  const source = `data:${file.type || "application/octet-stream"};base64,${contents}`;
+  return cloudinary.uploader.upload(source, {
+    folder: `ar-trans-tk/${folder}`,
+    public_id: publicId,
+    resource_type: resourceType,
+  });
+}
+
 export function getFleetPhotoUrl(publicId?: string | null) {
   if (!publicId || !process.env.CLOUDINARY_CLOUD_NAME) {
     return "/fleet/hero-truck.svg";

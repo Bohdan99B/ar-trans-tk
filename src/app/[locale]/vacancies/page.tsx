@@ -1,8 +1,15 @@
+import { VacancyApplicationForm } from "@/components/forms/VacancyApplicationForm";
 import { PageHero } from "@/components/sections/PageHero";
+import { prisma } from "@/lib/prisma";
 
 import styles from "../Site.module.css";
 
-export default function VacanciesPage() {
+type PageProps = { params: Promise<{ locale: string }> };
+
+export default async function VacanciesPage({ params }: PageProps) {
+  const { locale } = await params;
+  const vacancies = await prisma.vacancy.findMany({ orderBy: { createdAt: "desc" }, where: { status: "ACTIVE" } });
+
   return (
     <>
       <PageHero
@@ -12,10 +19,13 @@ export default function VacanciesPage() {
       />
       <section className={styles.sectionAlt}>
         <div className={`${styles.container} ${styles.grid}`}>
-          {["Водій міжнародних рейсів", "Логіст рефрижераторних перевезень"].map((title) => (
-            <article className={styles.card} key={title}>
-              <h2>{title}</h2>
-              <p>Надішліть контакти через форму на сторінці контактів, і менеджер повернеться з деталями.</p>
+          {vacancies.length === 0 ? <p>Активних вакансій зараз немає.</p> : vacancies.map((vacancy) => (
+            <article className={styles.card} key={vacancy.id}>
+              <h2>{locale === "en" ? vacancy.titleEn : vacancy.titleUk}</h2>
+              <p>{vacancy.location}{vacancy.salary ? ` · ${vacancy.salary}` : ""}</p>
+              <p>{vacancy.description}</p>
+              {vacancy.requirements ? <p>{vacancy.requirements}</p> : null}
+              <VacancyApplicationForm vacancyId={vacancy.id} />
             </article>
           ))}
         </div>

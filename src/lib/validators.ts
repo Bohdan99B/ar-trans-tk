@@ -39,5 +39,32 @@ export const questionSchema = z.object({
   question: z.string().trim().min(5),
 });
 
+export const vacancyApplicationSchema = z.object({
+  vacancyId: z.string().trim().min(1),
+  name: z.string().trim().min(2, "Вкажіть ім'я"),
+  phone: z.string().trim().min(7, "Вкажіть телефон"),
+  email: optionalEmail,
+  comment: z.string().trim().optional(),
+});
+
+export const cooperationApplicationSchema = z.object({
+  vacancyId: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.string().trim().min(1).optional(),
+  ),
+  customDirection: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.string().trim().min(2, "Вкажіть напрям співпраці").optional(),
+  ),
+  name: z.string().trim().min(2, "Вкажіть ім'я"),
+  phone: z.string().trim().min(7, "Вкажіть телефон"),
+  email: z.string().trim().email("Некоректний email"),
+  city: z.string().trim().min(2, "Вкажіть місто"),
+  comment: z.string().trim().optional(),
+}).refine((value) => Boolean(value.vacancyId || value.customDirection), {
+  message: "Оберіть напрям співпраці",
+  path: ["vacancyId"],
+});
+
 export type OrderRequestInput = z.infer<typeof orderRequestSchema>;
 export type StatusCheckInput = z.infer<typeof statusCheckSchema>;

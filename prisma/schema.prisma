@@ -17,6 +17,29 @@ enum InvitationStatus {
   EXPIRED
 }
 
+enum RequestType {
+  CONSULTATION
+  ORDER
+  FAQ
+}
+
+enum ReviewStatus {
+  PENDING
+  PUBLISHED
+  HIDDEN
+}
+
+enum VacancyStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum CooperationApplicationStatus {
+  NEW
+  CONTACTED
+  ARCHIVED
+}
+
 model User {
   id                         String               @id @default(cuid())
   name                       String?
@@ -102,15 +125,16 @@ model RequestStatus {
 model TransportRequest {
   id              String        @id @default(cuid())
   requestNumber   String        @unique
+  type            RequestType   @default(ORDER)
   name            String
   phone           String
   email           String?
   company         String?
-  origin          String
-  destination     String
-  cargoType       String
-  temperatureMode String
-  weight          String
+  origin          String?
+  destination     String?
+  cargoType       String?
+  temperatureMode String?
+  weight          String?
   comment         String?
   preferredDate   DateTime?
   emailSent       Boolean       @default(false)
@@ -149,6 +173,7 @@ model Service {
 model Vehicle {
   id              String   @id @default(cuid())
   title           String
+  description     String?  @db.Text
   brand           String?
   payloadTonnes   Decimal  @db.Decimal(5, 2)
   temperatureFrom Int
@@ -173,14 +198,15 @@ model GeographyRoute {
 }
 
 model Review {
-  id          String   @id @default(cuid())
-  author      String
-  company     String?
-  body        String   @db.Text
-  rating      Int      @default(5)
-  isPublished Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id               String       @id @default(cuid())
+  author           String
+  company          String?
+  body             String       @db.Text
+  rating           Int          @default(5)
+  moderationStatus ReviewStatus @default(PENDING)
+  isPublished      Boolean      @default(false)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
 }
 
 model BlogPost {
@@ -200,14 +226,54 @@ model BlogPost {
 }
 
 model Vacancy {
-  id          String   @id @default(cuid())
-  titleUk     String
-  titleEn     String
-  location    String
-  description String   @db.Text
-  isPublished Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                      String                   @id @default(cuid())
+  titleUk                 String
+  titleEn                 String
+  location                String
+  description             String                   @db.Text
+  requirements            String?                  @db.Text
+  salary                  String?
+  status                  VacancyStatus            @default(ACTIVE)
+  isPublished             Boolean                  @default(true)
+  applications            VacancyApplication[]
+  cooperationApplications CooperationApplication[]
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+}
+
+model VacancyApplication {
+  id         String   @id @default(cuid())
+  vacancyId  String
+  vacancy    Vacancy  @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+  name       String
+  phone      String
+  email      String?
+  comment    String?  @db.Text
+  cvUrl      String?
+  cvPublicId String?
+  createdAt  DateTime @default(now())
+
+  @@index([vacancyId])
+}
+
+model CooperationApplication {
+  id              String                       @id @default(cuid())
+  vacancyId       String?
+  vacancy         Vacancy?                     @relation(fields: [vacancyId], references: [id], onDelete: SetNull)
+  customDirection String?                      @db.Text
+  name            String
+  phone           String
+  email           String
+  city            String
+  comment         String?                      @db.Text
+  status          CooperationApplicationStatus @default(NEW)
+  emailSent       Boolean                      @default(false)
+  emailError      String?
+  createdAt       DateTime                     @default(now())
+  updatedAt       DateTime                     @updatedAt
+
+  @@index([vacancyId])
+  @@index([status, createdAt])
 }
 
 model FaqItem {

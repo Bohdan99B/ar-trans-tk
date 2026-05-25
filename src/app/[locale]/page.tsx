@@ -8,6 +8,7 @@ import { ReviewsCarousel } from "@/components/sections/ReviewsCarousel";
 import { TemperatureDashboard } from "@/components/sections/TemperatureDashboard";
 import { TruckIllustration } from "@/components/sections/TruckIllustration";
 import { faqs, fleet, managers, routes, services } from "@/lib/content";
+import { prisma } from "@/lib/prisma";
 
 import buttonStyles from "@/components/ui/Buttons.module.css";
 import styles from "./Site.module.css";
@@ -18,6 +19,20 @@ type HomePageProps = {
 
 export default async function HomePage({ params }: HomePageProps) {
   const { locale } = await params;
+  const [vehicles, publishedReviews] = await Promise.all([
+    prisma.vehicle.findMany({ orderBy: { createdAt: "desc" }, where: { isActive: true } }),
+    prisma.review.findMany({ orderBy: { createdAt: "desc" }, where: { moderationStatus: "PUBLISHED" } }),
+  ]);
+  const fleetItems = vehicles.length ? vehicles.map((vehicle) => ({
+    details: vehicle.description ?? vehicle.brand ?? "",
+    temp: `${vehicle.temperatureFrom}...${vehicle.temperatureTo} °C · ${vehicle.payloadTonnes.toString()} т`,
+    title: vehicle.title,
+  })) : fleet;
+  const reviewItems = publishedReviews.map((review) => ({
+    author: review.author,
+    body: review.body,
+    role: review.company ?? "Клієнт AR-TRANS",
+  }));
 
   return (
     <>
@@ -126,7 +141,7 @@ export default async function HomePage({ params }: HomePageProps) {
           <div className={styles.fleetPreview}>
             <TemperatureDashboard />
             <div className={styles.fleetGrid}>
-              {fleet.map((vehicle) => (
+              {fleetItems.map((vehicle) => (
                 <article className={`${styles.card} ${styles.fleetCard}`} key={vehicle.title}>
                   <h3>{vehicle.title}</h3>
                   <p>{vehicle.details}</p>
@@ -188,7 +203,7 @@ export default async function HomePage({ params }: HomePageProps) {
         <div className={styles.container}>
           <p className={styles.eyebrow}>Відгуки</p>
           <h2 className={styles.heading}>Довіра клієнтів — показник якості рейсу</h2>
-          <ReviewsCarousel />
+          <ReviewsCarousel items={reviewItems} />
         </div>
       </section>
 

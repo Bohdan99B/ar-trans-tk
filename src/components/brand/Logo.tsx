@@ -1,13 +1,16 @@
+import Image from "next/image";
+
 import styles from "./Logo.module.css";
 
 type LogoProps = {
   compact?: boolean;
+  imageUrl?: string;
 };
 
-export function Logo({ compact = false }: LogoProps) {
+export function Logo({ compact = false, imageUrl }: LogoProps) {
   return (
     <span className={styles.logo} aria-label="AR-TRANS">
-      <svg className={styles.mark} viewBox="0 0 148 78" role="img" aria-hidden="true">
+      {imageUrl ? <Image alt="AR-TRANS" className={styles.mark} height={78} src={imageUrl} width={148} /> : <svg className={styles.mark} viewBox="0 0 148 78" role="img" aria-hidden="true">
         <rect width="148" height="78" rx="12" fill="#123f90" />
         <path
           d="M17 54c9-26 28-38 57-38 16 0 30 4 42 12"
@@ -25,7 +28,7 @@ export function Logo({ compact = false }: LogoProps) {
           fill="#f8fafc"
         />
         <path d="M110 30h24v7h-8v22h-8V37h-8v-7Z" fill="#ffd34d" />
-      </svg>
+      </svg>}
       {!compact && (
         <span className={styles.word}>
           <strong>AR-TRANS</strong>

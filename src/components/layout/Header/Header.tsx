@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { getCurrentUser } from "@/lib/auth";
 import { navItems } from "@/lib/content";
+import { prisma } from "@/lib/prisma";
 
 import styles from "./Header.module.css";
 
@@ -11,7 +12,12 @@ type HeaderProps = {
 };
 
 export async function Header({ locale }: HeaderProps) {
-  const user = await getCurrentUser();
+  const [user, settings] = await Promise.all([
+    getCurrentUser(),
+    prisma.siteSetting.findMany({ where: { key: { in: ["brand.logo", "contact.phones"] } } }),
+  ]);
+  const values = Object.fromEntries(settings.map(({ key, value }) => [key, value]));
+  const phone = values["contact.phones"]?.split(/\r?\n|,/)[0]?.trim() || "+380 (67) 120-45-88";
   const managementHref =
     user?.role === "ADMIN"
       ? `/${locale}/admin`
@@ -22,7 +28,7 @@ export async function Header({ locale }: HeaderProps) {
   return (
     <header className={styles.header}>
       <Link className={styles.logo} href={`/${locale}`}>
-        <Logo />
+        <Logo imageUrl={values["brand.logo"]} />
       </Link>
       <details className={styles.menu}>
         <summary aria-label="Відкрити меню">
@@ -48,7 +54,7 @@ export async function Header({ locale }: HeaderProps) {
         {managementHref ? <Link href={managementHref}>Місце керування</Link> : null}
       </nav>
       <div className={styles.actions}>
-        <a href="tel:+380671204588">+380 (67) 120-45-88</a>
+        <a href={`tel:${phone.replaceAll(/[^+\d]/g, "")}`}>{phone}</a>
         <Link className={styles.order} href={`/${locale}/order`}>
           Розрахунок
         </Link>

@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-import { authOptions, requireAdmin } from "@/lib/auth";
+import { authOptions, requireStaff } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 type StatusRouteProps = {
@@ -13,8 +13,8 @@ export async function PATCH(request: Request, { params }: StatusRouteProps) {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const admin = await requireAdmin();
-  if (!admin) {
+  const staff = await requireStaff();
+  if (!staff) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

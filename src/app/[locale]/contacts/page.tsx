@@ -2,10 +2,21 @@ import { ContactCallbackForm } from "@/components/forms/ContactCallbackForm";
 import { OfficeMap } from "@/components/sections/OfficeMap";
 import { PageHero } from "@/components/sections/PageHero";
 import { managers } from "@/lib/content";
+import { prisma } from "@/lib/prisma";
 
 import styles from "../Site.module.css";
 
-export default function ContactsPage() {
+export default async function ContactsPage() {
+  const settings = Object.fromEntries((await prisma.siteSetting.findMany({
+    where: { key: { in: ["contact.phones", "contact.email", "contact.address", "contact.hours"] } },
+  })).map(({ key, value }) => [key, value]));
+  const contacts = settings["contact.phones"] || settings["contact.email"] ? [{
+    email: settings["contact.email"] || "sales@ar-trans-tk.ua",
+    name: "ПП «АР-Транс»",
+    phone: settings["contact.phones"]?.split(/\r?\n|,/)[0]?.trim() || "+380 (67) 120-45-88",
+    role: [settings["contact.address"], settings["contact.hours"]].filter(Boolean).join(" · ") || "Контактний центр",
+  }] : managers;
+
   return (
     <>
       <PageHero
@@ -16,7 +27,7 @@ export default function ContactsPage() {
       <section className={styles.sectionAlt}>
         <div className={`${styles.container} ${styles.split}`}>
           <div className={styles.managerList}>
-            {managers.map((manager) => (
+            {contacts.map((manager) => (
               <article className={styles.manager} key={manager.email}>
                 <h2>{manager.name}</h2>
                 <p>{manager.role}</p>

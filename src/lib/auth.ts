@@ -91,3 +91,12 @@ export async function requireAdmin() {
 
   return user;
 }
+
+export async function requireStaff() {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "ADMIN" && user.role !== "MANAGER")) {
+    return null;
+  }
+
+  return user;
+}

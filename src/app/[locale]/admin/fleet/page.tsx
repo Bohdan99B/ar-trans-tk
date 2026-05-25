@@ -1,8 +1,81 @@
-export default function AdminFleetPage() {
+import Image from "next/image";
+import { redirect } from "next/navigation";
+
+import { requireAdmin } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+
+import { ConfirmSubmitButton, SubmitButton } from "../AdminControls";
+import styles from "../Admin.module.css";
+import { deleteVehicle, saveVehicle } from "../actions";
+
+type PageProps = {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ error?: string; success?: string }>;
+};
+
+export default async function AdminFleetPage({ params, searchParams }: PageProps) {
+  const { locale } = await params;
+  if (!(await requireAdmin())) redirect(`/${locale}/admin/requests`);
+  const query = await searchParams;
+  const vehicles = await prisma.vehicle.findMany({ orderBy: { createdAt: "desc" } });
+
   return (
-    <section>
-      <h1>Fleet</h1>
-      <p>Manage fleet entries.</p>
-    </section>
+    <div className={styles.page}>
+      <div className={styles.pageHeader}>
+        <div><h2>Автопарк</h2><p className={styles.muted}>Транспорт, фото та відображення на сайті.</p></div>
+      </div>
+      {query.success ? <p className={styles.success}>{query.success}</p> : null}
+      {query.error ? <p className={styles.error}>{query.error}</p> : null}
+      <form action={saveVehicle} className={styles.form}>
+        <h2>Новий транспорт</h2>
+        <input name="locale" type="hidden" value={locale} />
+        <VehicleFields />
+        <SubmitButton>Створити транспорт</SubmitButton>
+      </form>
+      {vehicles.length === 0 ? <p className={styles.empty}>Транспорт ще не додано.</p> : (
+        <div className={styles.cards}>
+          {vehicles.map((vehicle) => (
+            <form action={saveVehicle} className={styles.form} key={vehicle.id}>
+              <h2>{vehicle.title}</h2>
+              {vehicle.photoUrl ? <Image alt={vehicle.title} height={160} src={vehicle.photoUrl} width={260} /> : null}
+              <input name="id" type="hidden" value={vehicle.id} />
+              <input name="locale" type="hidden" value={locale} />
+              <VehicleFields vehicle={vehicle} />
+              <div className={styles.actions}>
+                <SubmitButton>Зберегти</SubmitButton>
+                <ConfirmSubmitButton action={deleteVehicle} message="Видалити транспорт із автопарку?">Видалити</ConfirmSubmitButton>
+              </div>
+            </form>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+type VehicleValue = {
+  brand: string | null;
+  description: string | null;
+  isActive: boolean;
+  payloadTonnes: { toString(): string };
+  temperatureFrom: number;
+  temperatureTo: number;
+  title: string;
+  volume: string | null;
+};
+
+function VehicleFields({ vehicle }: { vehicle?: VehicleValue }) {
+  return (
+    <div className={styles.fields}>
+      <label>Назва<input defaultValue={vehicle?.title} name="title" required /></label>
+      <label>Марка<input defaultValue={vehicle?.brand ?? ""} name="brand" /></label>
+      <label>Короткий опис<textarea defaultValue={vehicle?.description ?? ""} name="description" /></label>
+      <label>Вантажопідйомність, т<input defaultValue={vehicle?.payloadTonnes.toString() ?? "20"} min="0.01" name="payloadTonnes" required step="0.01" type="number" /></label>
+      <label>Температура від<input defaultValue={vehicle?.temperatureFrom ?? -20} name="temperatureFrom" required type="number" /></label>
+      <label>Температура до<input defaultValue={vehicle?.temperatureTo ?? 20} name="temperatureTo" required type="number" /></label>
+      <label>Обʼєм<input defaultValue={vehicle?.volume ?? ""} name="volume" /></label>
+      <label>Фото<input accept="image/*" name="photo" type="file" /></label>
+      <label className={styles.checkbox}><input defaultChecked={vehicle?.isActive ?? true} name="isActive" type="checkbox" /> Активний на сайті</label>
+    </div>
   );
 }

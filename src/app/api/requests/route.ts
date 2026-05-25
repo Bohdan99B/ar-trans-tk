@@ -2,13 +2,8 @@ import { NextResponse } from "next/server";
 
 import { sendMail } from "@/lib/mailer";
 import { prisma } from "@/lib/prisma";
+import { createRequestNumber, getNewRequestStatus } from "@/lib/requests";
 import { orderRequestSchema } from "@/lib/validators";
-
-function createRequestNumber() {
-  const date = new Date();
-  const stamp = date.toISOString().slice(0, 10).replaceAll("-", "");
-  return `ART-${stamp}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
-}
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
@@ -24,21 +19,14 @@ export async function POST(request: Request) {
     );
   }
 
-  const status = await prisma.requestStatus.upsert({
-    create: {
-      code: "new",
-      titleEn: "New",
-      titleUk: "Нова",
-    },
-    update: {},
-    where: { code: "new" },
-  });
+  const status = await getNewRequestStatus();
 
   const transportRequest = await prisma.transportRequest.create({
     data: {
       ...parsed.data,
       requestNumber: createRequestNumber(),
       statusId: status.id,
+      type: "ORDER",
     },
     select: {
       cargoType: true,

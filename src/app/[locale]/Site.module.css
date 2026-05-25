@@ -405,6 +405,71 @@ a.card:hover,
   margin-top: 16px;
 }
 
+.heroActions {
+  margin-top: 30px;
+}
+
+.cooperationBenefits,
+.cooperationDirections {
+  display: grid;
+  gap: 16px;
+}
+
+.cooperationBenefits .card {
+  min-height: 112px;
+}
+
+.cooperationBenefits h3 {
+  font-size: clamp(18px, 2vw, 21px);
+}
+
+.cooperationCard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cooperationCard h3,
+.cooperationFallback h3 {
+  margin-bottom: 0;
+}
+
+.cooperationCard button,
+.cooperationFallback button {
+  align-self: flex-start;
+  border: 0;
+  cursor: pointer;
+  margin-top: auto;
+}
+
+.cooperationLocation {
+  color: var(--color-secondary) !important;
+  font-weight: 700;
+}
+
+.cooperationRequirements {
+  border-top: 1px solid var(--color-border);
+  display: grid;
+  gap: 6px;
+  padding-top: 12px;
+}
+
+.cooperationRequirements strong {
+  color: var(--color-text-soft);
+}
+
+.cooperationFallback {
+  display: grid;
+  gap: 18px;
+  max-width: 760px;
+}
+
+.cooperationFormLayout {
+  align-items: start;
+  display: grid;
+  gap: clamp(28px, 5vw, 56px);
+}
+
 .split {
   display: grid;
   gap: clamp(24px, 5vw, 56px);
@@ -1125,6 +1190,25 @@ a.card:hover,
   border-radius: 12px;
   color: var(--color-text-muted);
   padding: 10px 12px;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.adminNav a:hover {
+  background: rgba(255, 211, 77, 0.08);
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.adminNav a:focus-visible {
+  background: rgba(255, 211, 77, 0.08);
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+.adminNav a[aria-current="page"] {
+  background: rgba(255, 211, 77, 0.14);
+  border-color: rgba(255, 211, 77, 0.54);
+  color: var(--color-secondary);
 }
 
 .tableWrap {
@@ -1193,6 +1277,8 @@ a.card:hover,
 @media (min-width: 680px) {
   .stats,
   .grid,
+  .cooperationBenefits,
+  .cooperationDirections,
   .fridgeScheme,
   .telemetryGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1225,6 +1311,14 @@ a.card:hover,
 
   .heroInner {
     grid-template-columns: minmax(0, 0.9fr) minmax(440px, 1.1fr);
+  }
+
+  .cooperationBenefits {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .cooperationFormLayout {
+    grid-template-columns: minmax(280px, 0.76fr) minmax(420px, 1fr);
   }
 
   .stats {

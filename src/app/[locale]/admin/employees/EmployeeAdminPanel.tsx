@@ -40,6 +40,7 @@ export function EmployeeAdminPanel({ employees, locale }: EmployeeAdminPanelProp
   const [pendingDelete, setPendingDelete] = useState<Employee | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isResetting, setIsResetting] = useState<string | null>(null);
 
   async function createEmployee(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -94,6 +95,26 @@ export function EmployeeAdminPanel({ employees, locale }: EmployeeAdminPanelProp
     router.refresh();
   }
 
+  async function resetPassword(employee: Employee) {
+    setIsResetting(employee.id);
+    setMessage(null);
+    setInviteUrl(null);
+    const response = await fetch(`/api/admin/employees/${employee.id}/reset-password`, {
+      body: JSON.stringify({ locale }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    });
+    const payload = await response.json().catch(() => null);
+    setIsResetting(null);
+    if (!response.ok) {
+      setMessage({ tone: "error", text: payload?.error ?? "Не вдалося створити reset-посилання" });
+      return;
+    }
+    setInviteUrl(payload.inviteUrl);
+    setMessage({ tone: "success", text: "Посилання для нового пароля створено" });
+    router.refresh();
+  }
+
   return (
     <div className={styles.panel}>
       <form className={styles.form} onSubmit={createEmployee}>
@@ -124,7 +145,7 @@ export function EmployeeAdminPanel({ employees, locale }: EmployeeAdminPanelProp
       {message ? <p className={message.tone === "error" ? styles.error : styles.success}>{message.text}</p> : null}
       {inviteUrl ? (
         <div className={styles.inviteBox}>
-          <span>Invite link для ADMIN:</span>
+          <span>Одноразове посилання для встановлення пароля:</span>
           <a href={inviteUrl}>{inviteUrl}</a>
         </div>
       ) : null}
@@ -150,6 +171,9 @@ export function EmployeeAdminPanel({ employees, locale }: EmployeeAdminPanelProp
                   <td>{roleLabels[employee.role]}</td>
                   <td>{latestInvite ? latestInvite.status : "Пароль вже задано або invite відсутній"}</td>
                   <td>
+                    <button className={styles.secondaryButton} disabled={isResetting === employee.id} onClick={() => resetPassword(employee)} type="button">
+                      {isResetting === employee.id ? "Створення..." : "Reset password"}
+                    </button>{" "}
                     <button className={styles.dangerButton} onClick={() => setPendingDelete(employee)} type="button">
                       Видалити
                     </button>

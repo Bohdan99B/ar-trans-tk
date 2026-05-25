@@ -2,12 +2,17 @@
 
 import { useState } from "react";
 
-import { reviews } from "@/lib/content";
 import styles from "@/app/[locale]/Site.module.css";
 
-export function ReviewsCarousel() {
+type CarouselReview = { author: string; body: string; role: string };
+
+export function ReviewsCarousel({ items }: { items: CarouselReview[] }) {
   const [active, setActive] = useState(0);
-  const review = reviews[active];
+  const review = items[active];
+
+  if (!review) {
+    return <p>Опублікованих відгуків ще немає.</p>;
+  }
 
   return (
     <div className={styles.carousel} aria-label="Відгуки клієнтів">
@@ -18,7 +23,7 @@ export function ReviewsCarousel() {
         <small>{review.role}</small>
       </article>
       <div className={styles.carouselRail}>
-        {reviews.map((item, index) => (
+        {items.map((item, index) => (
           <button
             aria-pressed={active === index}
             className={active === index ? styles.activeReview : undefined}

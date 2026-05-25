@@ -1,23 +1,19 @@
 import { getServerSession } from "next-auth";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { authOptions, getCurrentUser } from "@/lib/auth";
 
 import styles from "../Site.module.css";
+import { AdminNav } from "./AdminNav";
+
+const staffLinks = [["requests", "Заявки та питання"]];
 
 const adminLinks = [
-  ["requests", "Заявки"],
-  ["statuses", "Статуси"],
-  ["employees", "Співробітники"],
-  ["managers", "Менеджери"],
-  ["services", "Послуги"],
+  ...staffLinks,
   ["fleet", "Автопарк"],
-  ["geography", "Напрямки"],
+  ["employees", "Співробітники"],
   ["reviews", "Відгуки"],
-  ["blog", "Блог"],
   ["vacancies", "Вакансії"],
-  ["faq", "FAQ"],
   ["settings", "Налаштування"],
 ];
 
@@ -35,22 +31,18 @@ export default async function AdminLayout({ children, params }: AdminLayoutProps
   }
 
   const user = await getCurrentUser();
-  if (user?.role !== "ADMIN") {
+  if (!user || (user.role !== "ADMIN" && user.role !== "MANAGER")) {
     redirect(`/${locale}`);
   }
+  const links = (user.role === "ADMIN" ? [["", "Dashboard"], ...adminLinks] : staffLinks).map(
+    ([href, label]) => ({ href: `/${locale}/admin${href ? `/${href}` : ""}`, label }),
+  );
 
   return (
     <section className={styles.adminShell}>
       <p className={styles.eyebrow}>Адмінка</p>
       <h1 className={styles.heading}>AR Trans TK CMS</h1>
-      <nav className={styles.adminNav} aria-label="Admin navigation">
-        <Link href={`/${locale}/admin`}>Dashboard</Link>
-        {adminLinks.map(([href, label]) => (
-          <Link href={`/${locale}/admin/${href}`} key={href}>
-            {label}
-          </Link>
-        ))}
-      </nav>
+      <AdminNav links={links} />
       {children}
     </section>
   );

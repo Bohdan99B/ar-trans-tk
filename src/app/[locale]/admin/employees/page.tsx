@@ -1,3 +1,6 @@
+import { redirect } from "next/navigation";
+
+import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 import { EmployeeAdminPanel } from "./EmployeeAdminPanel";
@@ -8,6 +11,7 @@ type AdminEmployeesPageProps = {
 
 export default async function AdminEmployeesPage({ params }: AdminEmployeesPageProps) {
   const { locale } = await params;
+  if (!(await requireAdmin())) redirect(`/${locale}/admin/requests`);
   const employees = await prisma.user.findMany({
     include: {
       employeeInvitations: {

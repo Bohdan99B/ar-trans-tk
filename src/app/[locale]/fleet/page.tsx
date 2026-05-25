@@ -1,10 +1,13 @@
+import Image from "next/image";
+
 import { PageHero } from "@/components/sections/PageHero";
 import { TemperatureDashboard } from "@/components/sections/TemperatureDashboard";
-import { fleet } from "@/lib/content";
+import { prisma } from "@/lib/prisma";
 
 import styles from "../Site.module.css";
 
-export default function FleetPage() {
+export default async function FleetPage() {
+  const fleet = await prisma.vehicle.findMany({ orderBy: { createdAt: "desc" }, where: { isActive: true } });
   return (
     <>
       <PageHero
@@ -14,11 +17,12 @@ export default function FleetPage() {
       />
       <section className={styles.sectionAlt}>
         <div className={`${styles.container} ${styles.fleetGrid}`}>
-          {fleet.map((vehicle) => (
-            <article className={`${styles.card} ${styles.fleetCard}`} key={vehicle.title}>
+          {fleet.length === 0 ? <p>Активного транспорту поки немає.</p> : fleet.map((vehicle) => (
+            <article className={`${styles.card} ${styles.fleetCard}`} key={vehicle.id}>
+              {vehicle.photoUrl ? <Image alt={vehicle.title} height={200} src={vehicle.photoUrl} width={360} /> : null}
               <h2>{vehicle.title}</h2>
-              <p>{vehicle.details}</p>
-              <p>{vehicle.temp}</p>
+              <p>{vehicle.description ?? vehicle.brand ?? ""}</p>
+              <p>{vehicle.temperatureFrom}...{vehicle.temperatureTo} °C · {vehicle.payloadTonnes.toString()} т</p>
             </article>
           ))}
         </div>
