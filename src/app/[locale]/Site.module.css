@@ -658,6 +658,16 @@ a.card:hover,
   gap: 12px;
 }
 
+.contactsLayout {
+  display: grid;
+  gap: clamp(24px, 5vw, 56px);
+}
+
+.contactCardGrid {
+  display: grid;
+  gap: 12px;
+}
+
 .manager {
   backdrop-filter: blur(16px);
   background: rgba(255, 255, 255, 0.055);
@@ -671,6 +681,14 @@ a.card:hover,
   margin: 6px 0;
 }
 
+.contactTextLink {
+  color: inherit;
+}
+
+.contactTextLink:hover {
+  color: var(--color-secondary);
+}
+
 .contactActions {
   display: flex;
   flex-wrap: wrap;
@@ -678,7 +696,8 @@ a.card:hover,
   margin-top: 16px;
 }
 
-.contactActions a {
+.contactActions a,
+.contactActions span {
   align-items: center;
   border: 1px solid var(--color-border);
   border-radius: 14px;
@@ -1348,6 +1367,10 @@ a.card:hover,
   .split {
     align-items: start;
     grid-template-columns: minmax(0, 1.02fr) minmax(340px, 0.98fr);
+  }
+
+  .contactCardGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .fleetPreview {

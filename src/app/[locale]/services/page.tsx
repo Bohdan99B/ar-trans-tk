@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { PageHero } from "@/components/sections/PageHero";
 import { SectionIcon } from "@/components/sections/Icons";
-import { services } from "@/lib/content";
+import { getSiteServices } from "@/lib/site-content";
 
 import styles from "../Site.module.css";
 
@@ -12,6 +12,7 @@ type ServicesPageProps = {
 
 export default async function ServicesPage({ params }: ServicesPageProps) {
   const { locale } = await params;
+  const services = await getSiteServices(locale);
 
   return (
     <>
@@ -25,10 +26,10 @@ export default async function ServicesPage({ params }: ServicesPageProps) {
           {services.map((service) => (
             <Link className={styles.card} href={`/${locale}/services/${service.slug}`} key={service.slug}>
               <span className={styles.icon}><SectionIcon label={service.icon} /></span>
-              <h2>{service.titleUk}</h2>
-              <p>{service.summaryUk}</p>
+              <h2>{service.title}</h2>
+              <p>{service.summary}</p>
               <ul>
-                {service.bulletsUk.map((item) => (
+                {service.bullets.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>

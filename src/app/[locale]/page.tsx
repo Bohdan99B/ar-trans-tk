@@ -7,8 +7,9 @@ import { SectionIcon } from "@/components/sections/Icons";
 import { ReviewsCarousel } from "@/components/sections/ReviewsCarousel";
 import { TemperatureDashboard } from "@/components/sections/TemperatureDashboard";
 import { TruckIllustration } from "@/components/sections/TruckIllustration";
-import { faqs, fleet, managers, routes, services } from "@/lib/content";
+import { fleet } from "@/lib/content";
 import { prisma } from "@/lib/prisma";
+import { getContentSettings, getPublicContacts, getSiteFaqs, getSiteRoutes, getSiteServices } from "@/lib/site-content";
 
 import buttonStyles from "@/components/ui/Buttons.module.css";
 import styles from "./Site.module.css";
@@ -19,9 +20,14 @@ type HomePageProps = {
 
 export default async function HomePage({ params }: HomePageProps) {
   const { locale } = await params;
-  const [vehicles, publishedReviews] = await Promise.all([
+  const [vehicles, publishedReviews, services, routes, faqs, content, contacts] = await Promise.all([
     prisma.vehicle.findMany({ orderBy: { createdAt: "desc" }, where: { isActive: true } }),
     prisma.review.findMany({ orderBy: { createdAt: "desc" }, where: { moderationStatus: "PUBLISHED" } }),
+    getSiteServices(locale),
+    getSiteRoutes(),
+    getSiteFaqs(locale),
+    getContentSettings(),
+    getPublicContacts(),
   ]);
   const fleetItems = vehicles.length ? vehicles.map((vehicle) => ({
     details: vehicle.description ?? vehicle.brand ?? "",
@@ -87,11 +93,9 @@ export default async function HomePage({ params }: HomePageProps) {
       <section className={styles.section}>
         <div className={styles.container}>
           <p className={styles.eyebrow}>Про компанію</p>
-          <h2 className={styles.heading}>Преміальна логістика без зайвої театральності</h2>
+          <h2 className={styles.heading}>{content["about.homeTitle"] || "Преміальна логістика без зайвої театральності"}</h2>
           <p className={styles.lead}>
-            ПП «АР-Транс» засноване у 2002 році в Трускавці. Компанія працює з бізнесом,
-            якому потрібні прогнозовані терміни, CMR-страхування, GPS-контроль,
-            температурна дисципліна й менеджер, який тримає маршрут у фокусі.
+            {content["about.homeText"] || "ПП «АР-Транс» засноване у 2002 році в Трускавці. Компанія працює з бізнесом, якому потрібні прогнозовані терміни, CMR-страхування, GPS-контроль, температурна дисципліна й менеджер, який тримає маршрут у фокусі."}
           </p>
         </div>
       </section>
@@ -104,8 +108,8 @@ export default async function HomePage({ params }: HomePageProps) {
             {services.map((service) => (
               <Link className={styles.card} href={`/${locale}/services/${service.slug}`} key={service.slug}>
                 <span className={styles.icon}><SectionIcon label={service.icon} /></span>
-                <h3>{service.titleUk}</h3>
-                <p>{service.summaryUk}</p>
+                <h3>{service.title}</h3>
+                <p>{service.summary}</p>
               </Link>
             ))}
           </div>
@@ -233,10 +237,9 @@ export default async function HomePage({ params }: HomePageProps) {
         <div className={`${styles.container} ${styles.split}`}>
           <div>
             <p className={styles.eyebrow}>Готові до рейсу</p>
-            <h2 className={styles.heading}>Розрахуємо маршрут, ставку й доступність транспорту</h2>
+            <h2 className={styles.heading}>{content["cta.title"] || "Розрахуємо маршрут, ставку й доступність транспорту"}</h2>
             <p className={styles.lead}>
-              Опишіть вантаж, напрямок і часові вікна. Менеджер підбере формат перевезення та
-              повернеться з конкретною пропозицією.
+              {content["cta.text"] || "Опишіть вантаж, напрямок і часові вікна. Менеджер підбере формат перевезення та повернеться з конкретною пропозицією."}
             </p>
           </div>
           <div className={buttonStyles.row}>
@@ -258,15 +261,21 @@ export default async function HomePage({ params }: HomePageProps) {
             <OrderForm />
           </div>
           <div>
-            <p className={styles.eyebrow}>Контакти менеджерів</p>
+            <p className={styles.eyebrow}>Наші контакти</p>
             <h2 className={styles.heading}>Підберемо маршрут і температурний режим</h2>
             <div className={styles.managerList}>
-              {managers.map((manager) => (
-                <article className={styles.manager} key={manager.email}>
-                  <h3>{manager.name}</h3>
-                  <p>{manager.role}</p>
-                  <p>{manager.phone}</p>
-                  <p>{manager.email}</p>
+              {[contacts.office, contacts.director].map((contact) => (
+                <article className={styles.manager} key={`${contact.name}-${contact.email}`}>
+                  <h3>{contact.name}</h3>
+                  <p>{contact.role}</p>
+                  <p>{contact.phone}</p>
+                  <p>{contact.email}</p>
+                  {contact.hours ? <p>Години роботи: {contact.hours}</p> : null}
+                  {contact.messengers.length ? (
+                    <div className={styles.contactActions}>
+                      {contact.messengers.map((messenger) => <span key={messenger}>{messenger}</span>)}
+                    </div>
+                  ) : null}
                 </article>
               ))}
             </div>

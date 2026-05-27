@@ -1,26 +1,158 @@
 import { z } from "zod";
 
+export const validationMessages = {
+  adminPhone: "Введіть номер у форматі +38 (0XX) XXX XXXX.",
+  contact: "Введіть коректний телефон або email.",
+  email: "Введіть коректний email.",
+  name: "Введіть ім’я.",
+  phone: "Введіть коректний номер телефону.",
+  question: "Напишіть ваше питання.",
+} as const;
+
+const namePattern = /^[A-Za-zА-Яа-яІіЇїЄєҐґ\s'’-]+$/u;
+const textPattern = /^[A-Za-zА-Яа-яІіЇїЄєҐґ0-9\s'’"“”.,-]+$/u;
+const locationPattern = /^[A-Za-zА-Яа-яІіЇїЄєҐґ0-9\s'’"“”.,()/-]+$/u;
+const adminPhonePattern = /^\+38 \(0\d{2}\) \d{3} \d{4}$/;
+
+function emptyToUndefined(value: unknown) {
+  return typeof value === "string" && value.trim() === "" ? undefined : value;
+}
+
+function hasMeaningfulContent(value: string) {
+  return /[\p{L}\p{N}]/u.test(value);
+}
+
+export function isValidEmail(value: string) {
+  return z.string().trim().email().safeParse(value).success;
+}
+
+export function isValidUkrainianPhone(value: string) {
+  const trimmed = value.trim();
+  const compact = trimmed.replace(/[()\s-]/g, "");
+
+  return /^\+380\d{9}$/.test(compact) || /^0\d{9}$/.test(compact);
+}
+
+export function isValidAdminPhone(value: string) {
+  return adminPhonePattern.test(value.trim());
+}
+
+export function maskAdminPhone(value: string) {
+  const digits = value.replace(/\D/g, "").replace(/^38/, "").slice(0, 10);
+  const operator = digits.slice(0, 3);
+  const first = digits.slice(3, 6);
+  const second = digits.slice(6, 10);
+  let masked = "+38";
+
+  if (operator) masked += ` (${operator}`;
+  if (operator.length === 3) masked += ")";
+  if (first) masked += ` ${first}`;
+  if (second) masked += ` ${second}`;
+
+  return masked;
+}
+
+const requiredName = z.string()
+  .trim()
+  .min(2, validationMessages.name)
+  .max(80, validationMessages.name)
+  .regex(namePattern, validationMessages.name)
+  .refine((value) => !/^\d+$/.test(value), validationMessages.name);
+
+const requiredCity = z.string()
+  .trim()
+  .min(2, "Вкажіть місто.")
+  .max(80, "Вкажіть місто.")
+  .regex(namePattern, "Вкажіть місто.")
+  .refine((value) => !/^\d+$/.test(value), "Вкажіть місто.");
+
+const requiredText = (message: string, max = 100) => z.string()
+  .trim()
+  .min(2, message)
+  .max(max, message)
+  .regex(textPattern, message)
+  .refine(hasMeaningfulContent, message);
+
+const optionalText = (message: string, max = 100) => z.preprocess(
+  emptyToUndefined,
+  requiredText(message, max).optional(),
+);
+
+const optionalTextarea = z.preprocess(
+  emptyToUndefined,
+  z.string()
+    .trim()
+    .max(1000, "Коментар має містити не більше 1000 символів.")
+    .refine(hasMeaningfulContent, "Коментар має містити змістовний текст.")
+    .optional(),
+);
+
+const requiredTextarea = (message: string) => z.string()
+  .trim()
+  .min(5, message)
+  .max(1000, message)
+  .refine(hasMeaningfulContent, message);
+
+const phone = z.string().trim().refine(isValidUkrainianPhone, validationMessages.phone);
+const adminPhone = z.string().trim().refine(isValidAdminPhone, validationMessages.adminPhone);
+
 const optionalEmail = z.preprocess(
-  (value) => (value === "" ? undefined : value),
-  z.string().email("Некоректний email").optional(),
+  emptyToUndefined,
+  z.string().trim().email(validationMessages.email).optional(),
+);
+
+const requiredEmail = z.string().trim().email(validationMessages.email);
+
+const phoneOrEmail = z.string()
+  .trim()
+  .refine((value) => isValidUkrainianPhone(value) || isValidEmail(value), validationMessages.contact);
+
+const optionalTime = z.preprocess(
+  emptyToUndefined,
+  z.string()
+    .trim()
+    .max(100, "Вкажіть коректний зручний час.")
+    .refine(hasMeaningfulContent, "Вкажіть коректний зручний час.")
+    .optional(),
 );
 
 const optionalDate = z.preprocess(
-  (value) => (value === "" ? undefined : value),
+  emptyToUndefined,
   z.coerce.date().optional(),
 );
 
+const location = (message: string) => z.string()
+  .trim()
+  .min(2, message)
+  .max(120, message)
+  .regex(locationPattern, message)
+  .refine(hasMeaningfulContent, message);
+
+const temperatureMode = z.string()
+  .trim()
+  .min(1, "Вкажіть коректний температурний режим.")
+  .max(80, "Вкажіть коректний температурний режим.")
+  .regex(/^[A-Za-zА-Яа-яІіЇїЄєҐґ0-9+\-°\s.,]+$/u, "Вкажіть коректний температурний режим.")
+  .refine((value) => /\d/.test(value), "Вкажіть коректний температурний режим.");
+
+const weight = z.string()
+  .trim()
+  .min(1, "Вкажіть вагу вантажу.")
+  .max(80, "Вкажіть вагу вантажу.")
+  .regex(/^[0-9\s.,кКгГтТ]+$/u, "Вкажіть вагу вантажу.")
+  .refine((value) => /\d/.test(value), "Вкажіть вагу вантажу.");
+
 export const orderRequestSchema = z.object({
-  name: z.string().trim().min(2, "Вкажіть ім'я"),
-  phone: z.string().trim().min(7, "Вкажіть телефон"),
+  name: requiredName,
+  phone,
   email: optionalEmail,
-  company: z.string().trim().optional(),
-  origin: z.string().trim().min(2, "Вкажіть звідки"),
-  destination: z.string().trim().min(2, "Вкажіть куди"),
-  cargoType: z.string().trim().min(2, "Вкажіть тип вантажу"),
-  temperatureMode: z.string().trim().min(1, "Вкажіть температурний режим"),
-  weight: z.string().trim().min(1, "Вкажіть вагу"),
-  comment: z.string().trim().optional(),
+  company: optionalText("Вкажіть коректну назву компанії."),
+  origin: location("Вкажіть місто або країну відправлення."),
+  destination: location("Вкажіть місто або країну доставки."),
+  cargoType: requiredText("Вкажіть тип вантажу.", 120),
+  temperatureMode,
+  weight,
+  comment: optionalTextarea,
   preferredDate: optionalDate,
 });
 
@@ -30,40 +162,53 @@ export const statusCheckSchema = z.object({
 });
 
 export const contactSchema = z.object({
-  contact: z.string().trim().min(3),
-  time: z.string().trim().optional(),
+  contact: phoneOrEmail,
+  time: optionalTime,
 });
 
 export const questionSchema = z.object({
-  contact: z.string().trim().min(3),
-  question: z.string().trim().min(5),
+  contact: phoneOrEmail,
+  question: requiredTextarea(validationMessages.question),
 });
 
 export const vacancyApplicationSchema = z.object({
   vacancyId: z.string().trim().min(1),
-  name: z.string().trim().min(2, "Вкажіть ім'я"),
-  phone: z.string().trim().min(7, "Вкажіть телефон"),
+  name: requiredName,
+  phone,
   email: optionalEmail,
-  comment: z.string().trim().optional(),
+  comment: optionalTextarea,
 });
 
 export const cooperationApplicationSchema = z.object({
   vacancyId: z.preprocess(
-    (value) => (value === "" ? undefined : value),
+    emptyToUndefined,
     z.string().trim().min(1).optional(),
   ),
   customDirection: z.preprocess(
-    (value) => (value === "" ? undefined : value),
-    z.string().trim().min(2, "Вкажіть напрям співпраці").optional(),
+    emptyToUndefined,
+    requiredText("Вкажіть напрям співпраці", 120).optional(),
   ),
-  name: z.string().trim().min(2, "Вкажіть ім'я"),
-  phone: z.string().trim().min(7, "Вкажіть телефон"),
-  email: z.string().trim().email("Некоректний email"),
-  city: z.string().trim().min(2, "Вкажіть місто"),
-  comment: z.string().trim().optional(),
+  name: requiredName,
+  phone,
+  email: requiredEmail,
+  city: requiredCity,
+  comment: optionalTextarea,
 }).refine((value) => Boolean(value.vacancyId || value.customDirection), {
   message: "Оберіть напрям співпраці",
   path: ["vacancyId"],
+});
+
+export const adminContactSchema = z.object({
+  email: requiredEmail,
+  messengers: z.array(z.enum(["Telegram", "Viber", "WhatsApp"])),
+  name: requiredName,
+  phone: adminPhone,
+  role: requiredText("Вкажіть посаду.", 120),
+});
+
+export const adminOfficeContactSchema = adminContactSchema.extend({
+  hours: requiredText("Вкажіть графік роботи.", 100),
+  recipientEmail: requiredEmail,
 });
 
 export type OrderRequestInput = z.infer<typeof orderRequestSchema>;

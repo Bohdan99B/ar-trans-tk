@@ -1,10 +1,11 @@
 import { PageHero } from "@/components/sections/PageHero";
 import { EuropeMap } from "@/components/sections/EuropeMap";
-import { routes } from "@/lib/content";
+import { getSiteRoutes } from "@/lib/site-content";
 
 import styles from "../Site.module.css";
 
-export default function GeographyPage() {
+export default async function GeographyPage() {
+  const routes = await getSiteRoutes();
   return (
     <>
       <PageHero

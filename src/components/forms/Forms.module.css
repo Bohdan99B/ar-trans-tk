@@ -48,6 +48,11 @@
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.14);
 }
 
+.field input[aria-invalid="true"],
+.field textarea[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
 .field textarea {
   min-height: 96px;
   resize: vertical;
@@ -69,7 +74,7 @@
 }
 
 .fieldHint[data-visible="true"] {
-  max-height: 28px;
+  max-height: 44px;
   opacity: 1;
   transform: translateY(0);
 }

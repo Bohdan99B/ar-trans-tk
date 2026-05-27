@@ -2,7 +2,7 @@ import type { Prisma } from "@prisma/client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { requireAdmin } from "@/lib/auth";
+import { requireStaff } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ensureRequestStatuses } from "@/lib/requests";
 
@@ -28,9 +28,11 @@ function getRequestDetailsHref(locale: string, id: string, type: "ORDER" | "FAQ"
 export default async function AdminPage({ params, searchParams }: AdminPageProps) {
   const { locale } = await params;
   const query = await searchParams;
-  if (!(await requireAdmin())) {
-    redirect(`/${locale}/admin/requests`);
+  const user = await requireStaff();
+  if (!user) {
+    redirect(`/${locale}`);
   }
+  const isAdmin = user.role === "ADMIN";
   await ensureRequestStatuses();
   const requestedPage = getPage(query.page);
   const requestWhere: Prisma.TransportRequestWhereInput = { type: "ORDER" };
@@ -45,10 +47,6 @@ export default async function AdminPage({ params, searchParams }: AdminPageProps
     messagesDone,
     messagesPending,
     latestCount,
-    reviewsTotal,
-    reviewsHidden,
-    reviewsPending,
-    reviewsPublished,
   ] = await Promise.all([
     prisma.transportRequest.count({ where: { ...requestWhere, status: { code: "new" } } }),
     prisma.transportRequest.count({ where: { ...requestWhere, status: { code: "completed" } } }),
@@ -59,11 +57,15 @@ export default async function AdminPage({ params, searchParams }: AdminPageProps
     prisma.transportRequest.count({ where: { ...messageWhere, status: { code: "completed" } } }),
     prisma.transportRequest.count({ where: { ...messageWhere, status: { code: { in: ["new", "in_progress"] } } } }),
     prisma.transportRequest.count({ where: requestWhere }),
-    prisma.review.count(),
-    prisma.review.count({ where: { moderationStatus: "HIDDEN" } }),
-    prisma.review.count({ where: { moderationStatus: "PENDING" } }),
-    prisma.review.count({ where: { moderationStatus: "PUBLISHED" } }),
   ]);
+  const [reviewsTotal, reviewsHidden, reviewsPending, reviewsPublished] = isAdmin
+    ? await Promise.all([
+      prisma.review.count(),
+      prisma.review.count({ where: { moderationStatus: "HIDDEN" } }),
+      prisma.review.count({ where: { moderationStatus: "PENDING" } }),
+      prisma.review.count({ where: { moderationStatus: "PUBLISHED" } }),
+    ])
+    : [0, 0, 0, 0];
   const pageCount = Math.max(1, Math.ceil(latestCount / PAGE_SIZE));
   const currentPage = Math.min(requestedPage, pageCount);
   const latest = await prisma.transportRequest.findMany({
@@ -78,14 +80,11 @@ export default async function AdminPage({ params, searchParams }: AdminPageProps
     <div className={adminStyles.page}>
       <div className={styles.grid}>
         <article className={styles.card}>
-          <h2>Нові заявки</h2>
-          <p>{newRequests}</p>
-        </article>
-        <article className={styles.card}>
           <h2>Заявки</h2>
           <dl className={adminStyles.metricBreakdown}>
-            <div><dt>Опрацьовані</dt><dd>{requestsDone}</dd></div>
+            <div><dt>Нові</dt><dd>{newRequests}</dd></div>
             <div><dt>В роботі</dt><dd>{requestsInProgress}</dd></div>
+            <div><dt>Опрацьовані</dt><dd>{requestsDone}</dd></div>
           </dl>
         </article>
         <article className={styles.card}>
@@ -103,7 +102,7 @@ export default async function AdminPage({ params, searchParams }: AdminPageProps
             <div><dt>Не опрацьовані</dt><dd>{messagesPending}</dd></div>
           </dl>
         </article>
-        <article className={styles.card}>
+        {isAdmin ? <article className={styles.card}>
           <h2 className={adminStyles.metricHeading}>
             <span>Відгуки</span>
             <strong>{reviewsTotal}</strong>
@@ -113,15 +112,15 @@ export default async function AdminPage({ params, searchParams }: AdminPageProps
             <div><dt>Очікує</dt><dd>{reviewsPending}</dd></div>
             <div><dt>Опубліковано</dt><dd>{reviewsPublished}</dd></div>
           </dl>
-        </article>
+        </article> : null}
       </div>
       <section className={adminStyles.panel}>
         <h2>Швидкі дії</h2>
         <div className={adminStyles.actions}>
           <Link className={adminStyles.linkButton} href={`/${locale}/admin/requests`}>Перейти до заявок</Link>
-          <Link className={adminStyles.linkButton} href={`/${locale}/admin/vacancies`}>Створити вакансію</Link>
+          <Link className={adminStyles.linkButton} href={`/${locale}/admin/vacancies`}>{isAdmin ? "Керувати вакансіями" : "Переглянути вакансії"}</Link>
           <Link className={adminStyles.linkButton} href={`/${locale}/admin/fleet`}>Перейти до автопарку</Link>
-          <Link className={adminStyles.linkButton} href={`/${locale}/admin/settings`}>Налаштування</Link>
+          {isAdmin ? <Link className={adminStyles.linkButton} href={`/${locale}/admin/settings`}>Налаштування</Link> : null}
         </div>
       </section>
       <section className={adminStyles.panel}>

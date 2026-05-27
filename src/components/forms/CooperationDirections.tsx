@@ -4,6 +4,8 @@ import { FormEvent, useState } from "react";
 
 import siteStyles from "@/app/[locale]/Site.module.css";
 import buttonStyles from "@/components/ui/Buttons.module.css";
+import { FieldErrors, validateFormData } from "@/lib/form-validation";
+import { cooperationApplicationSchema } from "@/lib/validators";
 
 import styles from "./Forms.module.css";
 
@@ -25,6 +27,7 @@ export function CooperationDirections({ locale, vacancies }: Props) {
   const [showDirectionQuestion, setShowDirectionQuestion] = useState(false);
   const [useCustomDirection, setUseCustomDirection] = useState(false);
   const [message, setMessage] = useState("");
+  const [errors, setErrors] = useState<FieldErrors>({});
   const [isError, setIsError] = useState(false);
   const [pending, setPending] = useState(false);
   const copy = locale === "en" ? {
@@ -85,16 +88,27 @@ export function CooperationDirections({ locale, vacancies }: Props) {
     const form = event.currentTarget;
     if (!selectedId && !useCustomDirection) {
       setShowDirectionQuestion(true);
+      setErrors({ vacancyId: "Оберіть напрям співпраці" });
       return;
     }
-    const values = Object.fromEntries(new FormData(form));
+    const formData = new FormData(form);
+    const validation = validateFormData(cooperationApplicationSchema, formData);
+
+    if (validation.errors) {
+      setErrors(validation.errors);
+      setMessage("");
+      setIsError(true);
+      return;
+    }
+
+    setErrors({});
     setPending(true);
     setMessage("");
     setIsError(false);
 
     try {
       const response = await fetch("/api/cooperation-applications", {
-        body: JSON.stringify(values),
+        body: JSON.stringify(validation.data),
         headers: { "Content-Type": "application/json" },
         method: "POST",
       });
@@ -158,13 +172,29 @@ export function CooperationDirections({ locale, vacancies }: Props) {
             <h2 className={siteStyles.heading}>{copy.formTitle}</h2>
             <p className={siteStyles.lead}>{copy.formIntro}</p>
           </div>
-          <form className={styles.form} onSubmit={onSubmit}>
+          <form className={styles.form} noValidate onSubmit={onSubmit}>
             <input name="vacancyId" type="hidden" value={selectedId} />
             <div className={styles.grid}>
-              <label className={styles.field}><span>{copy.name} *</span><input name="name" required /></label>
-              <label className={styles.field}><span>{copy.phone} *</span><input name="phone" required /></label>
-              <label className={styles.field}><span>{copy.email} *</span><input name="email" required type="email" /></label>
-              <label className={styles.field}><span>{copy.city} *</span><input name="city" required /></label>
+              <label className={styles.field}>
+                <span>{copy.name} *</span>
+                <input aria-describedby="cooperation-name-error" aria-invalid={Boolean(errors.name)} name="name" required />
+                <span className={styles.fieldHint} data-visible={Boolean(errors.name)} id="cooperation-name-error">{errors.name}</span>
+              </label>
+              <label className={styles.field}>
+                <span>{copy.phone} *</span>
+                <input aria-describedby="cooperation-phone-error" aria-invalid={Boolean(errors.phone)} name="phone" required />
+                <span className={styles.fieldHint} data-visible={Boolean(errors.phone)} id="cooperation-phone-error">{errors.phone}</span>
+              </label>
+              <label className={styles.field}>
+                <span>{copy.email} *</span>
+                <input aria-describedby="cooperation-email-error" aria-invalid={Boolean(errors.email)} name="email" required type="email" />
+                <span className={styles.fieldHint} data-visible={Boolean(errors.email)} id="cooperation-email-error">{errors.email}</span>
+              </label>
+              <label className={styles.field}>
+                <span>{copy.city} *</span>
+                <input aria-describedby="cooperation-city-error" aria-invalid={Boolean(errors.city)} name="city" required />
+                <span className={styles.fieldHint} data-visible={Boolean(errors.city)} id="cooperation-city-error">{errors.city}</span>
+              </label>
               {selectedId ? (
                 <label className={`${styles.field} ${styles.wide}`}>
                   <span>{copy.selectedDirection}</span>
@@ -197,17 +227,26 @@ export function CooperationDirections({ locale, vacancies }: Props) {
                       {copy.other}
                     </button>
                   </div>
+                  <span className={styles.fieldHint} data-visible={Boolean(errors.vacancyId)}>
+                    {errors.vacancyId}
+                  </span>
                 </div>
               ) : null}
               {useCustomDirection ? (
                 <label className={`${styles.field} ${styles.wide}`}>
                   <span>{copy.customDirection} *</span>
-                  <textarea name="customDirection" required />
+                  <textarea aria-describedby="cooperation-direction-error" aria-invalid={Boolean(errors.customDirection)} name="customDirection" required />
+                  <span className={styles.fieldHint} data-visible={Boolean(errors.customDirection)} id="cooperation-direction-error">
+                    {errors.customDirection}
+                  </span>
                 </label>
               ) : null}
               <label className={`${styles.field} ${styles.wide}`}>
                 <span>{copy.comment}</span>
-                <textarea name="comment" />
+                <textarea aria-describedby="cooperation-comment-error" aria-invalid={Boolean(errors.comment)} name="comment" />
+                <span className={styles.fieldHint} data-visible={Boolean(errors.comment)} id="cooperation-comment-error">
+                  {errors.comment}
+                </span>
               </label>
             </div>
             <button className={styles.button} disabled={pending} type="submit">

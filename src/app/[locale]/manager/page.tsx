@@ -20,5 +20,5 @@ export default async function ManagerPage({ params }: ManagerPageProps) {
     redirect(`/${locale}`);
   }
 
-  redirect(`/${locale}/admin/requests`);
+  redirect(`/${locale}/admin`);
 }

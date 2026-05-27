@@ -16,7 +16,7 @@ const statusLabels = { HIDDEN: "Приховано", PENDING: "Очікує", PU
 
 export default async function AdminReviewsPage({ params, searchParams }: PageProps) {
   const { locale } = await params;
-  if (!(await requireAdmin())) redirect(`/${locale}/admin/requests`);
+  if (!(await requireAdmin())) redirect(`/${locale}/admin`);
   const query = await searchParams;
   const reviews = await prisma.review.findMany({ orderBy: { createdAt: "desc" } });
 

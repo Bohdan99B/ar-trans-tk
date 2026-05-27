@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
 
-import { requireAdmin } from "@/lib/auth";
+import { requireStaff } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 import { ConfirmSubmitButton, SubmitButton } from "../AdminControls";
@@ -15,7 +15,9 @@ type PageProps = {
 
 export default async function AdminFleetPage({ params, searchParams }: PageProps) {
   const { locale } = await params;
-  if (!(await requireAdmin())) redirect(`/${locale}/admin/requests`);
+  const user = await requireStaff();
+  if (!user) redirect(`/${locale}`);
+  const canManage = user.role === "ADMIN";
   const query = await searchParams;
   const vehicles = await prisma.vehicle.findMany({ orderBy: { createdAt: "desc" } });
 
@@ -26,12 +28,12 @@ export default async function AdminFleetPage({ params, searchParams }: PageProps
       </div>
       {query.success ? <p className={styles.success}>{query.success}</p> : null}
       {query.error ? <p className={styles.error}>{query.error}</p> : null}
-      <form action={saveVehicle} className={styles.form}>
+      {canManage ? <form action={saveVehicle} className={styles.form}>
         <h2>Новий транспорт</h2>
         <input name="locale" type="hidden" value={locale} />
-        <VehicleFields />
+        <VehicleFields canManage />
         <SubmitButton>Створити транспорт</SubmitButton>
-      </form>
+      </form> : null}
       {vehicles.length === 0 ? <p className={styles.empty}>Транспорт ще не додано.</p> : (
         <div className={styles.cards}>
           {vehicles.map((vehicle) => (
@@ -40,10 +42,10 @@ export default async function AdminFleetPage({ params, searchParams }: PageProps
               {vehicle.photoUrl ? <Image alt={vehicle.title} height={160} src={vehicle.photoUrl} width={260} /> : null}
               <input name="id" type="hidden" value={vehicle.id} />
               <input name="locale" type="hidden" value={locale} />
-              <VehicleFields vehicle={vehicle} />
+              <VehicleFields canManage={canManage} vehicle={vehicle} />
               <div className={styles.actions}>
-                <SubmitButton>Зберегти</SubmitButton>
-                <ConfirmSubmitButton action={deleteVehicle} message="Видалити транспорт із автопарку?">Видалити</ConfirmSubmitButton>
+                <SubmitButton>{canManage ? "Зберегти" : "Оновити доступність"}</SubmitButton>
+                {canManage ? <ConfirmSubmitButton action={deleteVehicle} message="Видалити транспорт із автопарку?">Видалити</ConfirmSubmitButton> : null}
               </div>
             </form>
           ))}
@@ -64,17 +66,17 @@ type VehicleValue = {
   volume: string | null;
 };
 
-function VehicleFields({ vehicle }: { vehicle?: VehicleValue }) {
+function VehicleFields({ canManage, vehicle }: { canManage: boolean; vehicle?: VehicleValue }) {
   return (
     <div className={styles.fields}>
-      <label>Назва<input defaultValue={vehicle?.title} name="title" required /></label>
-      <label>Марка<input defaultValue={vehicle?.brand ?? ""} name="brand" /></label>
+      <label>Назва<input defaultValue={vehicle?.title} disabled={!canManage} name="title" required /></label>
+      <label>Марка<input defaultValue={vehicle?.brand ?? ""} disabled={!canManage} name="brand" /></label>
       <label>Короткий опис<textarea defaultValue={vehicle?.description ?? ""} name="description" /></label>
-      <label>Вантажопідйомність, т<input defaultValue={vehicle?.payloadTonnes.toString() ?? "20"} min="0.01" name="payloadTonnes" required step="0.01" type="number" /></label>
-      <label>Температура від<input defaultValue={vehicle?.temperatureFrom ?? -20} name="temperatureFrom" required type="number" /></label>
-      <label>Температура до<input defaultValue={vehicle?.temperatureTo ?? 20} name="temperatureTo" required type="number" /></label>
-      <label>Обʼєм<input defaultValue={vehicle?.volume ?? ""} name="volume" /></label>
-      <label>Фото<input accept="image/*" name="photo" type="file" /></label>
+      <label>Вантажопідйомність, т<input defaultValue={vehicle?.payloadTonnes.toString() ?? "20"} disabled={!canManage} min="0.01" name="payloadTonnes" required step="0.01" type="number" /></label>
+      <label>Температура від<input defaultValue={vehicle?.temperatureFrom ?? -20} disabled={!canManage} name="temperatureFrom" required type="number" /></label>
+      <label>Температура до<input defaultValue={vehicle?.temperatureTo ?? 20} disabled={!canManage} name="temperatureTo" required type="number" /></label>
+      <label>Обʼєм<input defaultValue={vehicle?.volume ?? ""} disabled={!canManage} name="volume" /></label>
+      {canManage ? <label>Фото<input accept="image/*" name="photo" type="file" /></label> : null}
       <label className={styles.checkbox}><input defaultChecked={vehicle?.isActive ?? true} name="isActive" type="checkbox" /> Активний на сайті</label>
     </div>
   );

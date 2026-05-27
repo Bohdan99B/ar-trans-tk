@@ -2,7 +2,8 @@
 
 import type { CooperationApplicationStatus } from "@prisma/client";
 import Link from "next/link";
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import { ConfirmSubmitButton, SubmitButton } from "../AdminControls";
 import styles from "../Admin.module.css";
@@ -38,9 +39,15 @@ type VacancyValue = {
   updatedAt: string;
 };
 
+type VacancyUpdate = Pick<
+  VacancyValue,
+  "description" | "id" | "isPublished" | "location" | "requirements" | "salary" | "status" | "titleEn" | "titleUk" | "updatedAt"
+>;
+
 type Props = {
   candidatePage: number;
   candidatePageCount: number;
+  canManage: boolean;
   generalApplications: ApplicationValue[];
   generalPage: number;
   generalPageCount: number;
@@ -60,6 +67,12 @@ const applicationStatuses: Array<{ label: string; value: CooperationApplicationS
   { label: "В архіві", value: "ARCHIVED" },
 ];
 
+const applicationDateFormatter = new Intl.DateTimeFormat("uk-UA", {
+  dateStyle: "short",
+  timeStyle: "medium",
+  timeZone: "Europe/Kyiv",
+});
+
 function statusLabel(status: CooperationApplicationStatus) {
   return applicationStatuses.find((item) => item.value === status)!.label;
 }
@@ -75,6 +88,7 @@ function hrefWithParams(locale: string, values: Record<string, string | number |
 export function VacanciesPanel({
   candidatePage,
   candidatePageCount,
+  canManage,
   generalApplications,
   generalPage,
   generalPageCount,
@@ -87,24 +101,29 @@ export function VacanciesPanel({
   vacancyPage,
   vacancyPageCount,
 }: Props) {
-  const [createOpen, setCreateOpen] = useState(initialCreateOpen);
+  const [createOpen, setCreateOpen] = useState(canManage && initialCreateOpen);
   const [openVacancyId, setOpenVacancyId] = useState<string | undefined>(initialVacancyId);
-  const [editVacancyId, setEditVacancyId] = useState<string | undefined>(initialEditVacancyId);
+  const [editVacancyId, setEditVacancyId] = useState<string | undefined>(canManage ? initialEditVacancyId : undefined);
   const [openCandidateId, setOpenCandidateId] = useState<string | undefined>();
   const [openGeneralId, setOpenGeneralId] = useState<string | undefined>();
   const [feedback, setFeedback] = useState(message);
+  const [vacancyUpdates, setVacancyUpdates] = useState<Record<string, VacancyUpdate>>({});
+  const visibleVacancies = vacancies.map((vacancy) => (
+    vacancyUpdates[vacancy.id] ? { ...vacancy, ...vacancyUpdates[vacancy.id] } : vacancy
+  ));
 
   return (
     <div className={styles.page}>
       <div className={styles.pageHeader}>
         <div>
           <h2>Вакансії та заявки на співпрацю</h2>
-          <p className={styles.muted}>Керуйте напрямами співпраці та контактами зацікавлених фахівців.</p>
+          <p className={styles.muted}>{canManage ? "Керуйте напрямами співпраці та контактами зацікавлених фахівців." : "Перегляд вакансій і заявок на співпрацю."}</p>
         </div>
       </div>
       {feedback.success ? <p className={styles.success}>{feedback.success}</p> : null}
       {feedback.error ? <p className={styles.error}>{feedback.error}</p> : null}
       <div className={styles.toolbar}>
+        {canManage ? (
         <button
           aria-expanded={createOpen}
           className={styles.primaryButton}
@@ -113,9 +132,10 @@ export function VacanciesPanel({
         >
           {createOpen ? "Сховати форму" : "Додати вакансію"}
         </button>
+        ) : null}
         <a className={styles.linkButton} href="#general-applications">Загальні заявки на співпрацю</a>
       </div>
-      <AnimatedPanel open={createOpen}>
+      {canManage ? <AnimatedPanel open={createOpen}>
         <form action={saveVacancy} className={styles.form}>
           <h2>Нова вакансія</h2>
           <input name="locale" type="hidden" value={locale} />
@@ -125,13 +145,13 @@ export function VacanciesPanel({
           <VacancyFields />
           <SubmitButton>Створити вакансію</SubmitButton>
         </form>
-      </AnimatedPanel>
+      </AnimatedPanel> : null}
       <section className={styles.panel}>
         <h2>Створені вакансії</h2>
-        {vacancies.length === 0 ? <p className={styles.empty}>Вакансій ще немає.</p> : (
+        {visibleVacancies.length === 0 ? <p className={styles.empty}>Вакансій ще немає.</p> : (
           <>
             <div className={styles.vacancyGrid}>
-              {vacancies.map((vacancy) => {
+              {visibleVacancies.map((vacancy) => {
                 const candidatesOpen = vacancy.id === openVacancyId;
                 const editOpen = vacancy.id === editVacancyId;
                 return (
@@ -164,25 +184,26 @@ export function VacanciesPanel({
                       >
                         {candidatesOpen ? "Сховати кандидатів" : "Переглянути кандидатів"}
                       </button>
-                      <button
+                      {canManage ? <button
                         aria-expanded={editOpen}
                         className={styles.secondaryButton}
                         onClick={() => setEditVacancyId(editOpen ? undefined : vacancy.id)}
                         type="button"
                       >
                         {editOpen ? "Сховати редагування" : "Редагувати"}
-                      </button>
+                      </button> : null}
                     </div>
-                    <AnimatedPanel open={editOpen}>
+                    {canManage ? <AnimatedPanel open={editOpen}>
                       <VacancyEditor
                         locale={locale}
-                        onSaved={(success) => {
+                        onSaved={(success, updatedVacancy) => {
+                          setVacancyUpdates((current) => ({ ...current, [updatedVacancy.id]: updatedVacancy }));
                           setEditVacancyId(undefined);
                           setFeedback({ success });
                         }}
                         vacancy={vacancy}
                       />
-                    </AnimatedPanel>
+                    </AnimatedPanel> : null}
                     <AnimatedPanel open={candidatesOpen}>
                       <section className={styles.candidates}>
                         <h3>Кандидати: {vacancy.titleUk}</h3>
@@ -200,6 +221,7 @@ export function VacanciesPanel({
                                 open={openCandidateId === application.id}
                                 selectedVacancyId={vacancy.id}
                                 vacancyPage={vacancyPage}
+                                canManage={canManage}
                               />
                             ))}
                           </div>
@@ -241,6 +263,7 @@ export function VacanciesPanel({
                 onToggle={() => setOpenGeneralId(openGeneralId === application.id ? undefined : application.id)}
                 open={openGeneralId === application.id}
                 vacancyPage={vacancyPage}
+                canManage={canManage}
               />
             ))}
           </div>
@@ -262,25 +285,57 @@ function VacancyEditor({
   vacancy,
 }: {
   locale: string;
-  onSaved: (message: string) => void;
+  onSaved: (message: string, vacancy: VacancyUpdate) => void;
   vacancy: VacancyValue;
 }) {
-  const [state, action] = useActionState(saveVacancyInline, undefined);
-  const reportedSuccess = useRef<string | undefined>(undefined);
+  const router = useRouter();
+  const [error, setError] = useState<string | undefined>();
 
-  useEffect(() => {
-    if (state?.success && reportedSuccess.current !== state.success) {
-      reportedSuccess.current = state.success;
-      onSaved(state.success);
+  async function save(data: FormData) {
+    setError(undefined);
+    const submittedVacancy: VacancyUpdate = {
+      description: String(data.get("description") ?? ""),
+      id: vacancy.id,
+      isPublished: data.get("status") === "ACTIVE",
+      location: String(data.get("location") ?? ""),
+      requirements: String(data.get("requirements") ?? "") || null,
+      salary: String(data.get("salary") ?? "") || null,
+      status: data.get("status") === "ARCHIVED" ? "ARCHIVED" : "ACTIVE",
+      titleEn: String(data.get("titleEn") ?? ""),
+      titleUk: String(data.get("titleUk") ?? ""),
+      updatedAt: new Date().toISOString(),
+    };
+    onSaved("Вакансію збережено", submittedVacancy);
+
+    const result = await saveVacancyInline(undefined, data);
+    if (result.error) {
+      onSaved("", {
+        description: vacancy.description,
+        id: vacancy.id,
+        isPublished: vacancy.isPublished,
+        location: vacancy.location,
+        requirements: vacancy.requirements,
+        salary: vacancy.salary,
+        status: vacancy.status,
+        titleEn: vacancy.titleEn,
+        titleUk: vacancy.titleUk,
+        updatedAt: vacancy.updatedAt,
+      });
+      setError(result.error);
+      return;
     }
-  }, [onSaved, state]);
+    if (result.success && result.vacancy) {
+      onSaved(result.success, result.vacancy);
+      router.refresh();
+    }
+  }
 
   return (
-    <form action={action} className={styles.form}>
+    <form action={save} className={styles.form}>
       <input name="id" type="hidden" value={vacancy.id} />
       <input name="locale" type="hidden" value={locale} />
       <VacancyFields vacancy={vacancy} />
-      {state?.error ? <p className={styles.error}>{state.error}</p> : null}
+      {error ? <p className={styles.error}>{error}</p> : null}
       <div className={styles.actions}>
         <SubmitButton>Зберегти</SubmitButton>
         <ConfirmSubmitButton action={deleteVacancy} message="Видалити вакансію та її заявки?">Видалити</ConfirmSubmitButton>
@@ -299,6 +354,7 @@ function AnimatedPanel({ children, open }: { children: React.ReactNode; open: bo
 
 function ApplicationAccordion({
   application,
+  canManage,
   candidatePage,
   direction,
   fragment,
@@ -310,6 +366,7 @@ function ApplicationAccordion({
   vacancyPage,
 }: {
   application: ApplicationValue;
+  canManage: boolean;
   candidatePage?: number;
   direction: string;
   fragment?: string;
@@ -333,8 +390,8 @@ function ApplicationAccordion({
           <p><strong>Місто:</strong> {application.city}</p>
           <p><strong>Напрям:</strong> {direction}</p>
           <p className={styles.details}><strong>Коментар:</strong> {application.comment || "Коментар відсутній"}</p>
-          <p><strong>Дата:</strong> {new Date(application.createdAt).toLocaleString("uk-UA")}</p>
-          <form action={updateCooperationApplicationStatus} className={styles.actions}>
+          <p><strong>Дата:</strong> {applicationDateFormatter.format(new Date(application.createdAt))}</p>
+          {canManage ? <form action={updateCooperationApplicationStatus} className={styles.actions}>
             <input name="id" type="hidden" value={application.id} />
             <input name="locale" type="hidden" value={locale} />
             <input name="vacancyPage" type="hidden" value={vacancyPage} />
@@ -346,7 +403,7 @@ function ApplicationAccordion({
               {applicationStatuses.map((status) => <option key={status.value} value={status.value}>{status.label}</option>)}
             </select>
             <SubmitButton pendingLabel="...">Зберегти</SubmitButton>
-          </form>
+          </form> : null}
         </div>
       </AnimatedPanel>
     </article>

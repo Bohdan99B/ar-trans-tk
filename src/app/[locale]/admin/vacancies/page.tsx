@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { requireAdmin } from "@/lib/auth";
+import { requireStaff } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 import { VacanciesPanel } from "./VacanciesPanel";
@@ -28,7 +28,8 @@ function getPage(value?: string) {
 
 export default async function AdminVacanciesPage({ params, searchParams }: PageProps) {
   const { locale } = await params;
-  if (!(await requireAdmin())) redirect(`/${locale}/admin/requests`);
+  const user = await requireStaff();
+  if (!user) redirect(`/${locale}`);
   const query = await searchParams;
   const [vacancyTotal, generalTotal] = await Promise.all([
     prisma.vacancy.count(),
@@ -77,6 +78,7 @@ export default async function AdminVacanciesPage({ params, searchParams }: PageP
     <VacanciesPanel
       candidatePage={candidatePage}
       candidatePageCount={candidatePageCount}
+      canManage={user.role === "ADMIN"}
       generalApplications={generalApplications.map((application) => ({
         ...application,
         createdAt: application.createdAt.toISOString(),

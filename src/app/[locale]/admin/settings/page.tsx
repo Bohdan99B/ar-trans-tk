@@ -4,63 +4,94 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-import { SubmitButton } from "../AdminControls";
+import { ConfirmSubmitButton, SubmitButton } from "../AdminControls";
 import styles from "../Admin.module.css";
-import { saveSettings } from "../actions";
+import { deleteLogo, saveLogo } from "../actions";
+import { SettingsContactsPanel } from "./SettingsContactsPanel";
 
 type PageProps = {
   params: Promise<{ locale: string }>;
   searchParams: Promise<{ error?: string; success?: string }>;
 };
 
+const defaults = {
+  email: "sales@ar-trans-tk.ua",
+  hours: "09:00 - 18:00",
+  name: "Офіс",
+  phone: "+380 (67) 120-45-88",
+  recipientEmail: "sales@ar-trans-tk.ua",
+  role: "Основні контактні дані",
+};
+
+const directorDefaults = {
+  email: "ar-trans@ukr.net",
+  messengers: [] as string[],
+  name: "Ігор",
+  phone: "+38 (067) 674 0411",
+  role: "Директор ПП «АР-Транс»",
+};
+
 export default async function AdminSettingsPage({ params, searchParams }: PageProps) {
   const { locale } = await params;
-  if (!(await requireAdmin())) redirect(`/${locale}/admin/requests`);
+  if (!(await requireAdmin())) redirect(`/${locale}/admin`);
   const query = await searchParams;
-  const values = Object.fromEntries((await prisma.siteSetting.findMany()).map(({ key, value }) => [key, value]));
+  const [rows, contacts] = await Promise.all([
+    prisma.siteSetting.findMany(),
+    prisma.manager.findMany({ orderBy: { createdAt: "asc" } }),
+  ]);
+  const values = Object.fromEntries(rows.map(({ key, value }) => [key, value]));
+  const director = {
+    email: values["director.email"] || directorDefaults.email,
+    messengers: values["director.messengers"]?.split(",").filter(Boolean) ?? directorDefaults.messengers,
+    name: values["director.name"] || directorDefaults.name,
+    phone: values["director.phone"] || directorDefaults.phone,
+    role: values["director.role"] || directorDefaults.role,
+  };
+  const office = {
+    email: values["contact.email"] || defaults.email,
+    hours: values["contact.hours"] || defaults.hours,
+    messengers: values["office.messengers"]?.split(",").filter(Boolean) ?? [],
+    name: values["office.name"] || defaults.name,
+    phone: values["contact.phones"]?.split(/\r?\n|,/)[0]?.trim() || defaults.phone,
+    recipientEmail: values["contact.recipientEmail"] || defaults.recipientEmail,
+    role: values["office.role"] || defaults.role,
+  };
 
   return (
     <div className={styles.page}>
-      <div className={styles.pageHeader}><div><h2>Налаштування</h2><p className={styles.muted}>Контакти, пошта, SEO та бренд сайту.</p></div></div>
+      <div className={styles.pageHeader}>
+        <div>
+          <h2>Налаштування</h2>
+          <p className={styles.muted}>Логотип і контактні дані, які бачать відвідувачі сайту.</p>
+        </div>
+      </div>
       {query.success ? <p className={styles.success}>{query.success}</p> : null}
       {query.error ? <p className={styles.error}>{query.error}</p> : null}
-      <form action={saveSettings} className={styles.form}>
-        <input name="locale" type="hidden" value={locale} />
-        <h2>Контактні дані</h2>
-        <div className={styles.fields}>
-          <Setting label="Телефони" name="contact.phones" value={values["contact.phones"]} />
-          <Setting label="Публічний email" name="contact.email" type="email" value={values["contact.email"]} />
-          <Setting label="Email для заявок" name="contact.recipientEmail" type="email" value={values["contact.recipientEmail"]} />
-          <Setting label="Соцмережі" name="contact.socials" value={values["contact.socials"]} />
-          <Setting label="Адреса" name="contact.address" value={values["contact.address"]} />
-          <Setting label="Графік роботи" name="contact.hours" value={values["contact.hours"]} />
-        </div>
-        <h2>SMTP</h2>
-        <div className={styles.fields}>
-          <Setting label="SMTP host" name="smtp.host" value={values["smtp.host"]} />
-          <Setting label="SMTP port" name="smtp.port" type="number" value={values["smtp.port"] ?? "587"} />
-          <Setting label="SMTP user" name="smtp.user" value={values["smtp.user"]} />
-          <Setting label="SMTP password (залиште порожнім, щоб не змінювати)" name="smtp.password" type="password" />
-          <Setting label="Email from" name="smtp.from" type="email" value={values["smtp.from"]} />
-          <label className={styles.checkbox}><input defaultChecked={values["smtp.secure"] === "true"} name="smtp.secure" type="checkbox" /> SMTP secure</label>
-        </div>
-        <h2>SEO defaults</h2>
-        <div className={styles.fields}>
-          <Setting label="Default title" name="seo.title" value={values["seo.title"]} />
-          <Setting label="Default description" name="seo.description" value={values["seo.description"]} />
-          <Setting label="OpenGraph title" name="seo.ogTitle" value={values["seo.ogTitle"]} />
-          <Setting label="OpenGraph description" name="seo.ogDescription" value={values["seo.ogDescription"]} />
-          <Setting label="OpenGraph image URL" name="seo.ogImage" value={values["seo.ogImage"]} />
-        </div>
+
+      <SettingsContactsPanel contacts={contacts} director={director} locale={locale} office={office} />
+
+      <section className={styles.panel}>
         <h2>Логотип</h2>
-        {values["brand.logo"] ? <Image alt="Логотип компанії" height={80} src={values["brand.logo"]} width={180} /> : null}
-        <label>Завантажити/замінити логотип<input accept="image/*" name="brand.logo" type="file" /></label>
-        <SubmitButton>Зберегти налаштування</SubmitButton>
-      </form>
+        <p className={styles.muted}>Логотип використовується у хедері та футері сайту.</p>
+        {values["brand.logo"] ? (
+          <div className={styles.logoPreview}>
+            <Image alt="Логотип компанії" height={80} src={values["brand.logo"]} width={180} />
+          </div>
+        ) : <p className={styles.empty}>Завантажений логотип відсутній.</p>}
+        <form action={saveLogo} className={styles.contactForm}>
+          <input name="locale" type="hidden" value={locale} />
+          <label className={styles.fileLabel}>
+            Завантажити або замінити логотип
+            <input accept="image/*" name="brand.logo" type="file" />
+          </label>
+          <div className={styles.actions}>
+            <SubmitButton>Зберегти логотип</SubmitButton>
+            {values["brand.logo"] ? (
+              <ConfirmSubmitButton action={deleteLogo} message="Видалити логотип із сайту?">Видалити логотип</ConfirmSubmitButton>
+            ) : null}
+          </div>
+        </form>
+      </section>
     </div>
   );
-}
-
-function Setting({ label, name, type = "text", value }: { label: string; name: string; type?: string; value?: string }) {
-  return <label>{label}<input defaultValue={value ?? ""} name={name} type={type} /></label>;
 }

@@ -2,10 +2,14 @@
 
 import { ChangeEvent, ClipboardEvent, FormEvent, KeyboardEvent, useMemo, useState } from "react";
 
+import { FieldErrors, validateFormData } from "@/lib/form-validation";
+import { orderRequestSchema } from "@/lib/validators";
+
 import styles from "./Forms.module.css";
 
 type State = {
   error?: string;
+  fieldErrors?: FieldErrors;
   message?: string;
   requestNumber?: string;
 };
@@ -133,6 +137,14 @@ function getCalendarDays(monthDate: Date) {
   ];
 }
 
+function FieldError({ children, id }: { children?: string; id: string }) {
+  return (
+    <span className={styles.fieldHint} data-visible={Boolean(children)} id={id}>
+      {children}
+    </span>
+  );
+}
+
 export function OrderForm({ compact = false }: { compact?: boolean }) {
   const [state, setState] = useState<State>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -155,12 +167,19 @@ export function OrderForm({ compact = false }: { compact?: boolean }) {
       return;
     }
 
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const validation = validateFormData(orderRequestSchema, formData);
+
+    if (validation.errors) {
+      setState({ error: "Перевірте поля форми.", fieldErrors: validation.errors });
+      return;
+    }
+
     setIsSubmitting(true);
     setState({});
-    const form = event.currentTarget;
-    const payload = Object.fromEntries(new FormData(form));
     const response = await fetch("/api/requests", {
-      body: JSON.stringify(payload),
+      body: JSON.stringify(validation.data),
       headers: { "Content-Type": "application/json" },
       method: "POST",
     });
@@ -177,6 +196,7 @@ export function OrderForm({ compact = false }: { compact?: boolean }) {
     setShouldShowDateError(false);
     setIsCalendarOpen(false);
     setState({
+      fieldErrors: {},
       message: "Заявку створено. Номер для перевірки статусу:",
       requestNumber: data.requestNumber,
     });
@@ -201,47 +221,56 @@ export function OrderForm({ compact = false }: { compact?: boolean }) {
   }
 
   return (
-    <form className={styles.form} onSubmit={onSubmit}>
+    <form className={styles.form} noValidate onSubmit={onSubmit}>
       <div className={styles.grid}>
         <label className={styles.field}>
           <span>Ім&apos;я *</span>
-          <input name="name" required />
+          <input aria-describedby="order-name-error" aria-invalid={Boolean(state.fieldErrors?.name)} name="name" required />
+          <FieldError id="order-name-error">{state.fieldErrors?.name}</FieldError>
         </label>
         <label className={styles.field}>
           <span>Телефон *</span>
-          <input name="phone" required type="tel" />
+          <input aria-describedby="order-phone-error" aria-invalid={Boolean(state.fieldErrors?.phone)} name="phone" required type="tel" />
+          <FieldError id="order-phone-error">{state.fieldErrors?.phone}</FieldError>
         </label>
         {!compact && (
           <>
             <label className={styles.field}>
               <span>Email</span>
-              <input name="email" type="email" />
+              <input aria-describedby="order-email-error" aria-invalid={Boolean(state.fieldErrors?.email)} name="email" type="email" />
+              <FieldError id="order-email-error">{state.fieldErrors?.email}</FieldError>
             </label>
             <label className={styles.field}>
               <span>Компанія</span>
-              <input name="company" />
+              <input aria-describedby="order-company-error" aria-invalid={Boolean(state.fieldErrors?.company)} name="company" />
+              <FieldError id="order-company-error">{state.fieldErrors?.company}</FieldError>
             </label>
           </>
         )}
         <label className={styles.field}>
           <span>Звідки *</span>
-          <input name="origin" placeholder="Країна, населений пункт, квадрат" required />
+          <input aria-describedby="order-origin-error" aria-invalid={Boolean(state.fieldErrors?.origin)} name="origin" placeholder="Країна, населений пункт, квадрат" required />
+          <FieldError id="order-origin-error">{state.fieldErrors?.origin}</FieldError>
         </label>
         <label className={styles.field}>
           <span>Куди *</span>
-          <input name="destination" placeholder="Країна, населений пункт, квадрат" required />
+          <input aria-describedby="order-destination-error" aria-invalid={Boolean(state.fieldErrors?.destination)} name="destination" placeholder="Країна, населений пункт, квадрат" required />
+          <FieldError id="order-destination-error">{state.fieldErrors?.destination}</FieldError>
         </label>
         <label className={styles.field}>
           <span>Тип вантажу *</span>
-          <input name="cargoType" required />
+          <input aria-describedby="order-cargo-error" aria-invalid={Boolean(state.fieldErrors?.cargoType)} name="cargoType" required />
+          <FieldError id="order-cargo-error">{state.fieldErrors?.cargoType}</FieldError>
         </label>
         <label className={styles.field}>
           <span>Температурний режим *</span>
-          <input name="temperatureMode" placeholder="-20 . . . +20" required />
+          <input aria-describedby="order-temperature-error" aria-invalid={Boolean(state.fieldErrors?.temperatureMode)} name="temperatureMode" placeholder="-20 . . . +20" required />
+          <FieldError id="order-temperature-error">{state.fieldErrors?.temperatureMode}</FieldError>
         </label>
         <label className={styles.field}>
           <span>Вага *</span>
-          <input name="weight" placeholder="до 22 т" required />
+          <input aria-describedby="order-weight-error" aria-invalid={Boolean(state.fieldErrors?.weight)} name="weight" placeholder="до 22 т" required />
+          <FieldError id="order-weight-error">{state.fieldErrors?.weight}</FieldError>
         </label>
         <label className={`${styles.field} ${styles.dateField}`}>
           <span>Бажана дата</span>
@@ -319,7 +348,8 @@ export function OrderForm({ compact = false }: { compact?: boolean }) {
         </label>
         <label className={`${styles.field} ${styles.wide}`}>
           <span>Коментар</span>
-          <textarea name="comment" placeholder="Вкажіть додаткову інформацію" />
+          <textarea aria-describedby="order-comment-error" aria-invalid={Boolean(state.fieldErrors?.comment)} name="comment" placeholder="Вкажіть додаткову інформацію" />
+          <FieldError id="order-comment-error">{state.fieldErrors?.comment}</FieldError>
         </label>
       </div>
       <button className={styles.button} disabled={isSubmitting} type="submit">

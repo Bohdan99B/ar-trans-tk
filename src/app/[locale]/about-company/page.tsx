@@ -6,6 +6,7 @@ import { FaqAccordion } from "@/components/sections/FaqAccordion";
 import { SectionIcon } from "@/components/sections/Icons";
 import { TemperatureDashboard } from "@/components/sections/TemperatureDashboard";
 import buttonStyles from "@/components/ui/Buttons.module.css";
+import { getSiteFaqs } from "@/lib/site-content";
 
 import styles from "../Site.module.css";
 
@@ -39,6 +40,7 @@ const advantages = [
 
 export default async function AboutCompanyPage({ params }: AboutCompanyPageProps) {
   const { locale } = await params;
+  const faqs = await getSiteFaqs(locale);
 
   return (
     <>
@@ -172,7 +174,7 @@ export default async function AboutCompanyPage({ params }: AboutCompanyPageProps
               Ознайомтесь із відповідями на найпоширеніші запитання щодо перевезень, маршрутів,
               страхування та логістичних умов.
             </p>
-            <FaqAccordion locale={locale} />
+            <FaqAccordion items={faqs} locale={locale} />
           </div>
           <ContactCallbackForm />
         </div>

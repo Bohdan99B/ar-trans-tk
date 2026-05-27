@@ -1,21 +1,13 @@
 import { ContactCallbackForm } from "@/components/forms/ContactCallbackForm";
 import { OfficeMap } from "@/components/sections/OfficeMap";
 import { PageHero } from "@/components/sections/PageHero";
-import { managers } from "@/lib/content";
-import { prisma } from "@/lib/prisma";
+import { getPublicContacts, type PublicContact } from "@/lib/site-content";
 
 import styles from "../Site.module.css";
 
 export default async function ContactsPage() {
-  const settings = Object.fromEntries((await prisma.siteSetting.findMany({
-    where: { key: { in: ["contact.phones", "contact.email", "contact.address", "contact.hours"] } },
-  })).map(({ key, value }) => [key, value]));
-  const contacts = settings["contact.phones"] || settings["contact.email"] ? [{
-    email: settings["contact.email"] || "sales@ar-trans-tk.ua",
-    name: "ПП «АР-Транс»",
-    phone: settings["contact.phones"]?.split(/\r?\n|,/)[0]?.trim() || "+380 (67) 120-45-88",
-    role: [settings["contact.address"], settings["contact.hours"]].filter(Boolean).join(" · ") || "Контактний центр",
-  }] : managers;
+  const { additionalContacts, director, office } = await getPublicContacts();
+  const contacts = [office, director, ...additionalContacts];
 
   return (
     <>
@@ -25,23 +17,9 @@ export default async function ContactsPage() {
         title="Контакти ПП «АР-Транс»"
       />
       <section className={styles.sectionAlt}>
-        <div className={`${styles.container} ${styles.split}`}>
-          <div className={styles.managerList}>
-            {contacts.map((manager) => (
-              <article className={styles.manager} key={manager.email}>
-                <h2>{manager.name}</h2>
-                <p>{manager.role}</p>
-                <p>{manager.phone}</p>
-                <p>{manager.email}</p>
-                <div className={styles.contactActions}>
-                  <a href={`tel:${manager.phone.replaceAll(" ", "").replaceAll("(", "").replaceAll(")", "").replaceAll("-", "")}`}>Phone</a>
-                  <a href={`mailto:${manager.email}`}>Email</a>
-                  <a href="https://t.me/" rel="noreferrer" target="_blank">Telegram</a>
-                  <a href="viber://chat?number=%2B380671204588">Viber</a>
-                  <a href="https://wa.me/380671204588" rel="noreferrer" target="_blank">WhatsApp</a>
-                </div>
-              </article>
-            ))}
+        <div className={`${styles.container} ${styles.contactsLayout}`}>
+          <div className={styles.contactCardGrid}>
+            {contacts.map((contact) => <ContactCard contact={contact} key={`${contact.name}-${contact.email}`} />)}
           </div>
           <ContactCallbackForm />
         </div>
@@ -60,5 +38,24 @@ export default async function ContactsPage() {
         </div>
       </section>
     </>
+  );
+}
+
+function ContactCard({ contact }: { contact: PublicContact }) {
+  const phone = contact.phone.replaceAll(/[^+\d]/g, "");
+
+  return (
+    <article className={styles.manager}>
+      <h2>{contact.name}</h2>
+      <p>{contact.role}</p>
+      <p><a className={styles.contactTextLink} href={`tel:${phone}`}>{contact.phone}</a></p>
+      <p><a className={styles.contactTextLink} href={`mailto:${contact.email}`}>{contact.email}</a></p>
+      {contact.hours ? <p>Години роботи: {contact.hours}</p> : null}
+      {contact.messengers.length ? (
+        <div className={styles.contactActions}>
+          {contact.messengers.map((messenger) => <span key={messenger}>{messenger}</span>)}
+        </div>
+      ) : null}
+    </article>
   );
 }

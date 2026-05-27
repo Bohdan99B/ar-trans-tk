@@ -14,7 +14,16 @@ const adminLinks = [
   ["employees", "Співробітники"],
   ["reviews", "Відгуки"],
   ["vacancies", "Вакансії"],
+  // TODO: Restore when the site content management section is ready.
+  // ["content", "Контент сайту"],
   ["settings", "Налаштування"],
+];
+
+const managerLinks = [
+  ["", "Dashboard"],
+  ...staffLinks,
+  ["fleet", "Автопарк"],
+  ["vacancies", "Вакансії"],
 ];
 
 type AdminLayoutProps = {
@@ -34,7 +43,7 @@ export default async function AdminLayout({ children, params }: AdminLayoutProps
   if (!user || (user.role !== "ADMIN" && user.role !== "MANAGER")) {
     redirect(`/${locale}`);
   }
-  const links = (user.role === "ADMIN" ? [["", "Dashboard"], ...adminLinks] : staffLinks).map(
+  const links = (user.role === "ADMIN" ? [["", "Dashboard"], ...adminLinks] : managerLinks).map(
     ([href, label]) => ({ href: `/${locale}/admin${href ? `/${href}` : ""}`, label }),
   );
 

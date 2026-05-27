@@ -34,6 +34,7 @@ export function ConfirmSubmitButton({
   return (
     <button
       className={styles.dangerButton}
+      data-skip-validation="true"
       disabled={pending}
       formAction={action}
       onClick={(event) => {

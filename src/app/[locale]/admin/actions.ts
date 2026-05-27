@@ -7,6 +7,7 @@ import { z } from "zod";
 import { requireAdmin, requireStaff } from "@/lib/auth";
 import { uploadCmsFile } from "@/lib/cloudinary";
 import { prisma } from "@/lib/prisma";
+import { adminContactSchema, adminOfficeContactSchema } from "@/lib/validators";
 
 const localeSchema = z.enum(["uk", "en"]);
 const idSchema = z.string().trim().min(1);
@@ -101,8 +102,27 @@ const vehicleSchema = z.object({
 
 export async function saveVehicle(data: FormData) {
   const locale = getLocale(data);
-  if (!(await requireAdmin())) {
+  const user = await requireStaff();
+  if (!user) {
     redirect(adminPath(locale, "fleet", "error", "Доступ заборонено"));
+  }
+
+  const id = field(data, "id");
+  if (user.role === "MANAGER") {
+    if (!id) {
+      redirect(adminPath(locale, "fleet", "error", "Менеджер не може додавати транспорт"));
+    }
+    await prisma.vehicle.update({
+      data: {
+        description: field(data, "description"),
+        isActive: data.get("isActive") === "on",
+      },
+      where: { id },
+    });
+    revalidateAdmin(locale, "fleet");
+    revalidatePath(`/${locale}/fleet`);
+    revalidatePath(`/${locale}`);
+    redirect(adminPath(locale, "fleet", "success", "Доступність транспорту оновлено"));
   }
 
   const parsed = vehicleSchema.safeParse({
@@ -119,7 +139,6 @@ export async function saveVehicle(data: FormData) {
     redirect(adminPath(locale, "fleet", "error", "Перевірте поля транспорту"));
   }
 
-  const id = field(data, "id");
   const photo = data.get("photo");
   let uploaded: { public_id: string; secure_url: string } | null = null;
   if (photo instanceof File && photo.size > 0) {
@@ -136,6 +155,7 @@ export async function saveVehicle(data: FormData) {
   }
   revalidateAdmin(locale, "fleet");
   revalidatePath(`/${locale}/fleet`);
+  revalidatePath(`/${locale}`);
   redirect(adminPath(locale, "fleet", "success", id ? "Транспорт оновлено" : "Транспорт створено"));
 }
 
@@ -256,14 +276,28 @@ export async function saveVacancyInline(
   if (!id.success) {
     return { error: "Вакансію не знайдено" };
   }
-  await prisma.vacancy.update({
+  const updated = await prisma.vacancy.update({
     data: { ...parsed.data, isPublished: parsed.data.status === "ACTIVE" },
     where: { id: id.data },
   });
   revalidateAdmin(locale, "vacancies");
   revalidatePath(`/${locale}/vacancies`);
   revalidatePath(`/${locale}/cooperation`);
-  return { success: "Вакансію збережено" };
+  return {
+    success: "Вакансію збережено",
+    vacancy: {
+      description: updated.description,
+      id: updated.id,
+      isPublished: updated.isPublished,
+      location: updated.location,
+      requirements: updated.requirements,
+      salary: updated.salary,
+      status: updated.status,
+      titleEn: updated.titleEn,
+      titleUk: updated.titleUk,
+      updatedAt: updated.updatedAt.toISOString(),
+    },
+  };
 }
 
 export async function deleteVacancy(data: FormData) {
@@ -285,46 +319,61 @@ export async function deleteVacancy(data: FormData) {
   redirect(adminPath(locale, "vacancies", "success", "Вакансію видалено"));
 }
 
-const settingKeys = [
-  "contact.phones",
-  "contact.email",
-  "contact.recipientEmail",
-  "contact.socials",
-  "contact.address",
-  "contact.hours",
-  "smtp.host",
-  "smtp.port",
-  "smtp.secure",
-  "smtp.user",
-  "smtp.from",
-  "seo.title",
-  "seo.description",
-  "seo.ogTitle",
-  "seo.ogDescription",
-  "seo.ogImage",
-] as const;
+function revalidatePublicContacts(locale: string) {
+  revalidateAdmin(locale, "settings");
+  revalidatePath(`/${locale}`, "layout");
+  revalidatePath(`/${locale}`);
+  revalidatePath(`/${locale}/contacts`);
+}
 
-export async function saveSettings(data: FormData) {
+const directorSchema = adminContactSchema;
+const officeSchema = adminOfficeContactSchema;
+
+function contactValues(data: FormData) {
+  return {
+    email: field(data, "email"),
+    messengers: data.getAll("messengers").map(String),
+    name: field(data, "name"),
+    phone: field(data, "phone"),
+    role: field(data, "role"),
+  };
+}
+
+export async function saveOffice(data: FormData) {
   const locale = getLocale(data);
   if (!(await requireAdmin())) {
     redirect(adminPath(locale, "settings", "error", "Доступ заборонено"));
   }
+  const parsed = officeSchema.safeParse({
+    ...contactValues(data),
+    hours: field(data, "hours"),
+    recipientEmail: field(data, "recipientEmail"),
+  });
+  if (!parsed.success) {
+    redirect(adminPath(locale, "settings", "error", "Перевірте дані офісу"));
+  }
+  const officeSettings = {
+    "contact.email": parsed.data.email,
+    "contact.hours": parsed.data.hours,
+    "contact.phones": parsed.data.phone,
+    "contact.recipientEmail": parsed.data.recipientEmail,
+    "office.messengers": parsed.data.messengers.join(","),
+    "office.name": parsed.data.name,
+    "office.role": parsed.data.role,
+  };
   await prisma.$transaction(
-    settingKeys.map((key) =>
-      prisma.siteSetting.upsert({
-        create: { key, value: key === "smtp.secure" ? String(data.get(key) === "on") : field(data, key) },
-        update: { value: key === "smtp.secure" ? String(data.get(key) === "on") : field(data, key) },
-        where: { key },
-      }),
+    Object.entries(officeSettings).map(([key, value]) =>
+      prisma.siteSetting.upsert({ create: { key, value }, update: { value }, where: { key } }),
     ),
   );
-  const password = field(data, "smtp.password");
-  if (password) {
-    await prisma.siteSetting.upsert({
-      create: { key: "smtp.password", value: password },
-      update: { value: password },
-      where: { key: "smtp.password" },
-    });
+  revalidatePublicContacts(locale);
+  redirect(adminPath(locale, "settings", "success", "Картку офісу збережено"));
+}
+
+export async function saveLogo(data: FormData) {
+  const locale = getLocale(data);
+  if (!(await requireAdmin())) {
+    redirect(adminPath(locale, "settings", "error", "Доступ заборонено"));
   }
   const logo = data.get("brand.logo");
   if (logo instanceof File && logo.size > 0) {
@@ -334,7 +383,243 @@ export async function saveSettings(data: FormData) {
       update: { value: result.secure_url },
       where: { key: "brand.logo" },
     });
+  } else {
+    redirect(adminPath(locale, "settings", "error", "Оберіть файл логотипу"));
   }
-  revalidateAdmin(locale, "settings");
-  redirect(adminPath(locale, "settings", "success", "Налаштування збережено"));
+  revalidatePublicContacts(locale);
+  redirect(adminPath(locale, "settings", "success", "Логотип збережено"));
+}
+
+export async function deleteLogo(data: FormData) {
+  const locale = getLocale(data);
+  if (!(await requireAdmin())) {
+    redirect(adminPath(locale, "settings", "error", "Доступ заборонено"));
+  }
+  await prisma.siteSetting.deleteMany({ where: { key: "brand.logo" } });
+  revalidatePublicContacts(locale);
+  redirect(adminPath(locale, "settings", "success", "Логотип видалено"));
+}
+
+export async function saveDirector(data: FormData) {
+  const locale = getLocale(data);
+  if (!(await requireAdmin())) {
+    redirect(adminPath(locale, "settings", "error", "Доступ заборонено"));
+  }
+  const parsed = directorSchema.safeParse(contactValues(data));
+  if (!parsed.success) {
+    redirect(adminPath(locale, "settings", "error", "Перевірте дані директора"));
+  }
+  const directorSettings = {
+    "director.email": parsed.data.email,
+    "director.messengers": parsed.data.messengers.join(","),
+    "director.name": parsed.data.name,
+    "director.phone": parsed.data.phone,
+    "director.role": parsed.data.role,
+  };
+  await prisma.$transaction(
+    Object.entries(directorSettings).map(([key, value]) =>
+      prisma.siteSetting.upsert({ create: { key, value }, update: { value }, where: { key } }),
+    ),
+  );
+  revalidatePublicContacts(locale);
+  redirect(adminPath(locale, "settings", "success", "Контакт директора збережено"));
+}
+
+const managerSchema = directorSchema;
+
+export async function saveManager(data: FormData) {
+  const locale = getLocale(data);
+  if (!(await requireAdmin())) {
+    redirect(adminPath(locale, "settings", "error", "Доступ заборонено"));
+  }
+  const parsed = managerSchema.safeParse(contactValues(data));
+  if (!parsed.success) {
+    redirect(adminPath(locale, "settings", "error", "Перевірте контактні дані"));
+  }
+  const id = field(data, "id");
+  if (id) {
+    await prisma.manager.update({ data: parsed.data, where: { id } });
+  } else {
+    await prisma.manager.create({ data: parsed.data });
+  }
+  revalidatePublicContacts(locale);
+  redirect(adminPath(locale, "settings", "success", id ? "Контакт оновлено" : "Контакт додано"));
+}
+
+export async function deleteManager(data: FormData) {
+  const locale = getLocale(data);
+  if (!(await requireAdmin())) {
+    redirect(adminPath(locale, "settings", "error", "Доступ заборонено"));
+  }
+  await prisma.manager.delete({ where: { id: idSchema.parse(field(data, "id")) } });
+  revalidatePublicContacts(locale);
+  redirect(adminPath(locale, "settings", "success", "Контакт видалено"));
+}
+
+const contentSettingKeys = [
+  "about.homeTitle",
+  "about.homeText",
+  "cta.title",
+  "cta.text",
+  "contact.phones",
+  "contact.email",
+  "contact.socials",
+  "contact.address",
+  "contact.hours",
+  "seo.title",
+  "seo.description",
+  "seo.ogTitle",
+  "seo.ogDescription",
+  "seo.ogImage",
+] as const;
+
+const contentManagementEnabled = false;
+
+export async function saveContentSettings(data: FormData) {
+  const locale = getLocale(data);
+  if (!(await requireAdmin())) {
+    redirect(adminPath(locale, "content", "error", "Доступ заборонено"));
+  }
+  if (!contentManagementEnabled) {
+    redirect(adminPath(locale, "", "error", "Керування контентом тимчасово недоступне"));
+  }
+  await prisma.$transaction(
+    contentSettingKeys.map((key) =>
+      prisma.siteSetting.upsert({
+        create: { key, value: field(data, key) },
+        update: { value: field(data, key) },
+        where: { key },
+      }),
+    ),
+  );
+  revalidateAdmin(locale, "content");
+  revalidatePath(`/${locale}`);
+  revalidatePath(`/${locale}/contacts`);
+  redirect(adminPath(locale, "content", "success", "Контентні блоки збережено"));
+}
+
+const serviceSchema = z.object({
+  bodyEn: z.string().min(2),
+  bodyUk: z.string().min(2),
+  isPublished: z.boolean(),
+  slug: z.string().regex(/^[a-z0-9-]+$/, "Slug має містити лише латиницю, цифри та дефіс"),
+  summaryEn: z.string().min(2),
+  summaryUk: z.string().min(2),
+  titleEn: z.string().min(2),
+  titleUk: z.string().min(2),
+});
+
+export async function saveServiceContent(data: FormData) {
+  const locale = getLocale(data);
+  if (!(await requireAdmin())) {
+    redirect(adminPath(locale, "content", "error", "Доступ заборонено"));
+  }
+  if (!contentManagementEnabled) {
+    redirect(adminPath(locale, "", "error", "Керування контентом тимчасово недоступне"));
+  }
+  const parsed = serviceSchema.safeParse({
+    bodyEn: field(data, "bodyEn"),
+    bodyUk: field(data, "bodyUk"),
+    isPublished: data.get("isPublished") === "on",
+    slug: field(data, "slug"),
+    summaryEn: field(data, "summaryEn"),
+    summaryUk: field(data, "summaryUk"),
+    titleEn: field(data, "titleEn"),
+    titleUk: field(data, "titleUk"),
+  });
+  if (!parsed.success) {
+    redirect(adminPath(locale, "content", "error", "Перевірте поля послуги та slug"));
+  }
+  const id = field(data, "id");
+  if (id) {
+    await prisma.service.update({ data: parsed.data, where: { id } });
+  } else {
+    await prisma.service.upsert({
+      create: parsed.data,
+      update: parsed.data,
+      where: { slug: parsed.data.slug },
+    });
+  }
+  revalidateAdmin(locale, "content");
+  revalidatePath(`/${locale}`);
+  revalidatePath(`/${locale}/services`);
+  redirect(adminPath(locale, "content", "success", "Послугу збережено"));
+}
+
+const routeSchema = z.object({
+  country: z.string().min(2),
+  destination: z.string().min(2),
+  direction: z.string().min(2),
+  isActive: z.boolean(),
+  origin: z.string().min(2),
+});
+
+export async function saveGeographyRoute(data: FormData) {
+  const locale = getLocale(data);
+  if (!(await requireAdmin())) {
+    redirect(adminPath(locale, "content", "error", "Доступ заборонено"));
+  }
+  if (!contentManagementEnabled) {
+    redirect(adminPath(locale, "", "error", "Керування контентом тимчасово недоступне"));
+  }
+  const parsed = routeSchema.safeParse({
+    country: field(data, "country"),
+    destination: field(data, "destination"),
+    direction: field(data, "direction"),
+    isActive: data.get("isActive") === "on",
+    origin: field(data, "origin"),
+  });
+  if (!parsed.success) {
+    redirect(adminPath(locale, "content", "error", "Перевірте поля маршруту"));
+  }
+  const id = field(data, "id");
+  if (id) {
+    await prisma.geographyRoute.update({ data: parsed.data, where: { id } });
+  } else {
+    await prisma.geographyRoute.create({ data: parsed.data });
+  }
+  revalidateAdmin(locale, "content");
+  revalidatePath(`/${locale}`);
+  revalidatePath(`/${locale}/geography`);
+  redirect(adminPath(locale, "content", "success", "Маршрут збережено"));
+}
+
+const faqSchema = z.object({
+  answerEn: z.string().min(2),
+  answerUk: z.string().min(2),
+  isPublished: z.boolean(),
+  questionEn: z.string().min(2),
+  questionUk: z.string().min(2),
+  sortOrder: z.coerce.number().int(),
+});
+
+export async function saveFaqContent(data: FormData) {
+  const locale = getLocale(data);
+  if (!(await requireAdmin())) {
+    redirect(adminPath(locale, "content", "error", "Доступ заборонено"));
+  }
+  if (!contentManagementEnabled) {
+    redirect(adminPath(locale, "", "error", "Керування контентом тимчасово недоступне"));
+  }
+  const parsed = faqSchema.safeParse({
+    answerEn: field(data, "answerEn"),
+    answerUk: field(data, "answerUk"),
+    isPublished: data.get("isPublished") === "on",
+    questionEn: field(data, "questionEn"),
+    questionUk: field(data, "questionUk"),
+    sortOrder: field(data, "sortOrder") || "0",
+  });
+  if (!parsed.success) {
+    redirect(adminPath(locale, "content", "error", "Перевірте поля FAQ"));
+  }
+  const id = field(data, "id");
+  if (id) {
+    await prisma.faqItem.update({ data: parsed.data, where: { id } });
+  } else {
+    await prisma.faqItem.create({ data: parsed.data });
+  }
+  revalidateAdmin(locale, "content");
+  revalidatePath(`/${locale}`);
+  revalidatePath(`/${locale}/faq`);
+  redirect(adminPath(locale, "content", "success", "FAQ збережено"));
 }

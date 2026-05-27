@@ -66,6 +66,57 @@
   padding: 18px;
 }
 
+.contactForm,
+.contactEditForm {
+  display: grid;
+  gap: 16px;
+}
+
+.contactEditForm {
+  border-top: 1px solid var(--color-border);
+  margin-top: 4px;
+  padding: 16px 14px 14px;
+}
+
+.contactHeading {
+  align-items: start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: space-between;
+}
+
+.contactCards {
+  align-items: start;
+  display: grid;
+  gap: 10px;
+}
+
+.primaryContactCards {
+  align-items: start;
+  display: grid;
+  gap: 10px;
+}
+
+.contactAccordion {
+  align-self: start;
+}
+
+.logoPreview {
+  background: rgba(7, 16, 28, 0.46);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 14px;
+  width: fit-content;
+}
+
+.fileLabel {
+  color: var(--color-text-soft);
+  display: grid;
+  font-weight: 800;
+  gap: 7px;
+}
+
 .fields {
   display: grid;
   gap: 14px;
@@ -75,7 +126,28 @@
   min-width: 0;
 }
 
+.fieldGroup {
+  color: var(--color-text-soft);
+  display: grid;
+  font-weight: 800;
+  gap: 7px;
+  min-width: 0;
+}
+
+.fieldError {
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.fieldError[data-visible="false"] {
+  display: none;
+}
+
 .form label,
+.contactForm label,
+.contactEditForm label,
 .filter label {
   color: var(--color-text-soft);
   display: grid;
@@ -86,6 +158,8 @@
 .form input,
 .form textarea,
 .form select,
+.contactForm input,
+.contactEditForm input,
 .filter select,
 .actions select {
   background: rgba(7, 16, 28, 0.72);
@@ -99,6 +173,8 @@
 }
 
 .form select,
+.contactForm select,
+.contactEditForm select,
 .filter select,
 .actions select {
   appearance: none;
@@ -117,6 +193,8 @@
 }
 
 .form select:hover,
+.contactForm select:hover,
+.contactEditForm select:hover,
 .filter select:hover,
 .actions select:hover {
   background-color: rgba(255, 211, 77, 0.06);
@@ -124,6 +202,8 @@
 }
 
 .form select:focus-visible,
+.contactForm select:focus-visible,
+.contactEditForm select:focus-visible,
 .filter select:focus-visible,
 .actions select:focus-visible {
   border-color: var(--color-secondary);
@@ -132,6 +212,8 @@
 }
 
 .form select option,
+.contactForm select option,
+.contactEditForm select option,
 .filter select option,
 .actions select option {
   background: #111827;
@@ -143,7 +225,8 @@
   resize: vertical;
 }
 
-.form input[type="file"] {
+.form input[type="file"],
+.contactForm input[type="file"] {
   max-width: 100%;
   overflow: hidden;
   padding: 8px;
@@ -158,6 +241,36 @@
 .checkbox input {
   min-height: auto;
   width: auto;
+}
+
+.multiSelect {
+  background: rgba(7, 16, 28, 0.72);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 8px;
+  font-weight: 500;
+  overflow: hidden;
+}
+
+.multiSelect summary {
+  color: var(--color-text);
+  cursor: pointer;
+  list-style: none;
+  min-height: 44px;
+  padding: 12px;
+}
+
+.multiSelect summary::-webkit-details-marker {
+  display: none;
+}
+
+.multiSelect[open] summary {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.multiSelect > div {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
 }
 
 .primaryButton,
@@ -633,6 +746,15 @@
 
   .cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .contactCards,
+  .primaryContactCards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .contactAccordionOpen {
+    grid-column: 1 / -1;
   }
 
   .vacancyGrid {

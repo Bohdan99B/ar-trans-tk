@@ -34,7 +34,7 @@ export function getPostLoginPath(role?: UserRole | null, callbackUrl?: string | 
   }
 
   if (role === "MANAGER") {
-    return `/${locale}/manager`;
+    return safePath?.match(/^\/(uk|en)\/admin(\/|$)/) ? safePath : `/${locale}/admin`;
   }
 
   return `/${locale}`;

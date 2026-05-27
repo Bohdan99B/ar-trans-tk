@@ -11,7 +11,7 @@ type AdminEmployeesPageProps = {
 
 export default async function AdminEmployeesPage({ params }: AdminEmployeesPageProps) {
   const { locale } = await params;
-  if (!(await requireAdmin())) redirect(`/${locale}/admin/requests`);
+  if (!(await requireAdmin())) redirect(`/${locale}/admin`);
   const employees = await prisma.user.findMany({
     include: {
       employeeInvitations: {

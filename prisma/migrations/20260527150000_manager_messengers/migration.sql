@@ -1,0 +1,2 @@
+ALTER TABLE "Manager"
+ADD COLUMN "messengers" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[];

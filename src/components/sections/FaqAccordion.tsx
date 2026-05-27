@@ -3,20 +3,20 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { faqs } from "@/lib/content";
 import styles from "@/app/[locale]/Site.module.css";
 
 type FaqAccordionProps = {
   className?: string;
+  items: Array<{ a: string; href: string; q: string }>;
   locale: string;
 };
 
-export function FaqAccordion({ className, locale }: FaqAccordionProps) {
+export function FaqAccordion({ className, items, locale }: FaqAccordionProps) {
   const [open, setOpen] = useState(-1);
 
   return (
     <div className={`${styles.accordion}${className ? ` ${className}` : ""}`}>
-      {faqs.map((faq, index) => (
+      {items.map((faq, index) => (
         <article className={styles.accordionItem} key={faq.q}>
           <button aria-expanded={open === index} onClick={() => setOpen(open === index ? -1 : index)} type="button">
             <span>{faq.q}</span>

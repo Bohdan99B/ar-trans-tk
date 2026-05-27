@@ -15,11 +15,12 @@ type FooterProps = {
 export async function Footer({ locale }: FooterProps) {
   const [session, settings] = await Promise.all([
     getServerSession(authOptions),
-    prisma.siteSetting.findMany({ where: { key: { in: ["brand.logo", "contact.phones", "contact.email", "contact.address", "contact.hours", "contact.socials"] } } }),
+    prisma.siteSetting.findMany({ where: { key: { in: ["brand.logo", "contact.phones", "contact.email", "contact.hours"] } } }),
   ]);
   const values = Object.fromEntries(settings.map(({ key, value }) => [key, value]));
   const phone = values["contact.phones"]?.split(/\r?\n|,/)[0]?.trim() || "+380 (67) 120-45-88";
   const email = values["contact.email"] || "sales@ar-trans-tk.ua";
+  const hours = values["contact.hours"] || "09:00 - 18:00";
 
   return (
     <footer className={styles.footer}>
@@ -50,9 +51,7 @@ export async function Footer({ locale }: FooterProps) {
           <div className={styles.contactLine}>
             <a href={`tel:${phone.replaceAll(/[^+\d]/g, "")}`}>{phone}</a>
             <a href={`mailto:${email}`}>{email}</a>
-            {values["contact.address"] ? <span>{values["contact.address"]}</span> : null}
-            {values["contact.hours"] ? <span>{values["contact.hours"]}</span> : null}
-            {values["contact.socials"] ? <span>{values["contact.socials"]}</span> : null}
+            <span className={styles.workHours}>Години роботи: {hours}</span>
             <Link href={`/${locale}/privacy-policy`}>Політика конфіденційності</Link>
             <EmployeeAuthAction isAuthenticated={Boolean(session?.user)} locale={locale} />
           </div>
