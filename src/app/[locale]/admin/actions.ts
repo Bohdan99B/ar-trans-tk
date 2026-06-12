@@ -263,10 +263,16 @@ const reviewSchema = z.object({
   moderationStatus: z.enum(["PENDING", "PUBLISHED", "HIDDEN"]),
 });
 
+function reviewResultPath(data: FormData, locale: string, type: "error" | "success", message: string) {
+  const mode = field(data, "id") ? "edit" : "create";
+  const params = new URLSearchParams({ mode, [type]: message });
+  return `/${locale}/admin/reviews?${params.toString()}`;
+}
+
 export async function saveReview(data: FormData) {
   const locale = getLocale(data);
   if (!(await requireAdmin())) {
-    redirect(adminPath(locale, "reviews", "error", "Доступ заборонено"));
+    redirect(reviewResultPath(data, locale, "error", "Доступ заборонено"));
   }
   const parsed = reviewSchema.safeParse({
     author: field(data, "author"),
@@ -275,7 +281,7 @@ export async function saveReview(data: FormData) {
     moderationStatus: field(data, "moderationStatus"),
   });
   if (!parsed.success) {
-    redirect(adminPath(locale, "reviews", "error", "Перевірте поля відгуку"));
+    redirect(reviewResultPath(data, locale, "error", "Перевірте поля відгуку"));
   }
   const id = field(data, "id");
   const values = { ...parsed.data, isPublished: parsed.data.moderationStatus === "PUBLISHED" };
@@ -287,7 +293,7 @@ export async function saveReview(data: FormData) {
   revalidateAdmin(locale, "reviews");
   revalidatePath(`/${locale}/reviews`);
   revalidatePath(`/${locale}`);
-  redirect(adminPath(locale, "reviews", "success", "Відгук збережено"));
+  redirect(reviewResultPath(data, locale, "success", id ? "Відгук оновлено" : "Відгук створено"));
 }
 
 export async function deleteReview(data: FormData) {

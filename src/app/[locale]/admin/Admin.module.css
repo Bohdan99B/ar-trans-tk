@@ -408,6 +408,12 @@
   resize: vertical;
 }
 
+.form .reviewTextarea {
+  min-height: 76px;
+  overflow-y: hidden;
+  resize: none;
+}
+
 .searchField {
   color: var(--color-text-soft);
   display: grid;
@@ -441,6 +447,52 @@
   border-color: var(--color-secondary);
   box-shadow: 0 0 0 3px rgba(255, 211, 77, 0.16);
   outline: none;
+}
+
+.reviewFilters {
+  align-items: end;
+  display: flex;
+  flex: 1 1 480px;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.reviewStatusFilter {
+  color: var(--color-text-soft);
+  display: grid;
+  flex: 0 1 220px;
+  font-weight: 800;
+  gap: 7px;
+  min-width: min(100%, 180px);
+}
+
+.reviewStatusFilter select {
+  appearance: none;
+  background:
+    linear-gradient(45deg, transparent 50%, var(--color-secondary) 50%) calc(100% - 17px) 50% / 5px 5px no-repeat,
+    linear-gradient(135deg, var(--color-secondary) 50%, transparent 50%) calc(100% - 12px) 50% / 5px 5px no-repeat,
+    rgba(7, 16, 28, 0.72);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 8px;
+  color: var(--color-text);
+  color-scheme: dark;
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 0;
+  padding: 10px 34px 10px 12px;
+  width: 100%;
+}
+
+.reviewStatusFilter select:focus-visible {
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 0 3px rgba(255, 211, 77, 0.16);
+  outline: none;
+}
+
+.reviewStatusFilter option {
+  background: #111827;
+  color: var(--color-text);
 }
 
 .checkbox {
@@ -869,7 +921,7 @@
   border-radius: 0;
 }
 
-.createVehicleSummary {
+.createAccordionSummary {
   grid-template-columns: minmax(0, 1fr) 24px;
 }
 
@@ -884,7 +936,7 @@
   width: 10px;
 }
 
-.createVehicleSummary[aria-expanded="true"] .chevron {
+.createAccordionSummary[aria-expanded="true"] .chevron {
   transform: rotate(225deg) translate(-2px, -2px);
 }
 
@@ -1057,27 +1109,34 @@
   padding-top: 12px;
 }
 
+.pagination button,
 .pagination a {
+  background: transparent;
   border: 1px solid var(--color-border-strong);
   border-radius: 8px;
   color: var(--color-text-muted);
+  cursor: pointer;
+  font: inherit;
   min-width: 42px;
   padding: 9px 12px;
   text-align: center;
   transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
 }
 
+.pagination button:hover,
 .pagination a:hover {
   background: rgba(255, 211, 77, 0.09);
   border-color: rgba(255, 211, 77, 0.54);
   color: var(--color-text);
 }
 
+.pagination button:focus-visible,
 .pagination a:focus-visible {
   outline: 2px solid var(--color-secondary);
   outline-offset: 2px;
 }
 
+.pagination button[aria-current="page"],
 .pagination a[aria-current="page"] {
   background: var(--color-secondary);
   border-color: var(--color-secondary);
@@ -1090,9 +1149,25 @@
   gap: 16px;
 }
 
+.reviewCard {
+  align-self: start;
+  min-width: 0;
+}
+
+.reviewEditForm {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  border-top: 1px solid var(--color-border);
+}
+
 @media (min-width: 700px) {
   .fields {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .reviewBodyField {
+    grid-column: 1 / -1;
   }
 
   .cards {

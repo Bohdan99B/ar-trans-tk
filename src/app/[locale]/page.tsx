@@ -31,8 +31,26 @@ export default async function HomePage({ params }: HomePageProps) {
   const reviewItems = publishedReviews.map((review) => ({
     author: review.author,
     body: review.body,
-    role: review.company ?? "Клієнт AR-TRANS",
+    id: review.id,
+    role: review.company ?? (locale === "uk" ? "Клієнт AR-TRANS" : "AR-TRANS client"),
   }));
+  const reviewLabels = locale === "uk"
+    ? {
+        carousel: "Відгуки клієнтів",
+        collapse: "Згорнути",
+        empty: "Опублікованих відгуків ще немає.",
+        next: "Наступний відгук",
+        previous: "Попередній відгук",
+        readMore: "Читати більше",
+      }
+    : {
+        carousel: "Client reviews",
+        collapse: "Show less",
+        empty: "There are no published reviews yet.",
+        next: "Next review",
+        previous: "Previous review",
+        readMore: "Read more",
+      };
 
   return (
     <>
@@ -216,9 +234,17 @@ export default async function HomePage({ params }: HomePageProps) {
 
       <section className={styles.section}>
         <div className={styles.container}>
-          <p className={styles.eyebrow}>Відгуки</p>
-          <h2 className={styles.heading}>Довіра клієнтів — показник якості рейсу</h2>
-          <ReviewsCarousel items={reviewItems} />
+          <div className={styles.reviewsHeading}>
+            <div>
+              <p className={styles.eyebrow}>Відгуки</p>
+              <h2 className={styles.heading}>Довіра клієнтів — показник якості рейсу</h2>
+            </div>
+            <Link className={styles.reviewsLink} href={`/${locale}/reviews`}>
+              {locale === "uk" ? "Усі відгуки" : "All reviews"}
+              <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+          <ReviewsCarousel items={reviewItems} labels={reviewLabels} />
         </div>
       </section>
 
