@@ -126,12 +126,12 @@ export default async function AdminRequestsPage({ params, searchParams }: Reques
                 <tbody>
                   {requests.map((item) => (
                     <tr className={item.id === selectedRequest?.id ? styles.selectedRow : undefined} key={item.id}>
-                      <td>{item.createdAt.toLocaleString("uk-UA")}<br /><span className={styles.muted}>{item.requestNumber}</span></td>
-                      <td>
+                      <td data-label="Дата / номер">{item.createdAt.toLocaleString("uk-UA")}<br /><span className={styles.muted}>{item.requestNumber}</span></td>
+                      <td data-label={view === "applications" ? "Клієнт" : "Тип і контакт"}>
                         {view === "questions" ? <><strong>{questionLabels[item.type as keyof typeof questionLabels]}</strong><br /></> : null}
                         {item.name}<br />{item.phone}<br />{item.email ?? "-"}
                       </td>
-                      <td>
+                      <td data-label="Перегляд">
                         <details className={styles.requestDetails} open={item.id === selectedRequest?.id}>
                           <summary>Переглянути</summary>
                           {view === "applications" ? (
@@ -140,7 +140,7 @@ export default async function AdminRequestsPage({ params, searchParams }: Reques
                           <p>{item.comment || "Коментар відсутній"}</p>
                         </details>
                       </td>
-                      <td>
+                      <td data-label="Статус">
                         <form action={updateRequestStatus} className={styles.actions}>
                           <input name="id" type="hidden" value={item.id} />
                           <input name="locale" type="hidden" value={locale} />

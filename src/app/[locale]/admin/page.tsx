@@ -88,7 +88,7 @@ export default async function AdminPage({ params, searchParams }: AdminPageProps
 
   return (
     <div className={adminStyles.page}>
-      <div className={styles.grid}>
+      <div className={adminStyles.dashboardGrid}>
         <article className={styles.card}>
           <h2>Заявки</h2>
           <dl className={adminStyles.metricBreakdown}>
@@ -152,7 +152,7 @@ export default async function AdminPage({ params, searchParams }: AdminPageProps
                 <tbody>
                   {latest.map((item) => (
                     <tr className={adminStyles.clickableRow} key={item.id}>
-                      <td>
+                      <td data-label="Номер">
                         <Link
                           aria-label={`Переглянути заявку ${item.requestNumber}`}
                           className={adminStyles.rowLink}
@@ -161,7 +161,7 @@ export default async function AdminPage({ params, searchParams }: AdminPageProps
                           {item.requestNumber}
                         </Link>
                       </td>
-                      <td>
+                      <td data-label="Клієнт">
                         <Link
                           aria-hidden="true"
                           className={adminStyles.rowLink}
@@ -171,7 +171,7 @@ export default async function AdminPage({ params, searchParams }: AdminPageProps
                           {item.name}<br />{item.phone}
                         </Link>
                       </td>
-                      <td>
+                      <td data-label="Статус">
                         <Link
                           aria-hidden="true"
                           className={adminStyles.rowLink}
@@ -181,7 +181,7 @@ export default async function AdminPage({ params, searchParams }: AdminPageProps
                           {item.status.titleUk}
                         </Link>
                       </td>
-                      <td>
+                      <td data-label="Дата">
                         <Link
                           aria-hidden="true"
                           className={adminStyles.rowLink}

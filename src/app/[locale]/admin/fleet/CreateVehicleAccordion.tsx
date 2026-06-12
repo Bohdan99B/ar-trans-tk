@@ -4,7 +4,7 @@ import { AdminCreateAccordion } from "../AdminCreateAccordion";
 
 export function CreateVehicleAccordion({ children }: { children: ReactNode }) {
   return (
-    <AdminCreateAccordion title="Добавити новий транспорт">
+    <AdminCreateAccordion title="Додати новий транспорт">
       {children}
     </AdminCreateAccordion>
   );

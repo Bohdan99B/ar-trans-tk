@@ -14,6 +14,7 @@
   justify-content: center;
   min-height: 54px;
   padding: 0 22px;
+  text-align: center;
   transition:
     background 180ms ease,
     border-color 180ms ease,
@@ -50,7 +51,7 @@
   }
 }
 
-@media (max-width: 520px) {
+@media (max-width: 639px) {
   .row,
   .primary,
   .secondary {

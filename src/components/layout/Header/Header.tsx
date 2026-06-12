@@ -12,6 +12,8 @@ type HeaderProps = {
   locale: string;
 };
 
+const headerNavItems = navItems.filter((item) => item.href !== "reviews");
+
 export async function Header({ locale }: HeaderProps) {
   const [user, settings] = await Promise.all([
     getCurrentUser(),
@@ -25,6 +27,8 @@ export async function Header({ locale }: HeaderProps) {
       : user?.role === "MANAGER"
         ? `/${locale}/manager`
         : null;
+  const isUkrainian = locale === "uk";
+  const navigationLabel = isUkrainian ? "Основна навігація" : "Primary navigation";
 
   return (
     <header className={styles.header}>
@@ -32,32 +36,32 @@ export async function Header({ locale }: HeaderProps) {
         <Logo imageUrl={values["brand.logo"]} />
       </Link>
       <details className={styles.menu}>
-        <summary aria-label="Відкрити меню">
+        <summary aria-label={isUkrainian ? "Відкрити меню" : "Open menu"}>
           <span />
           <span />
           <span />
         </summary>
-        <nav className={styles.nav} aria-label="Primary navigation">
-          {navItems.map((item) => (
+        <nav className={styles.nav} aria-label={navigationLabel}>
+          {headerNavItems.map((item) => (
             <Link key={item.href} href={`/${locale}/${item.href}`}>
               {locale === "en" ? item.en : item.uk}
             </Link>
           ))}
-          {managementHref ? <Link href={managementHref}>Місце керування</Link> : null}
+          {managementHref ? <Link href={managementHref}>{isUkrainian ? "Панель керування" : "Management"}</Link> : null}
         </nav>
       </details>
-      <nav className={styles.navDesktop} aria-label="Primary navigation">
-        {navItems.map((item) => (
+      <nav className={styles.navDesktop} aria-label={navigationLabel}>
+        {headerNavItems.map((item) => (
           <Link key={item.href} href={`/${locale}/${item.href}`}>
             {locale === "en" ? item.en : item.uk}
           </Link>
         ))}
-        {managementHref ? <Link href={managementHref}>Місце керування</Link> : null}
+        {managementHref ? <Link href={managementHref}>{isUkrainian ? "Панель керування" : "Management"}</Link> : null}
       </nav>
       <div className={styles.actions}>
         <a href={`tel:${phone.replaceAll(/[^+\d]/g, "")}`}>{phone}</a>
         <Link className={styles.order} href={`/${locale}/order`}>
-          Розрахунок
+          {isUkrainian ? "Розрахунок" : "Get a quote"}
         </Link>
       </div>
     </header>

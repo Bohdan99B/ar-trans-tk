@@ -637,7 +637,7 @@ const serviceSchema = z.object({
   bodyEn: z.string().min(2),
   bodyUk: z.string().min(2),
   isPublished: z.boolean(),
-  slug: z.string().regex(/^[a-z0-9-]+$/, "Slug має містити лише латиницю, цифри та дефіс"),
+  slug: z.string().regex(/^[a-z0-9-]+$/, "URL-ідентифікатор має містити лише латиницю, цифри та дефіс"),
   summaryEn: z.string().min(2),
   summaryUk: z.string().min(2),
   titleEn: z.string().min(2),

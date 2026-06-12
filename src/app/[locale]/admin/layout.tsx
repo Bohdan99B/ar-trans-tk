@@ -23,7 +23,7 @@ const adminLinks = [
 ];
 
 const managerLinks = [
-  ["", "Dashboard"],
+  ["", "Огляд"],
   ...staffLinks,
   ["fleet", "Автопарк"],
   ["vacancies", "Вакансії"],
@@ -47,7 +47,7 @@ export default async function AdminLayout({ children, params }: AdminLayoutProps
     redirect(`/${locale}`);
   }
   const hasAdminAccess = isAdminRole(user.role);
-  const links = (hasAdminAccess ? [["", "Dashboard"], ...adminLinks] : managerLinks).map(
+  const links = (hasAdminAccess ? [["", "Огляд"], ...adminLinks] : managerLinks).map(
     ([href, label]) => ({ href: `/${locale}/admin${href ? `/${href}` : ""}`, label }),
   );
   const passwordResetCount =

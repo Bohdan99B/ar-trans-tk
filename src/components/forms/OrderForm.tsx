@@ -236,7 +236,7 @@ export function OrderForm({ compact = false }: { compact?: boolean }) {
         {!compact && (
           <>
             <label className={styles.field}>
-              <span>Email</span>
+              <span>Електронна пошта</span>
               <input aria-describedby="order-email-error" aria-invalid={Boolean(state.fieldErrors?.email)} name="email" type="email" />
               <FieldError id="order-email-error">{state.fieldErrors?.email}</FieldError>
             </label>

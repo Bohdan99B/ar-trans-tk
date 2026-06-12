@@ -56,12 +56,12 @@ export function TruckIllustration({ compact = false }: TruckIllustrationProps) {
             <strong>18:40</strong>
           </div>
           <div className={`${styles.floatBadge} ${styles.badgeTemp}`}>
-            <span>Temperature</span>
-            <strong>-18 C stable</strong>
+            <span>Температура</span>
+            <strong>-18 °C стабільно</strong>
           </div>
           <div className={`${styles.floatBadge} ${styles.badgeLive}`}>
-            <span>Live Tracking</span>
-            <strong>Active Route</strong>
+            <span>Онлайн-відстеження</span>
+            <strong>Активний маршрут</strong>
           </div>
         </>
       )}

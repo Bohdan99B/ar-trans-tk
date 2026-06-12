@@ -2,6 +2,7 @@ import Image from "next/image";
 
 import { PageHero } from "@/components/sections/PageHero";
 import { TemperatureDashboard } from "@/components/sections/TemperatureDashboard";
+import { PaginatedCollection } from "@/components/ui/PaginatedCollection";
 import { prisma } from "@/lib/prisma";
 
 import styles from "../Site.module.css";
@@ -16,39 +17,50 @@ export default async function FleetPage() {
         title="Сучасний автопарк для Європи"
       />
       <section className={styles.sectionAlt}>
-        <div className={`${styles.container} ${styles.fleetGrid}`}>
-          {fleet.length === 0 ? <p>Активного транспорту поки немає.</p> : fleet.map((vehicle) => (
-            <article className={`${styles.card} ${styles.fleetCard}`} key={vehicle.id}>
-              {vehicle.photoUrl ? (
-                <div className={styles.fleetImageBox}>
-                  <Image
-                    alt={vehicle.title}
-                    className={styles.fleetCardImage}
-                    height={675}
-                    src={vehicle.photoUrl}
-                    width={1200}
-                  />
-                </div>
-              ) : null}
-              <h2>{vehicle.title}</h2>
-              {vehicle.brand ? <p className={styles.fleetCardBrand}>{vehicle.brand}</p> : null}
-              <p>{vehicle.description ?? ""}</p>
-              <dl className={`${styles.fleetMeta} ${styles.fleetMetaTwoColumn}`}>
-                <div>
-                  <dt>Вантажопідйомність:</dt>
-                  <dd>{vehicle.payloadTonnes.toString()} т</dd>
-                </div>
-                <div>
-                  <dt>Обʼєм:</dt>
-                  <dd>{vehicle.volume || "Не вказано"}</dd>
-                </div>
-                <div className={styles.fleetMetaWide}>
-                  <dt>Температурний режим:</dt>
-                  <dd>{vehicle.temperatureFrom}...{vehicle.temperatureTo} °C</dd>
-                </div>
-              </dl>
-            </article>
-          ))}
+        <div className={styles.container}>
+          {fleet.length === 0 ? (
+            <p className={styles.reviewsEmpty}>Активного транспорту поки немає.</p>
+          ) : (
+            <PaginatedCollection
+              ariaLabel="Пагінація автопарку"
+              className={styles.fleetGrid}
+              nextLabel="Наступна сторінка автопарку"
+              previousLabel="Попередня сторінка автопарку"
+            >
+              {fleet.map((vehicle) => (
+                <article className={`${styles.card} ${styles.fleetCard}`} key={vehicle.id}>
+                  {vehicle.photoUrl ? (
+                    <div className={styles.fleetImageBox}>
+                      <Image
+                        alt={vehicle.title}
+                        className={styles.fleetCardImage}
+                        height={675}
+                        src={vehicle.photoUrl}
+                        width={1200}
+                      />
+                    </div>
+                  ) : null}
+                  <h2>{vehicle.title}</h2>
+                  {vehicle.brand ? <p className={styles.fleetCardBrand}>{vehicle.brand}</p> : null}
+                  <p>{vehicle.description ?? ""}</p>
+                  <dl className={`${styles.fleetMeta} ${styles.fleetMetaTwoColumn}`}>
+                    <div>
+                      <dt>Вантажопідйомність:</dt>
+                      <dd>{vehicle.payloadTonnes.toString()} т</dd>
+                    </div>
+                    <div>
+                      <dt>Обʼєм:</dt>
+                      <dd>{vehicle.volume || "Не вказано"}</dd>
+                    </div>
+                    <div className={styles.fleetMetaWide}>
+                      <dt>Температурний режим:</dt>
+                      <dd>{vehicle.temperatureFrom}...{vehicle.temperatureTo} °C</dd>
+                    </div>
+                  </dl>
+                </article>
+              ))}
+            </PaginatedCollection>
+          )}
         </div>
       </section>
       <section className={styles.section}>

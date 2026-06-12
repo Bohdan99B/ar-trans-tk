@@ -73,7 +73,7 @@ type VehicleValue = {
 
 function VehicleFields({ canManage, vehicle }: { canManage: boolean; vehicle?: VehicleValue }) {
   return (
-    <div className={styles.fields}>
+    <div className={`${styles.fields} ${styles.vehicleFields}`}>
       <label>Реєстраційний номер<input defaultValue={vehicle?.title} disabled={!canManage} name="title" placeholder="Реєстраційний номер" required /></label>
       <label>Марка<input defaultValue={vehicle?.brand ?? ""} disabled={!canManage} name="brand" /></label>
       <label>Короткий опис<textarea defaultValue={vehicle?.description ?? ""} name="description" /></label>

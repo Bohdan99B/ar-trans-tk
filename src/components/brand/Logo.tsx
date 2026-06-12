@@ -32,7 +32,7 @@ export function Logo({ compact = false, imageUrl }: LogoProps) {
       {!compact && (
         <span className={styles.word}>
           <strong>AR-TRANS</strong>
-          <small>transport company</small>
+          <small>транспортна компанія</small>
         </span>
       )}
     </span>

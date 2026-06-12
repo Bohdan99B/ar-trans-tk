@@ -67,7 +67,7 @@ export function ReviewsPanel({
 
   return (
     <section className={styles.panel}>
-      <div className={styles.pageHeader}>
+      <div className={`${styles.pageHeader} ${styles.reviewPanelHeader}`}>
         <div>
           <h2>Створені відгуки</h2>
           <p className={styles.muted}>Знаходьте відгуки за даними картки та керуйте їхнім статусом.</p>
@@ -103,7 +103,7 @@ export function ReviewsPanel({
         </p>
       ) : (
         <>
-          <div className={styles.cards}>
+          <div className={`${styles.cards} ${styles.reviewCards}`}>
             {visibleReviews.map(({ index, review }) => {
               const open = openReviewId === review.id;
 

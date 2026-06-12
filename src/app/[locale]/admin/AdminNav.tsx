@@ -17,7 +17,12 @@ type AdminNavProps = {
 
 export function AdminNav({ initialPasswordResetCount, isAdmin, links }: AdminNavProps) {
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
   const [passwordResetCount, setPasswordResetCount] = useState(initialPasswordResetCount);
+  const activeLink = links.find((link) => {
+    const isDashboard = link.href.endsWith("/admin");
+    return pathname === link.href || (!isDashboard && pathname.startsWith(`${link.href}/`));
+  });
 
   const refreshCount = useCallback(async () => {
     if (!isAdmin) return;
@@ -46,22 +51,47 @@ export function AdminNav({ initialPasswordResetCount, isAdmin, links }: AdminNav
   }, [isAdmin, refreshCount]);
 
   return (
-    <nav className={styles.adminNav} aria-label="Admin navigation">
-      {links.map((link) => {
-        const isDashboard = link.href.endsWith("/admin");
-        const isActive = pathname === link.href || (!isDashboard && pathname.startsWith(`${link.href}/`));
+    <div className={styles.adminNavShell}>
+      <button
+        aria-controls="admin-navigation"
+        aria-expanded={open}
+        className={styles.adminNavToggle}
+        onClick={() => setOpen((value) => !value)}
+        type="button"
+      >
+        <span>
+          <small>Розділ панелі</small>
+          <strong>{activeLink?.label ?? "Навігація"}</strong>
+        </span>
+        <b aria-hidden="true">{open ? "−" : "+"}</b>
+      </button>
+      <nav
+        aria-label="Навігація панелі керування"
+        className={styles.adminNav}
+        data-open={open}
+        id="admin-navigation"
+      >
+        {links.map((link) => {
+          const isDashboard = link.href.endsWith("/admin");
+          const isActive = pathname === link.href || (!isDashboard && pathname.startsWith(`${link.href}/`));
 
-        return (
-          <Link aria-current={isActive ? "page" : undefined} href={link.href} key={link.href}>
-            <span>{link.label}</span>
-            {link.href.endsWith("/employees") && passwordResetCount > 0 ? (
-              <strong className={styles.adminNavBadge} aria-label={`${passwordResetCount} активних запитів`}>
-                {passwordResetCount}
-              </strong>
-            ) : null}
-          </Link>
-        );
-      })}
-    </nav>
+          return (
+            <Link
+              aria-current={isActive ? "page" : undefined}
+              href={link.href}
+              key={link.href}
+              onClick={() => setOpen(false)}
+            >
+              <span>{link.label}</span>
+              {link.href.endsWith("/employees") && passwordResetCount > 0 ? (
+                <strong className={styles.adminNavBadge} aria-label={`${passwordResetCount} активних запитів`}>
+                  {passwordResetCount}
+                </strong>
+              ) : null}
+            </Link>
+          );
+        })}
+      </nav>
+    </div>
   );
 }

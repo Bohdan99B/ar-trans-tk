@@ -217,6 +217,8 @@
   max-width: 560px;
   padding: 22px;
   width: min(100%, 560px);
+  max-height: calc(100dvh - 36px);
+  overflow-y: auto;
 }
 
 .modalActions {
@@ -226,9 +228,31 @@
   justify-content: flex-end;
 }
 
-@media (min-width: 760px) {
+@media (max-width: 639px) {
+  .form,
+  .modal {
+    padding: 16px;
+  }
+
+  .createButton,
+  .employeeActions,
+  .employeeActions > *,
+  .modalActions,
+  .modalActions > * {
+    width: 100%;
+  }
+
+  .employeeActions,
+  .modalActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+}
+
+@media (min-width: 768px) {
   .form {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .form > div {
@@ -237,5 +261,106 @@
 
   .createButton {
     align-self: end;
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 1024px) {
+  .form {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  }
+
+  .createButton {
+    grid-column: auto;
+  }
+}
+
+.panel,
+.form,
+.form label,
+.tableWrap,
+.employeeActions {
+  min-width: 0;
+}
+
+.form input,
+.form select {
+  min-width: 0;
+  width: 100%;
+}
+
+.employeeStatus {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+@media (max-width: 1023px) {
+  .tableWrap {
+    overflow: visible;
+  }
+
+  .table,
+  .table tbody,
+  .table tr,
+  .table td {
+    display: block;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .table {
+    border-collapse: separate;
+  }
+
+  .table thead {
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+
+  .table tbody {
+    display: grid;
+    gap: 12px;
+  }
+
+  .table tr {
+    background: rgba(7, 16, 28, 0.46);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .table td {
+    align-items: start;
+    border-bottom: 1px solid var(--color-border);
+    display: grid;
+    gap: 10px;
+    grid-template-columns: minmax(120px, 0.38fr) minmax(0, 1fr);
+    overflow-wrap: anywhere;
+    padding: 11px 12px;
+  }
+
+  .table td:last-child {
+    border-bottom: 0;
+  }
+
+  .table td::before {
+    color: var(--color-secondary);
+    content: attr(data-label);
+    font-size: 12px;
+    font-weight: 900;
+    line-height: 1.45;
+    text-transform: uppercase;
+  }
+}
+
+@media (max-width: 639px) {
+  .table td {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

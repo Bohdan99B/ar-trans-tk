@@ -34,6 +34,9 @@ export default async function ReviewsPage({ params }: ReviewsPageProps) {
             labels={{
               collapse: isUkrainian ? "Згорнути" : "Show less",
               empty: isUkrainian ? "Опублікованих відгуків ще немає." : "There are no published reviews yet.",
+              next: isUkrainian ? "Наступна сторінка відгуків" : "Next reviews page",
+              pagination: isUkrainian ? "Пагінація відгуків" : "Reviews pagination",
+              previous: isUkrainian ? "Попередня сторінка відгуків" : "Previous reviews page",
               readMore: isUkrainian ? "Читати більше" : "Read more",
             }}
           />

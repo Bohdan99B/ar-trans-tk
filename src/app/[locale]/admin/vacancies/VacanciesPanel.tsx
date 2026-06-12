@@ -386,7 +386,7 @@ function ApplicationAccordion({
       </button>
       <AnimatedPanel open={open}>
         <div className={styles.applicationDetails}>
-          <p><strong>Email:</strong> {application.email}</p>
+          <p><strong>Електронна пошта:</strong> {application.email}</p>
           <p><strong>Місто:</strong> {application.city}</p>
           <p><strong>Напрям:</strong> {direction}</p>
           <p className={styles.details}><strong>Коментар:</strong> {application.comment || "Коментар відсутній"}</p>

@@ -222,16 +222,18 @@
 
 .stat {
   background: rgba(255, 255, 255, 0.035);
-  padding: 20px;
+  min-width: 0;
+  padding: clamp(14px, 1.5vw, 20px);
 }
 
 .stat b {
   color: var(--color-secondary);
   display: block;
   font-family: var(--font-heading), sans-serif;
-  font-size: clamp(27px, 4vw, 36px);
+  font-size: clamp(27px, 3vw, 36px);
   line-height: 1;
   margin-bottom: 6px;
+  white-space: nowrap;
 }
 
 .stat span {
@@ -1109,16 +1111,16 @@ a.card:hover,
 
 .reviewsTrack {
   align-items: start;
-  display: grid;
+  display: flex;
   gap: 14px;
-  grid-auto-columns: minmax(0, 88%);
-  grid-auto-flow: column;
+  max-width: 100%;
   min-width: 0;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
   padding: 2px 2px 10px;
   scrollbar-width: none;
   scroll-snap-type: inline mandatory;
+  width: 100%;
 }
 
 .reviewsTrack::-webkit-scrollbar {
@@ -1144,6 +1146,11 @@ a.card:hover,
     box-shadow 260ms ease,
     transform 260ms ease;
   z-index: 0;
+}
+
+.reviewsTrack > .reviewCard {
+  flex: 0 0 100%;
+  width: 100%;
 }
 
 .reviewCardExpanded {
@@ -1499,11 +1506,56 @@ a.card:hover,
   padding: 36px 18px 64px;
 }
 
+.adminNavShell {
+  display: grid;
+  margin: 20px 0 28px;
+  min-width: 0;
+}
+
+.adminNavToggle {
+  align-items: center;
+  background: rgba(23, 32, 51, 0.72);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 14px;
+  color: var(--color-text);
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  min-height: 52px;
+  padding: 10px 14px;
+  text-align: left;
+  width: 100%;
+}
+
+.adminNavToggle span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.adminNavToggle small {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.adminNavToggle strong {
+  overflow-wrap: anywhere;
+}
+
+.adminNavToggle b {
+  color: var(--color-secondary);
+  flex: 0 0 auto;
+  font-size: 24px;
+  line-height: 1;
+}
+
 .adminNav {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin: 20px 0 28px;
 }
 
 .adminNav a {
@@ -1611,7 +1663,7 @@ a.card:hover,
   }
 }
 
-@media (min-width: 680px) {
+@media (min-width: 640px) {
   .stats,
   .grid,
   .cooperationBenefits,
@@ -1644,8 +1696,9 @@ a.card:hover,
     padding-right: 28px;
   }
 
-  .reviewsTrack {
-    grid-auto-columns: calc((100% - 14px) / 2);
+  .reviewsTrack > .reviewCard {
+    flex-basis: calc((100% - 14px) / 2);
+    width: calc((100% - 14px) / 2);
   }
 
   .reviewsGrid {
@@ -1653,7 +1706,7 @@ a.card:hover,
   }
 }
 
-@media (min-width: 960px) {
+@media (min-width: 1024px) {
   .hero {
     padding-top: 126px;
   }
@@ -1716,8 +1769,9 @@ a.card:hover,
     grid-template-columns: minmax(0, 1fr) minmax(320px, 0.42fr);
   }
 
-  .reviewsTrack {
-    grid-auto-columns: calc((100% - 28px) / 3);
+  .reviewsTrack > .reviewCard {
+    flex-basis: calc((100% - 28px) / 3);
+    width: calc((100% - 28px) / 3);
   }
 
   .reviewsGrid {
@@ -1725,7 +1779,7 @@ a.card:hover,
   }
 }
 
-@media (max-width: 520px) {
+@media (max-width: 639px) {
   .hero {
     min-height: auto;
     padding-top: 72px;
@@ -1753,5 +1807,368 @@ a.card:hover,
   .reviewsHeading {
     align-items: flex-start;
     flex-direction: column;
+  }
+}
+
+/* Responsive foundation: mobile first, then the shared project breakpoints. */
+.section,
+.sectionAlt {
+  padding: 56px 16px;
+}
+
+.mediaHero {
+  min-height: 520px;
+  padding: 88px 16px 54px;
+}
+
+.container,
+.heroInner,
+.heroText,
+.heroVisual,
+.split > *,
+.homeFaqLayout > *,
+.homeFleetOverview > *,
+.cooperationFormLayout > * {
+  min-width: 0;
+}
+
+.title {
+  font-size: clamp(34px, 10vw, 48px);
+  overflow-wrap: anywhere;
+}
+
+.heading {
+  font-size: clamp(27px, 8vw, 38px);
+  overflow-wrap: anywhere;
+}
+
+.richText p,
+.richText li {
+  font-size: 16px;
+}
+
+.hero {
+  min-height: auto;
+  padding: 72px 16px 56px;
+}
+
+.heroBadge {
+  max-width: 100%;
+}
+
+.homeFleetHighlight {
+  min-height: 150px;
+}
+
+.homeFleetHighlight strong,
+.tempZones strong {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.card {
+  border-radius: 20px;
+  min-height: 0;
+  padding: 20px;
+}
+
+.fleetMetaTwoColumn {
+  grid-template-columns: 1fr;
+}
+
+.map,
+.truckScene {
+  min-height: 0;
+}
+
+.truckScene,
+.truckCompact {
+  border-radius: 22px;
+}
+
+.routeList li {
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.routeList span {
+  text-align: left;
+}
+
+.accordionItem button {
+  gap: 14px;
+  padding: 16px;
+}
+
+.accordionItem b {
+  flex: 0 0 auto;
+}
+
+.accordionBodyInner {
+  padding-inline: 16px;
+}
+
+.accordionBody[data-open="true"] .accordionBodyInner {
+  padding: 16px 16px 20px;
+}
+
+.reviewsHeading {
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.officeMap {
+  min-height: 300px;
+}
+
+.officeMap iframe {
+  height: 360px;
+}
+
+.mapOverlay {
+  right: 18px;
+}
+
+.adminShell {
+  min-width: 0;
+  padding: 28px 16px 56px;
+}
+
+.adminNav {
+  display: grid;
+  gap: 8px;
+  margin-top: 0;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  padding-top: 0;
+  transition:
+    max-height 240ms ease,
+    margin-top 240ms ease,
+    opacity 180ms ease,
+    padding-top 240ms ease;
+  visibility: hidden;
+}
+
+.adminNav[data-open="true"] {
+  margin-top: 8px;
+  max-height: 32rem;
+  opacity: 1;
+  padding-top: 2px;
+  visibility: visible;
+}
+
+.adminNav a {
+  justify-content: space-between;
+  min-height: 44px;
+  width: 100%;
+}
+
+.tableWrap {
+  max-width: 100%;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (hover: none) {
+  a.card:hover,
+  .card:hover {
+    box-shadow: 0 18px 58px rgba(0, 0, 0, 0.2);
+    transform: none;
+  }
+}
+
+@media (min-width: 640px) {
+  .section,
+  .sectionAlt {
+    padding: 72px 24px;
+  }
+
+  .mediaHero {
+    padding: 108px 24px 70px;
+  }
+
+  .title {
+    font-size: clamp(44px, 8vw, 64px);
+  }
+
+  .heading {
+    font-size: clamp(34px, 5vw, 44px);
+  }
+
+  .card {
+    padding: 24px;
+  }
+
+  .fleetMetaTwoColumn {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .routeList li {
+    align-items: center;
+    flex-direction: row;
+  }
+
+  .routeList span {
+    text-align: right;
+  }
+
+  .reviewsHeading {
+    align-items: end;
+    flex-direction: row;
+  }
+
+  .adminShell {
+    padding: 36px 24px 64px;
+  }
+
+  .adminNavShell {
+    margin-bottom: 28px;
+    margin-top: 20px;
+  }
+
+  .adminNavToggle {
+    display: none;
+  }
+
+  .adminNav {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 0;
+    max-height: none;
+    opacity: 1;
+    overflow: visible;
+    padding-top: 0;
+    visibility: visible;
+  }
+
+  .adminNav a {
+    flex: 0 0 auto;
+    width: auto;
+  }
+}
+
+@media (min-width: 768px) {
+  .section,
+  .sectionAlt {
+    padding-bottom: 88px;
+    padding-top: 88px;
+  }
+
+  .richText p,
+  .richText li {
+    font-size: 17px;
+  }
+
+  .reviewsTrack > .reviewCard {
+    flex-basis: calc((100% - 14px) / 2);
+    width: calc((100% - 14px) / 2);
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero {
+    padding-top: 126px;
+  }
+
+  .heroInner {
+    grid-template-columns: minmax(0, 0.9fr) minmax(440px, 1.1fr);
+  }
+
+  .cooperationBenefits {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .cooperationFormLayout {
+    grid-template-columns: minmax(280px, 0.76fr) minmax(420px, 1fr);
+  }
+
+  .stats,
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .stat {
+    padding-inline: clamp(10px, 1.2vw, 16px);
+  }
+
+  .stat b {
+    font-size: clamp(27px, 2.5vw, 36px);
+  }
+
+  .featureGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .fleetGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .gridThree {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .faqGrid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+
+  .split {
+    align-items: start;
+    grid-template-columns: minmax(0, 1.02fr) minmax(340px, 0.98fr);
+  }
+
+  .contactCardGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .fleetPreview {
+    grid-template-columns: minmax(320px, 0.78fr) minmax(0, 1.22fr);
+  }
+
+  .homeFleetOverview {
+    align-items: center;
+    grid-template-columns: minmax(0, 0.78fr) minmax(500px, 1.22fr);
+  }
+
+  .homeFaqLayout {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.42fr);
+  }
+
+  .reviewsTrack > .reviewCard {
+    flex-basis: calc((100% - 28px) / 3);
+    width: calc((100% - 28px) / 3);
+  }
+
+  .reviewsGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .section,
+  .sectionAlt {
+    padding-bottom: 112px;
+    padding-top: 112px;
+  }
+}
+
+@media (max-width: 639px) {
+  .contactActions,
+  .contactActions a,
+  .contactActions span,
+  .reviewsLink {
+    width: 100%;
+  }
+
+  .contactActions a,
+  .contactActions span,
+  .reviewsLink {
+    justify-content: center;
+  }
+
+  .mapOverlay {
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
   }
 }

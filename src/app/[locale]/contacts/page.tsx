@@ -31,7 +31,7 @@ export default async function ContactsPage() {
             <h2 className={styles.heading}>Трускавець, Львівська область</h2>
             <p className={styles.lead}>
               Офіс компанії розташований у Трускавці. Карта завантажується ліниво та показує
-              marker локації без важких сторонніх скриптів.
+              позначку локації без важких сторонніх скриптів.
             </p>
           </div>
           <OfficeMap />

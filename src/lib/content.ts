@@ -34,7 +34,7 @@ export const services = [
     titleEn: "Refrigerated transport 20-23 t",
     summaryUk: "Рефрижератори, стабільний температурний режим, моніторинг температури у режимі поточного часу і звітність для кожного типу продукції.",
     summaryEn: "Dual-zone refrigerated trailers, stable temperature control, live monitoring and reports for food, medical and pharma cargo.",
-    bulletsUk: ["Двокамерні зони", "Температурний контроль", "Live monitoring"],
+    bulletsUk: ["Двокамерні зони", "Температурний контроль", "Онлайн-моніторинг"],
   },
   {
     slug: "international-transport",

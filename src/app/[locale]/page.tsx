@@ -5,7 +5,7 @@ import { OrderForm } from "@/components/forms/OrderForm";
 import { ContactCallbackForm } from "@/components/forms/ContactCallbackForm";
 import { EuropeMap } from "@/components/sections/EuropeMap";
 import { SectionIcon } from "@/components/sections/Icons";
-import { ReviewsCarousel } from "@/components/sections/ReviewsCarousel";
+import { ReviewsPreview } from "@/components/sections/ReviewsCarousel";
 import { TruckIllustration } from "@/components/sections/TruckIllustration";
 import { prisma } from "@/lib/prisma";
 import { getContentSettings, getPublicContacts, getSiteFaqs, getSiteRoutes, getSiteServices } from "@/lib/site-content";
@@ -20,7 +20,11 @@ type HomePageProps = {
 export default async function HomePage({ params }: HomePageProps) {
   const { locale } = await params;
   const [publishedReviews, services, routes, faqs, content, contacts, fleetTranslations] = await Promise.all([
-    prisma.review.findMany({ orderBy: { createdAt: "desc" }, where: { moderationStatus: "PUBLISHED" } }),
+    prisma.review.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 3,
+      where: { moderationStatus: "PUBLISHED" },
+    }),
     getSiteServices(locale),
     getSiteRoutes(),
     getSiteFaqs(locale),
@@ -36,19 +40,13 @@ export default async function HomePage({ params }: HomePageProps) {
   }));
   const reviewLabels = locale === "uk"
     ? {
-        carousel: "Відгуки клієнтів",
         collapse: "Згорнути",
         empty: "Опублікованих відгуків ще немає.",
-        next: "Наступний відгук",
-        previous: "Попередній відгук",
         readMore: "Читати більше",
       }
     : {
-        carousel: "Client reviews",
         collapse: "Show less",
         empty: "There are no published reviews yet.",
-        next: "Next review",
-        previous: "Previous review",
         readMore: "Read more",
       };
 
@@ -244,7 +242,7 @@ export default async function HomePage({ params }: HomePageProps) {
               <span aria-hidden="true">→</span>
             </Link>
           </div>
-          <ReviewsCarousel items={reviewItems} labels={reviewLabels} />
+          <ReviewsPreview items={reviewItems} labels={reviewLabels} />
         </div>
       </section>
 

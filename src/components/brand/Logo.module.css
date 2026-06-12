@@ -33,7 +33,7 @@
   text-transform: uppercase;
 }
 
-@media (max-width: 420px) {
+@media (max-width: 639px) {
   .mark {
     height: 36px;
     width: 68px;

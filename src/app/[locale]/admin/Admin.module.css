@@ -1,6 +1,12 @@
 .page {
   display: grid;
   gap: 22px;
+  min-width: 0;
+}
+
+.dashboardGrid {
+  display: grid;
+  gap: 16px;
 }
 
 .pageHeader {
@@ -919,6 +925,28 @@
   border: 0;
   border-top: 1px solid var(--color-border);
   border-radius: 0;
+  min-width: 0;
+  width: 100%;
+}
+
+.vehicleFields {
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  width: 100%;
+}
+
+.vehicleFields > *,
+.vehicleFields .compactField,
+.vehicleFields .compactInput,
+.vehicleFields .imageField,
+.vehicleFields .previewBox {
+  max-width: none;
+  min-width: 0;
+  width: 100%;
+}
+
+.vehicleFields textarea {
+  overflow-wrap: anywhere;
 }
 
 .createAccordionSummary {
@@ -1152,6 +1180,7 @@
 .reviewCard {
   align-self: start;
   min-width: 0;
+  width: 100%;
 }
 
 .reviewEditForm {
@@ -1159,15 +1188,74 @@
   border: 0;
   border-radius: 0;
   border-top: 1px solid var(--color-border);
+  min-width: 0;
+  width: 100%;
 }
 
-@media (min-width: 700px) {
+.reviewPanelHeader {
+  align-items: stretch;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.reviewPanelHeader > * {
+  min-width: 0;
+}
+
+.reviewFilters {
+  align-items: stretch;
+  display: grid;
+  flex: none;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr);
+  justify-content: stretch;
+  width: 100%;
+}
+
+.reviewFilters .searchField,
+.reviewFilters .reviewStatusFilter {
+  flex: none;
+  max-width: none;
+  min-width: 0;
+  width: 100%;
+}
+
+.reviewCards {
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+}
+
+.reviewEditForm h2,
+.reviewEditForm p,
+.reviewEditForm textarea {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 768px) {
+  .dashboardGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .fields {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .vehicleFields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .vehicleFields > .imageField {
+    grid-column: 1 / -1;
+  }
+
   .reviewBodyField {
     grid-column: 1 / -1;
+  }
+
+  .reviewFilters {
+    grid-template-columns: minmax(0, 1fr) minmax(180px, 0.55fr);
   }
 
   .cards {
@@ -1189,5 +1277,302 @@
 
   .expandedCard {
     grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 639px) {
+  .page {
+    gap: 18px;
+  }
+
+  .pageHeader,
+  .contactHeading,
+  .vacancyHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pageHeader > *,
+  .contactHeading > *,
+  .vacancyHeader > * {
+    min-width: 0;
+  }
+
+  .form,
+  .panel,
+  .vacancyCard {
+    padding: 14px;
+  }
+
+  .contactEditForm,
+  .vehicleEditForm,
+  .reviewEditForm {
+    padding-inline: 0;
+  }
+
+  .actions,
+  .filter,
+  .toolbar,
+  .reviewFilters,
+  .fileActionRow {
+    align-items: stretch;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .actions > *,
+  .filter > *,
+  .toolbar > *,
+  .reviewFilters > *,
+  .fileActionRow > *,
+  .primaryButton,
+  .secondaryButton,
+  .dangerButton,
+  .linkButton,
+  .fileButton,
+  .searchField,
+  .reviewStatusFilter,
+  .compactField {
+    justify-content: center;
+    max-width: none;
+    width: 100%;
+  }
+
+  .tabs {
+    margin-inline: -14px;
+    padding-inline: 14px;
+  }
+
+  .tabs a {
+    flex: 1 1 0;
+    justify-content: center;
+    min-height: 44px;
+    padding-inline: 14px;
+    text-align: center;
+  }
+
+  .applicationSummary {
+    align-items: start;
+    grid-template-columns: minmax(0, 1fr) 26px;
+  }
+
+  .applicationSummary .viewAction {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: start;
+  }
+
+  .reviewCard .viewAction {
+    justify-self: stretch;
+    width: 100%;
+  }
+
+  .reviewPanelHeader {
+    gap: 12px;
+  }
+
+  .reviewCards {
+    gap: 12px;
+  }
+
+  .pagination {
+    justify-content: center;
+  }
+
+}
+
+@media (min-width: 1024px) {
+  .dashboardGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .cards,
+  .vacancyGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .vehicleFields {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .vehicleFields > .imageField {
+    grid-column: span 2;
+  }
+
+  .reviewPanelHeader {
+    align-items: end;
+    grid-template-columns: minmax(240px, 0.8fr) minmax(440px, 1.2fr);
+  }
+
+  .reviewFilters {
+    grid-template-columns: minmax(240px, 1fr) minmax(180px, 220px);
+  }
+
+  .reviewCards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .dashboardGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.form,
+.panel,
+.contactCards,
+.primaryContactCards,
+.actions,
+.filter,
+.vacancyGrid,
+.vacancyCard,
+.applicationList,
+.applicationAccordion,
+.cards,
+.tableWrap {
+  min-width: 0;
+}
+
+.applicationSummary > * {
+  min-width: 0;
+}
+
+.activeTag,
+.archivedTag,
+.statusTag,
+.viewAction {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-align: center;
+  white-space: normal;
+}
+
+.vacancyHeader h3,
+.applicationSummary strong,
+.applicationSummary small,
+.applicationPreview span,
+.applicationDetails p,
+.rowLink,
+.details,
+.requestDetails p {
+  overflow-wrap: anywhere;
+}
+
+.requestDetails p {
+  min-width: 0;
+}
+
+@media (max-width: 639px) {
+  .applicationSummary > :first-child {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .applicationSummary > b {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .applicationSummary .viewAction,
+  .applicationSummary .statusTag {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: start;
+    max-width: 100%;
+    white-space: normal;
+  }
+}
+
+@media (max-width: 1023px) {
+  .tableWrap {
+    overflow: visible;
+  }
+
+  .table,
+  .table tbody,
+  .table tr,
+  .table td {
+    display: block;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .table {
+    border-collapse: separate;
+  }
+
+  .table thead {
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+
+  .table tbody {
+    display: grid;
+    gap: 12px;
+  }
+
+  .table tr {
+    background: rgba(7, 16, 28, 0.46);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .table td,
+  .clickableRow td {
+    align-items: start;
+    border-bottom: 1px solid var(--color-border);
+    display: grid;
+    gap: 10px;
+    grid-template-columns: minmax(96px, 0.38fr) minmax(0, 1fr);
+    overflow-wrap: anywhere;
+    padding: 11px 12px;
+  }
+
+  .table td:last-child {
+    border-bottom: 0;
+  }
+
+  .table td::before {
+    color: var(--color-secondary);
+    content: attr(data-label);
+    font-size: 12px;
+    font-weight: 900;
+    line-height: 1.45;
+    text-transform: uppercase;
+  }
+
+  .rowLink {
+    min-width: 0;
+    padding: 0;
+  }
+
+  .selectedRow td:first-child {
+    border-left: 0;
+    box-shadow: inset 3px 0 var(--color-secondary);
+  }
+
+  .table .actions {
+    align-items: stretch;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    width: 100%;
+  }
+}
+
+@media (max-width: 639px) {
+  .table td,
+  .clickableRow td {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .table .actions {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

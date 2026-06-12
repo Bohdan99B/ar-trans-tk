@@ -40,9 +40,8 @@
 
 .navLinks {
   align-items: start;
-  column-gap: 28px;
-  grid-auto-flow: column;
-  grid-template-rows: repeat(4, auto);
+  grid-auto-flow: row;
+  grid-template-columns: 1fr;
 }
 
 .links a,
@@ -53,6 +52,7 @@
   color: var(--color-text-soft);
   font-weight: 700;
   text-align: left;
+  width: fit-content;
 }
 
 .contactLine .employeeLogin {
@@ -96,7 +96,7 @@
   font-weight: 700;
 }
 
-@media (min-width: 560px) {
+@media (min-width: 640px) {
   .footer {
     padding: 38px 24px;
   }
@@ -108,9 +108,16 @@
   .brandBlock {
     grid-column: 1 / -1;
   }
+
+  .navLinks {
+    column-gap: 28px;
+    grid-auto-flow: column;
+    grid-template-columns: none;
+    grid-template-rows: repeat(4, auto);
+  }
 }
 
-@media (min-width: 1120px) {
+@media (min-width: 1280px) {
   .footer {
     padding: 46px clamp(28px, 5vw, 72px);
   }
@@ -127,9 +134,12 @@
     column-gap: 32px;
     grid-template-rows: repeat(3, auto);
   }
+  .footerInner {
+    gap: 36px;
+  }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 639px) {
   .navLinks {
     grid-auto-flow: row;
     grid-template-columns: 1fr;

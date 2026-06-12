@@ -49,7 +49,7 @@ export function EuropeMap() {
           <path className={styles.routeArc} d={path} fill="none" filter="url(#routeGlow)" key={path} />
         ))}
         <circle className={styles.routePulse} cx="493" cy="238" r="7" />
-        <text className={styles.mapLabel} x="36" y="55">AR-TRANS Europe Routes</text>
+        <text className={styles.mapLabel} x="36" y="55">Маршрути AR-TRANS у Європі</text>
         <text className={styles.mapNote} x="36" y="82">Італія виділена як пріоритетний напрямок</text>
       </svg>
     </div>

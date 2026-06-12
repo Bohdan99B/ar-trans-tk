@@ -144,7 +144,7 @@ export function EmployeeAdminPanel({ currentUser, employees, locale, resetLabels
     const payload = await response.json().catch(() => null);
     setIsResetting(null);
     if (!response.ok) {
-      setMessage({ tone: "error", text: payload?.error ?? "Не вдалося створити reset-посилання" });
+      setMessage({ tone: "error", text: payload?.error ?? "Не вдалося створити посилання для скидання" });
       return;
     }
     setInviteUrl(payload.inviteUrl);
@@ -174,7 +174,7 @@ export function EmployeeAdminPanel({ currentUser, employees, locale, resetLabels
           <input name="name" required type="text" />
         </label>
         <label>
-          Email
+          Електронна пошта
           <input name="email" required type="email" />
         </label>
         <label>
@@ -205,7 +205,7 @@ export function EmployeeAdminPanel({ currentUser, employees, locale, resetLabels
           <thead>
             <tr>
               <th>Ім&apos;я</th>
-              <th>Email</th>
+              <th>Електронна пошта</th>
               <th>Роль</th>
               <th>Запрошення</th>
               <th>Дія</th>
@@ -229,15 +229,15 @@ export function EmployeeAdminPanel({ currentUser, employees, locale, resetLabels
                         };
               return (
                 <tr key={employee.id}>
-                  <td>{employee.name ?? "Без імені"}</td>
-                  <td>{employee.email}</td>
-                  <td>{employee.isOwner ? "OWNER" : roleLabels[employee.role]}</td>
-                  <td>
+                  <td data-label="Ім'я">{employee.name ?? "Без імені"}</td>
+                  <td data-label="Електронна пошта">{employee.email}</td>
+                  <td data-label="Роль">{employee.isOwner ? "OWNER" : roleLabels[employee.role]}</td>
+                  <td data-label="Запрошення">
                     <span className={styles.employeeStatus} data-tone={employeeStatus.tone}>
                       {employeeStatus.label}
                     </span>
                   </td>
-                  <td>
+                  <td data-label="Дія">
                     <div className={styles.employeeActions}>
                       <button
                         className={adminStyles.secondaryButton}
@@ -246,7 +246,7 @@ export function EmployeeAdminPanel({ currentUser, employees, locale, resetLabels
                         title={employee.isOwner ? "OWNER змінює пароль через email-відновлення" : undefined}
                         type="button"
                       >
-                        {isResetting === employee.id ? "Створення..." : "Створити reset-посилання"}
+                        {isResetting === employee.id ? "Створення..." : "Створити посилання для скидання"}
                       </button>
                       <button
                         className={adminStyles.dangerButton}

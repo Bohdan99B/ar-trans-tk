@@ -47,7 +47,7 @@ export function VacancyApplicationForm({ vacancyId }: { vacancyId: string }) {
         <span className={styles.fieldHint} data-visible={Boolean(errors.phone)} id="vacancy-phone-error">{errors.phone}</span>
       </label>
       <label className={styles.field}>
-        <span>Email</span>
+        <span>Електронна пошта</span>
         <input aria-describedby="vacancy-email-error" aria-invalid={Boolean(errors.email)} name="email" type="email" />
         <span className={styles.fieldHint} data-visible={Boolean(errors.email)} id="vacancy-email-error">{errors.email}</span>
       </label>

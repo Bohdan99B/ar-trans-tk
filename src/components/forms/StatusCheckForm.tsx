@@ -38,7 +38,7 @@ export function StatusCheckForm() {
         <input name="requestNumber" required />
       </label>
       <label className={styles.field}>
-        <span>Email або телефон *</span>
+        <span>Електронна пошта або телефон *</span>
         <input name="contact" required />
       </label>
       <button className={styles.button} type="submit">

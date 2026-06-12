@@ -55,11 +55,11 @@ export default async function AdminContentPage({ params, searchParams }: PagePro
         <h2>SEO-дані сторінок</h2>
         <p className={styles.muted}>Значення використовуються як загальні metadata defaults для локалізованих сторінок.</p>
         <div className={styles.fields}>
-          <Setting label="Default title" name="seo.title" value={values["seo.title"]} />
-          <Setting area label="Default description" name="seo.description" value={values["seo.description"]} />
-          <Setting label="OpenGraph title" name="seo.ogTitle" value={values["seo.ogTitle"]} />
-          <Setting area label="OpenGraph description" name="seo.ogDescription" value={values["seo.ogDescription"]} />
-          <Setting label="OpenGraph image URL" name="seo.ogImage" value={values["seo.ogImage"]} />
+          <Setting label="Типовий заголовок" name="seo.title" value={values["seo.title"]} />
+          <Setting area label="Типовий опис" name="seo.description" value={values["seo.description"]} />
+          <Setting label="Заголовок OpenGraph" name="seo.ogTitle" value={values["seo.ogTitle"]} />
+          <Setting area label="Опис OpenGraph" name="seo.ogDescription" value={values["seo.ogDescription"]} />
+          <Setting label="URL зображення OpenGraph" name="seo.ogImage" value={values["seo.ogImage"]} />
         </div>
         <SubmitButton>Зберегти текстовий контент</SubmitButton>
       </form>
@@ -121,7 +121,7 @@ function ServiceForm({ locale, service }: { locale: string; service?: ServiceVal
       <input name="locale" type="hidden" value={locale} />
       {service ? <input name="id" type="hidden" value={service.id} /> : null}
       <div className={styles.fields}>
-        <Setting label="Slug" name="slug" value={service?.slug} />
+        <Setting label="URL-ідентифікатор" name="slug" value={service?.slug} />
         <Setting label="Назва українською" name="titleUk" value={service?.titleUk} />
         <Setting label="Назва англійською" name="titleEn" value={service?.titleEn} />
         <Setting area label="Анонс українською" name="summaryUk" value={service?.summaryUk} />

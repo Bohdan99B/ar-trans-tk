@@ -2,7 +2,7 @@
   backdrop-filter: blur(18px);
   background: rgba(23, 32, 51, 0.72);
   border: 1px solid var(--color-border);
-  border-radius: 24px;
+  border-radius: 20px;
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.24);
   display: grid;
   gap: 14px;
@@ -37,6 +37,7 @@
   border-radius: 14px;
   color: var(--color-text);
   min-height: 48px;
+  min-width: 0;
   padding: 12px 14px;
   width: 100%;
 }
@@ -88,7 +89,8 @@
   display: grid;
   gap: 12px;
   left: auto;
-  min-width: 286px;
+  max-width: 100%;
+  min-width: min(286px, 100%);
   padding: 14px;
   position: absolute;
   right: 0;
@@ -176,6 +178,7 @@
   font-weight: 900;
   min-height: 54px;
   padding: 0 18px;
+  width: 100%;
   transition:
     box-shadow 180ms ease,
     filter 180ms ease,
@@ -227,6 +230,7 @@
   cursor: pointer;
   font-weight: 700;
   min-height: 44px;
+  overflow-wrap: anywhere;
   padding: 8px 13px;
   transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
 }
@@ -254,7 +258,7 @@
   font-weight: 700;
 }
 
-@media (min-width: 720px) {
+@media (min-width: 768px) {
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -262,18 +266,26 @@
   .wide {
     grid-column: 1 / -1;
   }
-}
 
-@media (max-width: 1100px) {
-  .datePicker {
-    right: 0;
+  .button {
+    justify-self: start;
+    width: auto;
   }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 639px) {
+  .form {
+    padding: 16px;
+  }
+
   .datePicker {
     left: 0;
     min-width: 0;
     right: 0;
+  }
+
+  .directionOptions,
+  .directionOption {
+    width: 100%;
   }
 }
