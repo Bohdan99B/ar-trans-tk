@@ -2,6 +2,8 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
 import { authOptions, getCurrentUser } from "@/lib/auth";
+import { getActionablePasswordResetWhere } from "@/lib/password-reset-requests";
+import { prisma } from "@/lib/prisma";
 
 import styles from "../Site.module.css";
 import { AdminNav } from "./AdminNav";
@@ -46,12 +48,16 @@ export default async function AdminLayout({ children, params }: AdminLayoutProps
   const links = (user.role === "ADMIN" ? [["", "Dashboard"], ...adminLinks] : managerLinks).map(
     ([href, label]) => ({ href: `/${locale}/admin${href ? `/${href}` : ""}`, label }),
   );
+  const passwordResetCount =
+    user.role === "ADMIN"
+      ? await prisma.passwordResetRequest.count({ where: getActionablePasswordResetWhere() })
+      : 0;
 
   return (
     <section className={styles.adminShell}>
       <p className={styles.eyebrow}>Адмінка</p>
       <h1 className={styles.heading}>AR Trans TK CMS</h1>
-      <AdminNav links={links} />
+      <AdminNav initialPasswordResetCount={passwordResetCount} isAdmin={user.role === "ADMIN"} links={links} />
       {children}
     </section>
   );

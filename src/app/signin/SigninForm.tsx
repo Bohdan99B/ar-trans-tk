@@ -10,6 +10,15 @@ import styles from "./Signin.module.css";
 
 type SigninFormProps = {
   callbackUrl?: string;
+  messages: {
+    email: string;
+    invalidCredentials: string;
+    password: string;
+    requiredCredentials: string;
+    signin: string;
+    signingIn: string;
+    staffOnly: string;
+  };
 };
 
 type SessionPayload = {
@@ -18,7 +27,7 @@ type SessionPayload = {
   };
 };
 
-export function SigninForm({ callbackUrl }: SigninFormProps) {
+export function SigninForm({ callbackUrl, messages }: SigninFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,7 +41,7 @@ export function SigninForm({ callbackUrl }: SigninFormProps) {
     const password = String(formData.get("password") ?? "");
 
     if (!email || !password) {
-      setError("Вкажіть email і пароль.");
+      setError(messages.requiredCredentials);
       return;
     }
 
@@ -45,7 +54,7 @@ export function SigninForm({ callbackUrl }: SigninFormProps) {
 
     if (!result?.ok) {
       setIsSubmitting(false);
-      setError("Неправильний email або пароль.");
+      setError(messages.invalidCredentials);
       return;
     }
 
@@ -55,7 +64,7 @@ export function SigninForm({ callbackUrl }: SigninFormProps) {
 
     setIsSubmitting(false);
     if (!role) {
-      setError("Вхід лише для співробітників компанії.");
+      setError(messages.staffOnly);
       return;
     }
 
@@ -64,18 +73,18 @@ export function SigninForm({ callbackUrl }: SigninFormProps) {
   }
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
+    <form className={styles.form} noValidate onSubmit={handleSubmit}>
       <label>
-        Email
-        <input autoComplete="email" inputMode="email" name="email" required type="email" />
+        {messages.email}
+        <input autoComplete="email" disabled={isSubmitting} inputMode="email" name="email" required type="email" />
       </label>
       <label>
-        Пароль
-        <input autoComplete="current-password" name="password" required type="password" />
+        {messages.password}
+        <input autoComplete="current-password" disabled={isSubmitting} name="password" required type="password" />
       </label>
-      {error ? <p className={styles.error}>{error}</p> : null}
+      {error ? <p className={styles.error} role="alert">{error}</p> : null}
       <button disabled={isSubmitting} type="submit">
-        {isSubmitting ? "Вхід..." : "Увійти"}
+        {isSubmitting ? messages.signingIn : messages.signin}
       </button>
     </form>
   );

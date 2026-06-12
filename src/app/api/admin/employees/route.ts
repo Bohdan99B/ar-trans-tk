@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth";
+import { getAppBaseUrl } from "@/lib/app-url";
 import { createInviteToken, getInviteExpiresAt, hashInviteToken } from "@/lib/employee-invitations";
 import { prisma } from "@/lib/prisma";
 
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
     },
   });
 
-  const baseUrl = process.env.NEXTAUTH_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? new URL(request.url).origin;
+  const baseUrl = getAppBaseUrl(request.url);
   const inviteUrl = new URL(`/${locale}/accept-invite`, baseUrl);
   inviteUrl.searchParams.set("token", token);
 

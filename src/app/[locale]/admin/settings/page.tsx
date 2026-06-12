@@ -1,12 +1,12 @@
-import Image from "next/image";
 import { redirect } from "next/navigation";
 
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-import { ConfirmSubmitButton, SubmitButton } from "../AdminControls";
+import { SubmitButton } from "../AdminControls";
 import styles from "../Admin.module.css";
 import { deleteLogo, saveLogo } from "../actions";
+import { ImageUploadField } from "../ImageUploadField";
 import { SettingsContactsPanel } from "./SettingsContactsPanel";
 
 type PageProps = {
@@ -73,22 +73,20 @@ export default async function AdminSettingsPage({ params, searchParams }: PagePr
       <section className={styles.panel}>
         <h2>Логотип</h2>
         <p className={styles.muted}>Логотип використовується у хедері та футері сайту.</p>
-        {values["brand.logo"] ? (
-          <div className={styles.logoPreview}>
-            <Image alt="Логотип компанії" height={80} src={values["brand.logo"]} width={180} />
-          </div>
-        ) : <p className={styles.empty}>Завантажений логотип відсутній.</p>}
         <form action={saveLogo} className={styles.contactForm}>
           <input name="locale" type="hidden" value={locale} />
-          <label className={styles.fileLabel}>
-            Завантажити або замінити логотип
-            <input accept="image/*" name="brand.logo" type="file" />
-          </label>
+          <ImageUploadField
+            currentAlt="Логотип компанії"
+            currentImageUrl={values["brand.logo"]}
+            deleteAction={values["brand.logo"] ? deleteLogo : undefined}
+            deleteConfirmMessage="Видалити логотип із Cloudinary?"
+            emptyText="Завантажений логотип відсутній."
+            inputName="brand.logo"
+            label="Завантажити або замінити логотип"
+            previewKind="logo"
+          />
           <div className={styles.actions}>
             <SubmitButton>Зберегти логотип</SubmitButton>
-            {values["brand.logo"] ? (
-              <ConfirmSubmitButton action={deleteLogo} message="Видалити логотип із сайту?">Видалити логотип</ConfirmSubmitButton>
-            ) : null}
           </div>
         </form>
       </section>

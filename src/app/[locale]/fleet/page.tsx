@@ -19,10 +19,34 @@ export default async function FleetPage() {
         <div className={`${styles.container} ${styles.fleetGrid}`}>
           {fleet.length === 0 ? <p>Активного транспорту поки немає.</p> : fleet.map((vehicle) => (
             <article className={`${styles.card} ${styles.fleetCard}`} key={vehicle.id}>
-              {vehicle.photoUrl ? <Image alt={vehicle.title} height={200} src={vehicle.photoUrl} width={360} /> : null}
+              {vehicle.photoUrl ? (
+                <div className={styles.fleetImageBox}>
+                  <Image
+                    alt={vehicle.title}
+                    className={styles.fleetCardImage}
+                    height={675}
+                    src={vehicle.photoUrl}
+                    width={1200}
+                  />
+                </div>
+              ) : null}
               <h2>{vehicle.title}</h2>
-              <p>{vehicle.description ?? vehicle.brand ?? ""}</p>
-              <p>{vehicle.temperatureFrom}...{vehicle.temperatureTo} °C · {vehicle.payloadTonnes.toString()} т</p>
+              {vehicle.brand ? <p className={styles.fleetCardBrand}>{vehicle.brand}</p> : null}
+              <p>{vehicle.description ?? ""}</p>
+              <dl className={`${styles.fleetMeta} ${styles.fleetMetaTwoColumn}`}>
+                <div>
+                  <dt>Вантажопідйомність:</dt>
+                  <dd>{vehicle.payloadTonnes.toString()} т</dd>
+                </div>
+                <div>
+                  <dt>Обʼєм:</dt>
+                  <dd>{vehicle.volume || "Не вказано"}</dd>
+                </div>
+                <div className={styles.fleetMetaWide}>
+                  <dt>Температурний режим:</dt>
+                  <dd>{vehicle.temperatureFrom}...{vehicle.temperatureTo} °C</dd>
+                </div>
+              </dl>
             </article>
           ))}
         </div>

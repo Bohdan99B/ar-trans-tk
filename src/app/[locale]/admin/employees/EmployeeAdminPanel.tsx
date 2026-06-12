@@ -1,26 +1,36 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+import adminStyles from "../Admin.module.css";
 import styles from "./Employees.module.css";
 
 type Employee = {
   createdAt: string;
   email: string;
   id: string;
+  isOwner: boolean;
   invitations: {
     expiresAt: string;
     id: string;
     status: string;
   }[];
   name: string | null;
+  resetStatus: "NEW" | "VIEWED" | "COMPLETED" | "EXPIRED" | "CANCELLED" | "FAILED" | null;
   role: "ADMIN" | "MANAGER";
 };
 
 type EmployeeAdminPanelProps = {
   employees: Employee[];
   locale: string;
+  resetLabels: {
+    accepted: string;
+    completed: string;
+    invitePending: string;
+    requested: string;
+    viewed: string;
+  };
 };
 
 type Message = {
@@ -33,7 +43,7 @@ const roleLabels = {
   MANAGER: "MANAGER",
 };
 
-export function EmployeeAdminPanel({ employees, locale }: EmployeeAdminPanelProps) {
+export function EmployeeAdminPanel({ employees, locale, resetLabels }: EmployeeAdminPanelProps) {
   const router = useRouter();
   const [message, setMessage] = useState<Message | null>(null);
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
@@ -41,6 +51,18 @@ export function EmployeeAdminPanel({ employees, locale }: EmployeeAdminPanelProp
   const [isCreating, setIsCreating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isResetting, setIsResetting] = useState<string | null>(null);
+  const [resetStatuses, setResetStatuses] = useState<Record<string, Employee["resetStatus"]>>(
+    Object.fromEntries(employees.map((employee) => [employee.id, employee.resetStatus])),
+  );
+
+  useEffect(() => {
+    const handleUpdate = (event: Event) => {
+      const detail = (event as CustomEvent<{ statuses?: Record<string, Employee["resetStatus"]> }>).detail;
+      if (detail?.statuses) setResetStatuses(detail.statuses);
+    };
+    window.addEventListener("password-reset-updated", handleUpdate);
+    return () => window.removeEventListener("password-reset-updated", handleUpdate);
+  }, []);
 
   async function createEmployee(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -115,6 +137,16 @@ export function EmployeeAdminPanel({ employees, locale }: EmployeeAdminPanelProp
     router.refresh();
   }
 
+  async function copyInviteUrl() {
+    if (!inviteUrl) return;
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      setMessage({ tone: "success", text: "Посилання скопійовано" });
+    } catch {
+      setMessage({ tone: "error", text: "Не вдалося скопіювати посилання" });
+    }
+  }
+
   return (
     <div className={styles.panel}>
       <form className={styles.form} onSubmit={createEmployee}>
@@ -137,7 +169,7 @@ export function EmployeeAdminPanel({ employees, locale }: EmployeeAdminPanelProp
             <option value="ADMIN">ADMIN</option>
           </select>
         </label>
-        <button className={styles.primaryButton} disabled={isCreating} type="submit">
+        <button className={`${adminStyles.primaryButton} ${styles.createButton}`} disabled={isCreating} type="submit">
           {isCreating ? "Створення..." : "Створити запрошення"}
         </button>
       </form>
@@ -147,6 +179,9 @@ export function EmployeeAdminPanel({ employees, locale }: EmployeeAdminPanelProp
         <div className={styles.inviteBox}>
           <span>Одноразове посилання для встановлення пароля:</span>
           <a href={inviteUrl}>{inviteUrl}</a>
+          <button className={adminStyles.secondaryButton} onClick={copyInviteUrl} type="button">
+            Копіювати посилання
+          </button>
         </div>
       ) : null}
 
@@ -164,19 +199,48 @@ export function EmployeeAdminPanel({ employees, locale }: EmployeeAdminPanelProp
           <tbody>
             {employees.map((employee) => {
               const latestInvite = employee.invitations[0];
+              const resetStatus = resetStatuses[employee.id];
+              const employeeStatus =
+                resetStatus === "NEW"
+                  ? { label: resetLabels.requested, tone: "requested" }
+                  : resetStatus === "VIEWED"
+                    ? { label: resetLabels.viewed, tone: "viewed" }
+                    : resetStatus === "COMPLETED"
+                      ? { label: resetLabels.completed, tone: "completed" }
+                      : {
+                          label: latestInvite?.status === "PENDING" ? resetLabels.invitePending : resetLabels.accepted,
+                          tone: "accepted",
+                        };
               return (
                 <tr key={employee.id}>
                   <td>{employee.name ?? "Без імені"}</td>
                   <td>{employee.email}</td>
-                  <td>{roleLabels[employee.role]}</td>
-                  <td>{latestInvite ? latestInvite.status : "Пароль вже задано або invite відсутній"}</td>
+                  <td>{employee.isOwner ? "OWNER" : roleLabels[employee.role]}</td>
                   <td>
-                    <button className={styles.secondaryButton} disabled={isResetting === employee.id} onClick={() => resetPassword(employee)} type="button">
-                      {isResetting === employee.id ? "Створення..." : "Reset password"}
-                    </button>{" "}
-                    <button className={styles.dangerButton} onClick={() => setPendingDelete(employee)} type="button">
-                      Видалити
-                    </button>
+                    <span className={styles.employeeStatus} data-tone={employeeStatus.tone}>
+                      {employeeStatus.label}
+                    </span>
+                  </td>
+                  <td>
+                    <div className={styles.employeeActions}>
+                      <button
+                        className={adminStyles.secondaryButton}
+                        disabled={isResetting === employee.id}
+                        onClick={() => resetPassword(employee)}
+                        type="button"
+                      >
+                        {isResetting === employee.id ? "Створення..." : "Створити reset-посилання"}
+                      </button>
+                      <button
+                        className={adminStyles.dangerButton}
+                        disabled={employee.isOwner}
+                        onClick={() => setPendingDelete(employee)}
+                        title={employee.isOwner ? "Owner-акаунт не можна видалити" : undefined}
+                        type="button"
+                      >
+                        Видалити
+                      </button>
+                    </div>
                   </td>
                 </tr>
               );
@@ -194,10 +258,15 @@ export function EmployeeAdminPanel({ employees, locale }: EmployeeAdminPanelProp
               даних.
             </p>
             <div className={styles.modalActions}>
-              <button className={styles.secondaryButton} disabled={isDeleting} onClick={() => setPendingDelete(null)} type="button">
+              <button
+                className={adminStyles.secondaryButton}
+                disabled={isDeleting}
+                onClick={() => setPendingDelete(null)}
+                type="button"
+              >
                 Скасувати
               </button>
-              <button className={styles.dangerButton} disabled={isDeleting} onClick={deleteEmployee} type="button">
+              <button className={adminStyles.dangerButton} disabled={isDeleting} onClick={deleteEmployee} type="button">
                 {isDeleting ? "Видалення..." : "Так, видалити"}
               </button>
             </div>

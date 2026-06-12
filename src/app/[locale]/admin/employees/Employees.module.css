@@ -32,16 +32,18 @@
 
 .form input,
 .form select {
+  appearance: none;
   background: rgba(7, 16, 28, 0.72);
   border: 1px solid var(--color-border-strong);
   border-radius: 8px;
   color: var(--color-text);
+  color-scheme: dark;
   min-height: 44px;
   padding: 10px 12px;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, color 160ms ease;
 }
 
 .form select {
-  appearance: none;
   background-image:
     linear-gradient(45deg, transparent 50%, var(--color-secondary) 50%),
     linear-gradient(135deg, var(--color-secondary) 50%, transparent 50%);
@@ -55,15 +57,23 @@
   padding-right: 34px;
 }
 
+.form input:hover,
 .form select:hover {
   background-color: rgba(255, 211, 77, 0.06);
   border-color: rgba(255, 211, 77, 0.46);
 }
 
+.form input:focus-visible,
 .form select:focus-visible {
   border-color: var(--color-secondary);
   box-shadow: 0 0 0 3px rgba(255, 211, 77, 0.16);
   outline: none;
+}
+
+.form input:disabled,
+.form select:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
 }
 
 .form select option {
@@ -71,39 +81,8 @@
   color: var(--color-text);
 }
 
-.primaryButton,
-.secondaryButton,
-.dangerButton {
-  border: 1px solid transparent;
-  border-radius: 8px;
-  font-weight: 900;
-  min-height: 42px;
-  padding: 10px 14px;
-}
-
-.primaryButton {
-  background: var(--color-secondary);
-  color: #091624;
+.createButton {
   justify-self: start;
-}
-
-.secondaryButton {
-  background: transparent;
-  border-color: var(--color-border-strong);
-  color: var(--color-text);
-}
-
-.dangerButton {
-  background: rgba(214, 40, 40, 0.12);
-  border-color: rgba(255, 107, 107, 0.44);
-  color: #fecaca;
-}
-
-.primaryButton:disabled,
-.secondaryButton:disabled,
-.dangerButton:disabled {
-  cursor: wait;
-  opacity: 0.7;
 }
 
 .error,
@@ -136,8 +115,58 @@
   overflow-wrap: anywhere;
 }
 
+.inviteBox button {
+  justify-self: start;
+}
+
+.employeeStatus {
+  background: rgba(34, 197, 94, 0.14);
+  border-radius: 999px;
+  color: #bbf7d0;
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 6px 9px;
+  white-space: nowrap;
+}
+
+.employeeStatus[data-tone="requested"] {
+  background: rgba(239, 68, 68, 0.14);
+  color: #fecaca;
+}
+
+.employeeStatus[data-tone="viewed"] {
+  background: rgba(255, 211, 77, 0.14);
+  color: var(--color-secondary);
+}
+
+.employeeStatus[data-tone="completed"] {
+  background: rgba(59, 130, 246, 0.16);
+  color: #bfdbfe;
+}
+
 .tableWrap {
   overflow-x: auto;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+  scrollbar-width: thin;
+}
+
+.tableWrap::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.tableWrap::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tableWrap::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+}
+
+.tableWrap::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 211, 77, 0.42);
 }
 
 .table {
@@ -158,6 +187,13 @@
   color: var(--color-secondary);
   font-size: 13px;
   text-transform: uppercase;
+}
+
+.employeeActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .modalBackdrop {
@@ -199,7 +235,7 @@
     grid-column: 1 / -1;
   }
 
-  .primaryButton {
+  .createButton {
     align-self: end;
   }
 }

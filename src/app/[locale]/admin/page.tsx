@@ -1,13 +1,16 @@
 import type { Prisma } from "@prisma/client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 import { requireStaff } from "@/lib/auth";
+import { getActionablePasswordResetWhere } from "@/lib/password-reset-requests";
 import { prisma } from "@/lib/prisma";
 import { ensureRequestStatuses } from "@/lib/requests";
 
 import styles from "../Site.module.css";
 import adminStyles from "./Admin.module.css";
+import { PasswordResetDashboardCard } from "./PasswordResetDashboardCard";
 
 type AdminPageProps = {
   params: Promise<{ locale: string }>;
@@ -33,6 +36,9 @@ export default async function AdminPage({ params, searchParams }: AdminPageProps
     redirect(`/${locale}`);
   }
   const isAdmin = user.role === "ADMIN";
+  const passwordResetTranslations = isAdmin
+    ? await getTranslations({ locale, namespace: "passwordResetAdmin" })
+    : null;
   await ensureRequestStatuses();
   const requestedPage = getPage(query.page);
   const requestWhere: Prisma.TransportRequestWhereInput = { type: "ORDER" };
@@ -66,6 +72,9 @@ export default async function AdminPage({ params, searchParams }: AdminPageProps
       prisma.review.count({ where: { moderationStatus: "PUBLISHED" } }),
     ])
     : [0, 0, 0, 0];
+  const passwordResetCount = isAdmin
+    ? await prisma.passwordResetRequest.count({ where: getActionablePasswordResetWhere() })
+    : 0;
   const pageCount = Math.max(1, Math.ceil(latestCount / PAGE_SIZE));
   const currentPage = Math.min(requestedPage, pageCount);
   const latest = await prisma.transportRequest.findMany({
@@ -113,6 +122,15 @@ export default async function AdminPage({ params, searchParams }: AdminPageProps
             <div><dt>Опубліковано</dt><dd>{reviewsPublished}</dd></div>
           </dl>
         </article> : null}
+        {isAdmin && passwordResetTranslations ? (
+          <PasswordResetDashboardCard
+            action={passwordResetTranslations("dashboardAction")}
+            description={passwordResetTranslations("dashboardDescription")}
+            href={`/${locale}/admin/employees`}
+            initialCount={passwordResetCount}
+            title={passwordResetTranslations("dashboardTitle")}
+          />
+        ) : null}
       </div>
       <section className={adminStyles.panel}>
         <h2>Швидкі дії</h2>

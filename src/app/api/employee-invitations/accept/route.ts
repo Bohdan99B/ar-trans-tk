@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { hashInviteToken } from "@/lib/employee-invitations";
+import { logPasswordResetEvent } from "@/lib/password-reset-logging";
 import { prisma } from "@/lib/prisma";
 
 const acceptInviteSchema = z.object({
@@ -47,7 +48,24 @@ export async function POST(request: Request) {
       },
       where: { id: invitation.id },
     }),
+    ...(invitation.passwordResetRequestId
+      ? [
+          prisma.passwordResetEvent.create({
+            data: {
+              details: "Менеджер встановив новий пароль через invite-посилання.",
+              requestId: invitation.passwordResetRequestId,
+              type: "COMPLETED",
+            },
+          }),
+        ]
+      : []),
   ]);
+  if (invitation.passwordResetRequestId) {
+    logPasswordResetEvent("manager_password_changed", {
+      requestId: invitation.passwordResetRequestId,
+      userId: invitation.userId,
+    });
+  }
 
   return NextResponse.json({ ok: true, email: invitation.user.email });
 }

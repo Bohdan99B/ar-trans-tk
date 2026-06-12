@@ -255,6 +255,50 @@
   gap: clamp(20px, 4vw, 36px);
 }
 
+.homeFleetOverview {
+  display: grid;
+  gap: clamp(28px, 5vw, 64px);
+}
+
+.homeFleetIntro {
+  align-content: center;
+  display: grid;
+}
+
+.homeFleetText {
+  color: var(--color-text-muted);
+  line-height: 1.7;
+  margin: 18px 0 28px;
+  max-width: 680px;
+}
+
+.homeFleetHighlights {
+  display: grid;
+  gap: 12px;
+}
+
+.homeFleetHighlight {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 180px;
+}
+
+.homeFleetHighlight strong {
+  color: var(--color-secondary);
+  font-family: var(--font-heading), sans-serif;
+  font-size: clamp(24px, 2.35vw, 34px);
+  line-height: 1;
+  margin-bottom: 14px;
+  white-space: nowrap;
+}
+
+.homeFleetHighlight span {
+  color: var(--color-text-soft);
+  font-weight: 700;
+  line-height: 1.5;
+}
+
 .fleetGrid {
   display: grid;
   gap: 16px;
@@ -313,6 +357,26 @@
   overflow-wrap: break-word;
 }
 
+.fleetImageBox {
+  align-items: center;
+  aspect-ratio: 16 / 9;
+  background: #0f172a;
+  border-radius: 16px;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.fleetCardImage {
+  display: block;
+  height: 100%;
+  object-fit: contain;
+  object-position: center center;
+  width: 100%;
+}
+
 .fleetCard h2,
 .fleetCard h3 {
   margin-top: 0;
@@ -323,11 +387,55 @@
   margin-top: 14px;
 }
 
-.fleetCard p:last-child {
+.fleetCardBrand {
+  color: var(--color-text-soft) !important;
+  font-weight: 800;
+  margin-top: -4px;
+}
+
+.fleetMeta {
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  justify-content: space-between;
+  margin: auto 0 0;
+  padding-top: 14px;
+}
+
+.fleetMeta div {
+  display: grid;
+  gap: 3px;
+  min-width: min(100%, 180px);
+}
+
+.fleetMetaTwoColumn {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.fleetMetaTwoColumn div {
+  min-width: 0;
+}
+
+.fleetMetaWide {
+  flex-basis: 100%;
+  grid-column: 1 / -1;
+}
+
+.fleetMeta dt {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.fleetMeta dd {
   color: var(--color-secondary);
+  font-size: 16px;
   font-weight: 900;
-  margin-top: auto;
-  padding-top: 16px;
+  line-height: 1.35;
+  margin: 0;
 }
 
 .featureGrid > .card {
@@ -1205,11 +1313,27 @@ a.card:hover,
 }
 
 .adminNav a {
+  align-items: center;
   border: 1px solid var(--color-border);
   border-radius: 12px;
   color: var(--color-text-muted);
+  display: inline-flex;
+  gap: 8px;
   padding: 10px 12px;
   transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.adminNavBadge {
+  align-items: center;
+  background: #dc2626;
+  border-radius: 999px;
+  color: #fff;
+  display: inline-flex;
+  font-size: 12px;
+  justify-content: center;
+  min-height: 22px;
+  min-width: 22px;
+  padding: 2px 7px;
 }
 
 .adminNav a:hover {
@@ -1307,6 +1431,10 @@ a.card:hover,
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .homeFleetHighlights {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .faqGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1375,6 +1503,11 @@ a.card:hover,
 
   .fleetPreview {
     grid-template-columns: minmax(320px, 0.78fr) minmax(0, 1.22fr);
+  }
+
+  .homeFleetOverview {
+    align-items: center;
+    grid-template-columns: minmax(0, 0.78fr) minmax(500px, 1.22fr);
   }
 
   .homeFaqLayout {

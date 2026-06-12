@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 import { Logo } from "@/components/brand/Logo";
 import { authOptions } from "@/lib/auth";
@@ -14,7 +15,11 @@ type SigninPageProps = {
 };
 
 export default async function SigninPage({ searchParams }: SigninPageProps) {
-  const [{ callbackUrl, error }, session] = await Promise.all([searchParams, getServerSession(authOptions)]);
+  const [{ callbackUrl, error }, session, t] = await Promise.all([
+    searchParams,
+    getServerSession(authOptions),
+    getTranslations({ locale: "uk", namespace: "auth" }),
+  ]);
 
   if (session?.user?.role) {
     redirect(getPostLoginPath(session.user.role, callbackUrl));
@@ -24,17 +29,31 @@ export default async function SigninPage({ searchParams }: SigninPageProps) {
     <main className={styles.screen}>
       <section className={styles.shell}>
         <Link className={styles.backLink} href="/uk">
-          Повернутись на сайт
+          {t("backToSite")}
         </Link>
         <div className={styles.card}>
           <Logo />
           <div className={styles.intro}>
-            <h1>Вхід співробітника</h1>
-            <p>Увійдіть, щоб отримати доступ до панелі керування</p>
+            <h1>{t("employeeSignin")}</h1>
+            <p>{t("signinDescription")}</p>
           </div>
-          <SigninForm callbackUrl={callbackUrl} />
-          {error ? <p className={styles.error}>Неправильний email або пароль.</p> : null}
-          <p className={styles.notice}>Доступ лише для співробітників компанії.</p>
+          <SigninForm
+            callbackUrl={callbackUrl}
+            messages={{
+              email: t("email"),
+              invalidCredentials: t("invalidCredentials"),
+              requiredCredentials: t("requiredCredentials"),
+              signin: t("signin"),
+              signingIn: t("signingIn"),
+              staffOnly: t("staffOnly"),
+              password: t("password"),
+            }}
+          />
+          <Link className={styles.authLink} href="/uk/forgot-password">
+            {t("forgotPassword")}
+          </Link>
+          {error ? <p className={styles.error}>{t("invalidCredentials")}</p> : null}
+          <p className={styles.notice}>{t("staffOnly")}</p>
         </div>
       </section>
     </main>

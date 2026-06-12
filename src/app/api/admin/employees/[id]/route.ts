@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { requireAdmin } from "@/lib/auth";
+import { isOwnerEmail } from "@/lib/owner-account";
 import { prisma } from "@/lib/prisma";
 
 type EmployeeRouteProps = {
@@ -19,12 +20,16 @@ export async function DELETE(_request: Request, { params }: EmployeeRouteProps) 
   }
 
   const employee = await prisma.user.findUnique({
-    select: { id: true, role: true },
+    select: { email: true, id: true, role: true },
     where: { id },
   });
 
   if (!employee) {
     return NextResponse.json({ error: "Співробітника не знайдено" }, { status: 404 });
+  }
+
+  if (isOwnerEmail(employee.email)) {
+    return NextResponse.json({ error: "Owner-акаунт не можна видалити" }, { status: 400 });
   }
 
   if (employee.role === "ADMIN") {

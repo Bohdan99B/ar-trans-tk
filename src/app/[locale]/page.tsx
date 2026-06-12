@@ -1,13 +1,12 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 import { OrderForm } from "@/components/forms/OrderForm";
 import { ContactCallbackForm } from "@/components/forms/ContactCallbackForm";
 import { EuropeMap } from "@/components/sections/EuropeMap";
 import { SectionIcon } from "@/components/sections/Icons";
 import { ReviewsCarousel } from "@/components/sections/ReviewsCarousel";
-import { TemperatureDashboard } from "@/components/sections/TemperatureDashboard";
 import { TruckIllustration } from "@/components/sections/TruckIllustration";
-import { fleet } from "@/lib/content";
 import { prisma } from "@/lib/prisma";
 import { getContentSettings, getPublicContacts, getSiteFaqs, getSiteRoutes, getSiteServices } from "@/lib/site-content";
 
@@ -20,20 +19,15 @@ type HomePageProps = {
 
 export default async function HomePage({ params }: HomePageProps) {
   const { locale } = await params;
-  const [vehicles, publishedReviews, services, routes, faqs, content, contacts] = await Promise.all([
-    prisma.vehicle.findMany({ orderBy: { createdAt: "desc" }, where: { isActive: true } }),
+  const [publishedReviews, services, routes, faqs, content, contacts, fleetTranslations] = await Promise.all([
     prisma.review.findMany({ orderBy: { createdAt: "desc" }, where: { moderationStatus: "PUBLISHED" } }),
     getSiteServices(locale),
     getSiteRoutes(),
     getSiteFaqs(locale),
     getContentSettings(),
     getPublicContacts(),
+    getTranslations({ locale, namespace: "home.fleet" }),
   ]);
-  const fleetItems = vehicles.length ? vehicles.map((vehicle) => ({
-    details: vehicle.description ?? vehicle.brand ?? "",
-    temp: `${vehicle.temperatureFrom}...${vehicle.temperatureTo} °C · ${vehicle.payloadTonnes.toString()} т`,
-    title: vehicle.title,
-  })) : fleet;
   const reviewItems = publishedReviews.map((review) => ({
     author: review.author,
     body: review.body,
@@ -140,18 +134,35 @@ export default async function HomePage({ params }: HomePageProps) {
 
       <section className={styles.sectionAlt}>
         <div className={styles.container}>
-          <p className={styles.eyebrow}>Автопарк</p>
-          <h2 className={styles.heading}>Сучасний автопарк для міжнародних рефрижераторних перевезень</h2>
-          <div className={styles.fleetPreview}>
-            <TemperatureDashboard />
-            <div className={styles.fleetGrid}>
-              {fleetItems.map((vehicle) => (
-                <article className={`${styles.card} ${styles.fleetCard}`} key={vehicle.title}>
-                  <h3>{vehicle.title}</h3>
-                  <p>{vehicle.details}</p>
-                  <p>{vehicle.temp}</p>
-                </article>
-              ))}
+          <div className={styles.homeFleetOverview}>
+            <div className={styles.homeFleetIntro}>
+              <p className={styles.eyebrow}>{fleetTranslations("eyebrow")}</p>
+              <h2 className={styles.heading}>{fleetTranslations("title")}</h2>
+              <p className={styles.lead}>{fleetTranslations("description")}</p>
+              <p className={styles.homeFleetText}>{fleetTranslations("trailers")}</p>
+              <div className={buttonStyles.row}>
+                <Link className={buttonStyles.primary} href={`/${locale}/fleet`}>
+                  {fleetTranslations("cta")}
+                </Link>
+              </div>
+            </div>
+            <div className={styles.homeFleetHighlights}>
+              <article className={`${styles.card} ${styles.homeFleetHighlight}`}>
+                <strong>-20…+20 °C</strong>
+                <span>{fleetTranslations("temperature")}</span>
+              </article>
+              <article className={`${styles.card} ${styles.homeFleetHighlight}`}>
+                <strong>{fleetTranslations("payloadValue")}</strong>
+                <span>{fleetTranslations("payload")}</span>
+              </article>
+              <article className={`${styles.card} ${styles.homeFleetHighlight}`}>
+                <strong>GPS</strong>
+                <span>{fleetTranslations("monitoring")}</span>
+              </article>
+              <article className={`${styles.card} ${styles.homeFleetHighlight}`}>
+                <strong>{fleetTranslations("refrigeratorsValue")}</strong>
+                <span>{fleetTranslations("refrigerators")}</span>
+              </article>
             </div>
           </div>
         </div>

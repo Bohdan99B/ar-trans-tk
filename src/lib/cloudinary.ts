@@ -22,7 +22,7 @@ export async function uploadFleetPhoto(filePath: string, publicId?: string) {
   }
 
   return cloudinary.uploader.upload(filePath, {
-    folder: "ar-trans-tk/fleet",
+    folder: "AR-Trans/fleet",
     public_id: publicId,
   });
 }
@@ -32,12 +32,63 @@ export async function uploadCmsFile(file: File, folder: string, publicId?: strin
     throw new Error("Cloudinary is not configured");
   }
 
-  const contents = Buffer.from(await file.arrayBuffer()).toString("base64");
-  const source = `data:${file.type || "application/octet-stream"};base64,${contents}`;
-  return cloudinary.uploader.upload(source, {
-    folder: `ar-trans-tk/${folder}`,
-    public_id: publicId,
-    resource_type: resourceType,
+  const buffer = Buffer.from(await file.arrayBuffer());
+  return new Promise<Awaited<ReturnType<typeof cloudinary.uploader.upload>>>((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: `AR-Trans/${folder}`,
+        public_id: publicId,
+        resource_type: resourceType,
+      },
+      (error, result) => {
+        if (error || !result) {
+          reject(error ?? new Error("Cloudinary upload failed"));
+          return;
+        }
+        resolve(result);
+      },
+    );
+    stream.end(buffer);
+  });
+}
+
+export async function deleteCloudinaryFile(publicId?: string | null, resourceType: "image" | "raw" = "image") {
+  if (!publicId || !isCloudinaryConfigured) {
+    return;
+  }
+
+  await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
+}
+
+export function uploadBuffer(
+  buffer: Buffer,
+  {
+    folder,
+    publicId,
+    resourceType = "image",
+  }: {
+    folder: string;
+    publicId?: string;
+    resourceType?: "image" | "raw";
+  },
+) {
+  if (!isCloudinaryConfigured) {
+    throw new Error("Cloudinary is not configured");
+  }
+
+  return new Promise<Awaited<ReturnType<typeof cloudinary.uploader.upload>>>((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream({
+      folder,
+      public_id: publicId,
+      resource_type: resourceType,
+    }, (error, result) => {
+      if (error || !result) {
+        reject(error ?? new Error("Cloudinary upload failed"));
+        return;
+      }
+      resolve(result);
+    });
+    stream.end(buffer);
   });
 }
 

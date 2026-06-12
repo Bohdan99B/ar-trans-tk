@@ -5,8 +5,8 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { requireAdmin, requireStaff } from "@/lib/auth";
-import { uploadCmsFile } from "@/lib/cloudinary";
 import { prisma } from "@/lib/prisma";
+import { deleteImage, uploadImage, UploadImageError, type UploadedImage } from "@/lib/uploadImage";
 import { adminContactSchema, adminOfficeContactSchema } from "@/lib/validators";
 
 const localeSchema = z.enum(["uk", "en"]);
@@ -41,6 +41,37 @@ function getLocale(data: FormData) {
 function revalidateAdmin(locale: string, section: string) {
   revalidatePath(`/${locale}/admin/${section}`);
   revalidatePath(`/${locale}/admin`);
+}
+
+async function saveFileRegistry(uploaded: UploadedImage, entityType: string, entityId: string | null, userId?: string) {
+  await prisma.file.upsert({
+    create: {
+      entityId,
+      entityType,
+      key: uploaded.key,
+      mimeType: uploaded.mimeType,
+      size: uploaded.size,
+      url: uploaded.url,
+      userId,
+    },
+    update: {
+      entityId,
+      entityType,
+      mimeType: uploaded.mimeType,
+      size: uploaded.size,
+      url: uploaded.url,
+      userId,
+    },
+    where: { key: uploaded.key },
+  });
+}
+
+function uploadErrorMessage(error: unknown) {
+  if (error instanceof UploadImageError) {
+    return error.message;
+  }
+
+  return "Не вдалося завантажити фото. Перевірте Cloudinary налаштування";
 }
 
 function requestResultPath(data: FormData, locale: string, type: "error" | "success", message: string) {
@@ -96,7 +127,7 @@ const vehicleSchema = z.object({
   payloadTonnes: z.coerce.number().positive(),
   temperatureFrom: z.coerce.number(),
   temperatureTo: z.coerce.number(),
-  title: z.string().min(2, "Вкажіть назву"),
+  title: z.string().min(2, "Вкажіть реєстраційний номер"),
   volume: z.string().optional(),
 });
 
@@ -140,18 +171,38 @@ export async function saveVehicle(data: FormData) {
   }
 
   const photo = data.get("photo");
-  let uploaded: { public_id: string; secure_url: string } | null = null;
+  let uploaded: UploadedImage | null = null;
   if (photo instanceof File && photo.size > 0) {
-    uploaded = await uploadCmsFile(photo, "fleet");
+    try {
+      uploaded = await uploadImage(photo, "fleet");
+    } catch (error) {
+      redirect(adminPath(locale, "fleet", "error", uploadErrorMessage(error)));
+    }
   }
+
+  const existing = id
+    ? await prisma.vehicle.findUnique({ select: { photoPublicId: true }, where: { id } })
+    : null;
+  const shouldRemovePhoto = data.get("removePhoto") === "on";
   const update = {
     ...parsed.data,
-    ...(uploaded ? { photoPublicId: uploaded.public_id, photoUrl: uploaded.secure_url } : {}),
+    ...(uploaded ? { photoPublicId: uploaded.key, photoUrl: uploaded.url } : {}),
+    ...(!uploaded && shouldRemovePhoto ? { photoPublicId: null, photoUrl: null } : {}),
   };
   if (id) {
     await prisma.vehicle.update({ data: update, where: { id } });
+    if (uploaded) {
+      await saveFileRegistry(uploaded, "fleet", id, user.id);
+    }
   } else {
-    await prisma.vehicle.create({ data: update });
+    const created = await prisma.vehicle.create({ data: update });
+    if (uploaded) {
+      await saveFileRegistry(uploaded, "fleet", created.id, user.id);
+    }
+  }
+  if ((uploaded || shouldRemovePhoto) && existing?.photoPublicId && existing.photoPublicId !== uploaded?.key) {
+    await deleteImage(existing.photoPublicId).catch(() => null);
+    await prisma.file.deleteMany({ where: { key: existing.photoPublicId } });
   }
   revalidateAdmin(locale, "fleet");
   revalidatePath(`/${locale}/fleet`);
@@ -164,10 +215,45 @@ export async function deleteVehicle(data: FormData) {
   if (!(await requireAdmin())) {
     redirect(adminPath(locale, "fleet", "error", "Доступ заборонено"));
   }
-  await prisma.vehicle.delete({ where: { id: idSchema.parse(field(data, "id")) } });
+  const id = idSchema.parse(field(data, "id"));
+  const vehicle = await prisma.vehicle.findUnique({ select: { photoPublicId: true }, where: { id } });
+  await prisma.vehicle.delete({ where: { id } });
+  if (vehicle?.photoPublicId) {
+    await deleteImage(vehicle.photoPublicId).catch(() => null);
+    await prisma.file.deleteMany({ where: { key: vehicle.photoPublicId } });
+  }
   revalidateAdmin(locale, "fleet");
   revalidatePath(`/${locale}/fleet`);
   redirect(adminPath(locale, "fleet", "success", "Транспорт видалено"));
+}
+
+export async function deleteVehiclePhoto(data: FormData) {
+  const locale = getLocale(data);
+  if (!(await requireAdmin())) {
+    redirect(adminPath(locale, "fleet", "error", "Доступ заборонено"));
+  }
+  const id = idSchema.parse(field(data, "id"));
+  const vehicle = await prisma.vehicle.findUnique({
+    select: { photoPublicId: true },
+    where: { id },
+  });
+  if (!vehicle) {
+    redirect(adminPath(locale, "fleet", "error", "Транспорт не знайдено"));
+  }
+  if (!vehicle.photoPublicId) {
+    redirect(adminPath(locale, "fleet", "error", "Фото вже відсутнє"));
+  }
+
+  await prisma.vehicle.update({
+    data: { photoPublicId: null, photoUrl: null },
+    where: { id },
+  });
+  await deleteImage(vehicle.photoPublicId).catch(() => null);
+  await prisma.file.deleteMany({ where: { key: vehicle.photoPublicId } });
+  revalidateAdmin(locale, "fleet");
+  revalidatePath(`/${locale}/fleet`);
+  revalidatePath(`/${locale}`);
+  redirect(adminPath(locale, "fleet", "success", "Фото видалено"));
 }
 
 const reviewSchema = z.object({
@@ -372,17 +458,55 @@ export async function saveOffice(data: FormData) {
 
 export async function saveLogo(data: FormData) {
   const locale = getLocale(data);
-  if (!(await requireAdmin())) {
+  const user = await requireAdmin();
+  if (!user) {
     redirect(adminPath(locale, "settings", "error", "Доступ заборонено"));
   }
   const logo = data.get("brand.logo");
   if (logo instanceof File && logo.size > 0) {
-    const result = await uploadCmsFile(logo, "brand", "logo");
-    await prisma.siteSetting.upsert({
-      create: { key: "brand.logo", value: result.secure_url },
-      update: { value: result.secure_url },
-      where: { key: "brand.logo" },
-    });
+    let result: UploadedImage;
+    try {
+      result = await uploadImage(logo, "logo");
+    } catch (error) {
+      redirect(adminPath(locale, "settings", "error", uploadErrorMessage(error)));
+    }
+    const previousLogoKey = await prisma.siteSetting.findUnique({ where: { key: "brand.logoKey" } });
+    await prisma.$transaction([
+      prisma.siteSetting.upsert({
+        create: { key: "brand.logo", value: result.url },
+        update: { value: result.url },
+        where: { key: "brand.logo" },
+      }),
+      prisma.siteSetting.upsert({
+        create: { key: "brand.logoKey", value: result.key },
+        update: { value: result.key },
+        where: { key: "brand.logoKey" },
+      }),
+      prisma.file.upsert({
+        create: {
+          entityId: null,
+          entityType: "logo",
+          key: result.key,
+          mimeType: result.mimeType,
+          size: result.size,
+          url: result.url,
+          userId: user.id,
+        },
+        update: {
+          entityId: null,
+          entityType: "logo",
+          mimeType: result.mimeType,
+          size: result.size,
+          url: result.url,
+          userId: user.id,
+        },
+        where: { key: result.key },
+      }),
+    ]);
+    if (previousLogoKey?.value && previousLogoKey.value !== result.key) {
+      await deleteImage(previousLogoKey.value).catch(() => null);
+      await prisma.file.deleteMany({ where: { key: previousLogoKey.value } });
+    }
   } else {
     redirect(adminPath(locale, "settings", "error", "Оберіть файл логотипу"));
   }
@@ -395,7 +519,12 @@ export async function deleteLogo(data: FormData) {
   if (!(await requireAdmin())) {
     redirect(adminPath(locale, "settings", "error", "Доступ заборонено"));
   }
-  await prisma.siteSetting.deleteMany({ where: { key: "brand.logo" } });
+  const previousLogoKey = await prisma.siteSetting.findUnique({ where: { key: "brand.logoKey" } });
+  await prisma.siteSetting.deleteMany({ where: { key: { in: ["brand.logo", "brand.logoKey"] } } });
+  if (previousLogoKey?.value) {
+    await deleteImage(previousLogoKey.value).catch(() => null);
+    await prisma.file.deleteMany({ where: { key: previousLogoKey.value } });
+  }
   revalidatePublicContacts(locale);
   redirect(adminPath(locale, "settings", "success", "Логотип видалено"));
 }
