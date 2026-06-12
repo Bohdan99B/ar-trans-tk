@@ -1108,6 +1108,7 @@ a.card:hover,
 }
 
 .reviewsTrack {
+  align-items: start;
   display: grid;
   gap: 14px;
   grid-auto-columns: minmax(0, 88%);
@@ -1135,7 +1136,24 @@ a.card:hover,
   min-height: 238px;
   min-width: 0;
   padding: 20px;
+  position: relative;
   scroll-snap-align: start;
+  transition:
+    background 260ms ease,
+    border-color 260ms ease,
+    box-shadow 260ms ease,
+    transform 260ms ease;
+  z-index: 0;
+}
+
+.reviewCardExpanded {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.095), rgba(255, 255, 255, 0.035)),
+    rgba(23, 32, 51, 0.92);
+  border-color: var(--color-border-strong);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.22);
+  transform: translateY(-2px);
+  z-index: 1;
 }
 
 .reviewQuote {
@@ -1147,30 +1165,48 @@ a.card:hover,
   line-height: 1;
 }
 
-.reviewBody,
-.reviewBodyExpanded {
-  color: var(--color-text-soft);
+.reviewBodyFrame {
   font-size: 15px;
   line-height: 1.62;
-  margin: 12px 0 0;
-  overflow-wrap: anywhere;
+  margin-top: 12px;
+  min-height: 6.48em;
+  min-width: 0;
+}
+
+.reviewBodyFrameCollapsed {
+  max-height: 6.48em;
+  overflow: hidden;
+  transition: max-height 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reviewBodyFrameExpanded {
+  max-height: var(--review-body-height, 80rem);
+  overflow: hidden;
+  transition: max-height 420ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .reviewBody {
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
-  display: -webkit-box;
-  overflow: hidden;
+  color: var(--color-text-soft);
+  font-size: inherit;
+  line-height: inherit;
+  margin: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.reviewMoreSlot {
+  align-items: flex-start;
+  display: flex;
+  margin-top: 8px;
+  min-height: 22px;
 }
 
 .reviewMore {
-  align-self: flex-start;
   background: transparent;
   border: 0;
   color: var(--color-secondary);
   font-size: 13px;
   font-weight: 900;
-  margin-top: 8px;
   padding: 2px 0;
 }
 
@@ -1267,9 +1303,17 @@ a.card:hover,
 }
 
 .reviewsGrid {
+  align-items: start;
   display: grid;
   gap: 14px;
   grid-template-columns: 1fr;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reviewCard,
+  .reviewBodyFrame {
+    transition-duration: 0.01ms;
+  }
 }
 
 .reviewsEmpty {

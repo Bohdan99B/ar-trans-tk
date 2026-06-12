@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 
 import styles from "@/app/[locale]/Site.module.css";
 
@@ -40,28 +40,60 @@ function ReviewCard({
   labels: Pick<ReviewLabels, "collapse" | "readMore">;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [bodyHeight, setBodyHeight] = useState(0);
+  const bodyRef = useRef<HTMLParagraphElement>(null);
   const isLong = item.body.length > LONG_REVIEW_LENGTH;
   const bodyId = `review-body-${item.id}`;
+  const bodyFrameStyle = bodyHeight
+    ? ({ "--review-body-height": `${bodyHeight}px` } as CSSProperties)
+    : undefined;
+
+  useEffect(() => {
+    const body = bodyRef.current;
+    if (!body || !isLong) return;
+
+    const updateBodyHeight = () => setBodyHeight(body.scrollHeight);
+    updateBodyHeight();
+
+    const resizeObserver = new ResizeObserver(updateBodyHeight);
+    resizeObserver.observe(body);
+
+    return () => resizeObserver.disconnect();
+  }, [isLong, item.body]);
 
   return (
-    <article className={styles.reviewCard}>
+    <article className={`${styles.reviewCard} ${expanded ? styles.reviewCardExpanded : ""}`}>
       <span aria-hidden="true" className={styles.reviewQuote}>
         “
       </span>
-      <p className={isLong && !expanded ? styles.reviewBody : styles.reviewBodyExpanded} id={bodyId}>
-        {item.body}
-      </p>
-      {isLong ? (
-        <button
-          aria-controls={bodyId}
-          aria-expanded={expanded}
-          className={styles.reviewMore}
-          onClick={() => setExpanded((value) => !value)}
-          type="button"
-        >
-          {expanded ? labels.collapse : labels.readMore}
-        </button>
-      ) : null}
+      <div
+        className={`${styles.reviewBodyFrame} ${
+          isLong
+            ? expanded
+              ? styles.reviewBodyFrameExpanded
+              : styles.reviewBodyFrameCollapsed
+            : ""
+        }`}
+        id={bodyId}
+        style={bodyFrameStyle}
+      >
+        <p className={styles.reviewBody} ref={bodyRef}>
+          {item.body}
+        </p>
+      </div>
+      <div className={styles.reviewMoreSlot}>
+        {isLong ? (
+          <button
+            aria-controls={bodyId}
+            aria-expanded={expanded}
+            className={styles.reviewMore}
+            onClick={() => setExpanded((value) => !value)}
+            type="button"
+          >
+            {expanded ? labels.collapse : labels.readMore}
+          </button>
+        ) : null}
+      </div>
       <footer className={styles.reviewAuthor}>
         <span aria-hidden="true">{item.author.trim().charAt(0).toLocaleUpperCase()}</span>
         <div>
