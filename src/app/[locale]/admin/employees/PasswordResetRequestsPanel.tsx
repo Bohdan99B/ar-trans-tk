@@ -61,7 +61,7 @@ type ResetRequest = {
   handledBy: { name: string | null } | null;
   id: string;
   invitation: { status: string } | null;
-  role: "ADMIN" | "MANAGER";
+  role: "OWNER" | "ADMIN" | "MANAGER";
   status: ResetStatus;
   user: { id: string; name: string | null };
   viewedAt: string | null;

@@ -21,8 +21,10 @@ export async function POST(request: Request) {
 
   const tokenHash = hashPasswordResetToken(parsed.data.token);
   const passwordHash = await bcrypt.hash(parsed.data.password, 12);
-  const resetSucceeded = await prisma
-    .$transaction(async (transaction) => {
+  let resetSucceeded = false;
+
+  try {
+    resetSucceeded = await prisma.$transaction(async (transaction) => {
       const resetToken = await transaction.passwordResetToken.findUnique({
         select: { expiresAt: true, id: true, requestId: true, userId: true },
         where: { tokenHash },
@@ -75,11 +77,11 @@ export async function POST(request: Request) {
         userId: resetToken.userId,
       });
       return true;
-    })
-    .catch((error) => {
-      logPasswordResetEvent("password_change_failed", { error });
-      return false;
     });
+  } catch (error) {
+    logPasswordResetEvent("password_change_failed", { error });
+    return NextResponse.json({ error: "Не вдалося змінити пароль. Спробуйте ще раз." }, { status: 500 });
+  }
 
   if (!resetSucceeded) {
     return NextResponse.json({ error: "Посилання недійсне або прострочене." }, { status: 400 });

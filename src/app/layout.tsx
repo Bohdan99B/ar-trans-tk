@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Manrope } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const inter = Inter({
@@ -34,7 +35,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="uk" className={`${inter.variable} ${manrope.variable}`} data-scroll-behavior="smooth">
-      <body>{children}</body>
+      <body>
+        {children}
+        <Toaster position="top-center" richColors />
+      </body>
     </html>
   );
 }

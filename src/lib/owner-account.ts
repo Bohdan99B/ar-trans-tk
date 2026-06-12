@@ -1,5 +1,9 @@
-export const OWNER_EMAIL = "bozheikob@gmail.com";
+import type { UserRole } from "@prisma/client";
 
-export function isOwnerEmail(email: string) {
-  return email.trim().toLowerCase() === OWNER_EMAIL;
+export function isOwnerRole(role: UserRole) {
+  return role === "OWNER";
+}
+
+export function isAdminRole(role: UserRole) {
+  return role === "OWNER" || role === "ADMIN";
 }

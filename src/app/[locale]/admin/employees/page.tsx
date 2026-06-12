@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
 import { requireAdmin } from "@/lib/auth";
-import { isOwnerEmail } from "@/lib/owner-account";
+import { isOwnerRole } from "@/lib/owner-account";
 import { prisma } from "@/lib/prisma";
 
 import { EmployeeAdminPanel } from "./EmployeeAdminPanel";
@@ -14,7 +14,8 @@ type AdminEmployeesPageProps = {
 
 export default async function AdminEmployeesPage({ params }: AdminEmployeesPageProps) {
   const { locale } = await params;
-  if (!(await requireAdmin())) redirect(`/${locale}/admin`);
+  const currentUser = await requireAdmin();
+  if (!currentUser) redirect(`/${locale}/admin`);
   const t = await getTranslations({ locale, namespace: "passwordResetAdmin" });
   const employees = await prisma.user.findMany({
     include: {
@@ -39,11 +40,12 @@ export default async function AdminEmployeesPage({ params }: AdminEmployeesPageP
   return (
     <section>
       <EmployeeAdminPanel
+        currentUser={{ id: currentUser.id, role: currentUser.role }}
         employees={employees.map((employee) => ({
           createdAt: employee.createdAt.toISOString(),
           email: employee.email,
           id: employee.id,
-          isOwner: isOwnerEmail(employee.email),
+          isOwner: isOwnerRole(employee.role),
           invitations: employee.employeeInvitations.map((invite) => ({
             expiresAt: invite.expiresAt.toISOString(),
             id: invite.id,

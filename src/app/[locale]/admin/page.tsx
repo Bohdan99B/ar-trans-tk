@@ -5,6 +5,7 @@ import { getTranslations } from "next-intl/server";
 
 import { requireStaff } from "@/lib/auth";
 import { getActionablePasswordResetWhere } from "@/lib/password-reset-requests";
+import { isAdminRole } from "@/lib/owner-account";
 import { prisma } from "@/lib/prisma";
 import { ensureRequestStatuses } from "@/lib/requests";
 
@@ -35,7 +36,7 @@ export default async function AdminPage({ params, searchParams }: AdminPageProps
   if (!user) {
     redirect(`/${locale}`);
   }
-  const isAdmin = user.role === "ADMIN";
+  const isAdmin = isAdminRole(user.role);
   const passwordResetTranslations = isAdmin
     ? await getTranslations({ locale, namespace: "passwordResetAdmin" })
     : null;

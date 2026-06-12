@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "admin:create": "node scripts/create-admin.mjs",
+    "owner:create": "node scripts/manage-owner.mjs create",
+    "owner:check": "node scripts/manage-owner.mjs check",
+    "owner:email:update": "node scripts/manage-owner.mjs update-email",
+    "owner:promote": "node scripts/manage-owner.mjs promote",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -24,6 +27,7 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "sharp": "^0.34.5",
+    "sonner": "^2.0.7",
     "zod": "^4.4.3"
   },
   "devDependencies": {

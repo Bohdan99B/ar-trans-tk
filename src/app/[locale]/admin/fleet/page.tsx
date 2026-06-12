@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { requireStaff } from "@/lib/auth";
+import { isAdminRole } from "@/lib/owner-account";
 import { prisma } from "@/lib/prisma";
 
 import { ConfirmSubmitButton, SubmitButton } from "../AdminControls";
@@ -19,7 +20,7 @@ export default async function AdminFleetPage({ params, searchParams }: PageProps
   const { locale } = await params;
   const user = await requireStaff();
   if (!user) redirect(`/${locale}`);
-  const canManage = user.role === "ADMIN";
+  const canManage = isAdminRole(user.role);
   const query = await searchParams;
   const vehicles = await prisma.vehicle.findMany({ orderBy: { createdAt: "desc" } });
 

@@ -46,7 +46,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: neutralMessage, ok: true });
     }
 
-    const expiresAt = user.role === "ADMIN" ? getPasswordResetExpiresAt() : getManagerResetRequestExpiresAt();
+    const expiresAt = user.role === "MANAGER" ? getManagerResetRequestExpiresAt() : getPasswordResetExpiresAt();
     const resetRequest =
       user.role === "MANAGER"
         ? await prisma.$transaction(async (transaction) => {

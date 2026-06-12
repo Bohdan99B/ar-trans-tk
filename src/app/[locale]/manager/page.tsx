@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
 import { authOptions, getCurrentUser } from "@/lib/auth";
+import { isAdminRole } from "@/lib/owner-account";
 
 type ManagerPageProps = {
   params: Promise<{ locale: string }>;
@@ -16,7 +17,7 @@ export default async function ManagerPage({ params }: ManagerPageProps) {
   }
 
   const user = await getCurrentUser();
-  if (!user || (user.role !== "MANAGER" && user.role !== "ADMIN")) {
+  if (!user || (user.role !== "MANAGER" && !isAdminRole(user.role))) {
     redirect(`/${locale}`);
   }
 

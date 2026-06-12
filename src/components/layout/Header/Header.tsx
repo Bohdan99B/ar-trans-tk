@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { getCurrentUser } from "@/lib/auth";
 import { navItems } from "@/lib/content";
+import { isAdminRole } from "@/lib/owner-account";
 import { prisma } from "@/lib/prisma";
 
 import styles from "./Header.module.css";
@@ -19,7 +20,7 @@ export async function Header({ locale }: HeaderProps) {
   const values = Object.fromEntries(settings.map(({ key, value }) => [key, value]));
   const phone = values["contact.phones"]?.split(/\r?\n|,/)[0]?.trim() || "+380 (67) 120-45-88";
   const managementHref =
-    user?.role === "ADMIN"
+    user && isAdminRole(user.role)
       ? `/${locale}/admin`
       : user?.role === "MANAGER"
         ? `/${locale}/manager`

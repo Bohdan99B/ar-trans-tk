@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { requireStaff } from "@/lib/auth";
+import { isAdminRole } from "@/lib/owner-account";
 import { prisma } from "@/lib/prisma";
 
 import { VacanciesPanel } from "./VacanciesPanel";
@@ -78,7 +79,7 @@ export default async function AdminVacanciesPage({ params, searchParams }: PageP
     <VacanciesPanel
       candidatePage={candidatePage}
       candidatePageCount={candidatePageCount}
-      canManage={user.role === "ADMIN"}
+      canManage={isAdminRole(user.role)}
       generalApplications={generalApplications.map((application) => ({
         ...application,
         createdAt: application.createdAt.toISOString(),

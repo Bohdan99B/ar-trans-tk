@@ -1,32 +1,36 @@
 "use client";
 
-import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
 
 import styles from "../../signin/Signin.module.css";
 
 type ResetPasswordFormProps = {
+  locale: string;
   messages: {
     confirmPassword: string;
     newPassword: string;
     passwordMin: string;
     passwordMismatch: string;
     resetFailed: string;
-    resetSuccess: string;
     savePassword: string;
     savingPassword: string;
-    signin: string;
   };
   token: string;
 };
 
-export function ResetPasswordForm({ messages, token }: ResetPasswordFormProps) {
+export function ResetPasswordForm({ locale, messages, token }: ResetPasswordFormProps) {
+  const router = useRouter();
+  const submitInProgress = useRef(false);
   const [error, setError] = useState<string | null>(null);
-  const [isComplete, setIsComplete] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (submitInProgress.current) {
+      return;
+    }
+
     setError(null);
 
     const formData = new FormData(event.currentTarget);
@@ -42,32 +46,33 @@ export function ResetPasswordForm({ messages, token }: ResetPasswordFormProps) {
       return;
     }
 
+    submitInProgress.current = true;
     setIsSubmitting(true);
-    const response = await fetch("/api/auth/reset-password", {
-      body: JSON.stringify({ password, token }),
-      headers: { "Content-Type": "application/json" },
-      method: "POST",
-    });
-    const payload = await response.json().catch(() => null);
-    setIsSubmitting(false);
 
-    if (!response.ok) {
-      setError(payload?.error ?? messages.resetFailed);
-      return;
+    try {
+      const response = await fetch("/api/auth/reset-password", {
+        body: JSON.stringify({ password, token }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      });
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        setError(payload?.error ?? messages.resetFailed);
+        return;
+      }
+
+      const signinParams = new URLSearchParams({
+        locale,
+        passwordReset: "success",
+      });
+      router.replace(`/signin?${signinParams}`);
+    } catch {
+      setError(messages.resetFailed);
+    } finally {
+      submitInProgress.current = false;
+      setIsSubmitting(false);
     }
-
-    setIsComplete(true);
-  }
-
-  if (isComplete) {
-    return (
-      <>
-        <p className={styles.success} role="status">{messages.resetSuccess}</p>
-        <Link className={styles.authLink} href="/signin">
-          {messages.signin}
-        </Link>
-      </>
-    );
   }
 
   return (

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { requireStaff } from "@/lib/auth";
+import { isAdminRole } from "@/lib/owner-account";
 import { prisma } from "@/lib/prisma";
 import { deleteImage } from "@/lib/uploadImage";
 
@@ -19,7 +20,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
   if (!file) {
     return NextResponse.json({ message: "Файл не знайдено" }, { status: 404 });
   }
-  if (file.entityType === "logo" && user.role !== "ADMIN") {
+  if (file.entityType === "logo" && !isAdminRole(user.role)) {
     return NextResponse.json({ message: "Доступ заборонено" }, { status: 403 });
   }
 

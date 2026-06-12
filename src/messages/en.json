@@ -49,7 +49,7 @@
     "passwordMismatch": "The passwords do not match.",
     "invalidResetLink": "The recovery link is invalid or incomplete.",
     "resetFailed": "We could not change the password.",
-    "resetSuccess": "Your password has been changed. You can now sign in."
+    "resetSuccess": "Your password has been changed. Sign in with your new password."
   },
   "passwordResetAdmin": {
     "title": "Password recovery requests",

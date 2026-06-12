@@ -21,6 +21,9 @@ export async function POST(request: Request, { params }: RouteProps) {
   const { id } = await params;
   const employee = await prisma.user.findUnique({ where: { id } });
   if (!employee) return NextResponse.json({ error: "Співробітника не знайдено" }, { status: 404 });
+  if (employee.role === "OWNER") {
+    return NextResponse.json({ error: "OWNER змінює пароль лише через email-відновлення" }, { status: 403 });
+  }
   const resetRequest = parsed.data.requestId
     ? await prisma.passwordResetRequest.findFirst({
         where: {

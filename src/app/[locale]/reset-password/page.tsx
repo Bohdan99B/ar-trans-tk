@@ -18,7 +18,7 @@ export default async function ResetPasswordPage({ params, searchParams }: ResetP
   return (
     <section className={styles.screen}>
       <div className={styles.shell}>
-        <Link className={styles.backLink} href="/signin">
+        <Link className={styles.backLink} href={`/signin?locale=${locale}`}>
           {t("backToSignin")}
         </Link>
         <div className={styles.card}>
@@ -29,16 +29,15 @@ export default async function ResetPasswordPage({ params, searchParams }: ResetP
           </div>
           {token ? (
             <ResetPasswordForm
+              locale={locale}
               messages={{
                 confirmPassword: t("confirmPassword"),
                 newPassword: t("newPassword"),
                 passwordMin: t("passwordMin"),
                 passwordMismatch: t("passwordMismatch"),
                 resetFailed: t("resetFailed"),
-                resetSuccess: t("resetSuccess"),
                 savePassword: t("savePassword"),
                 savingPassword: t("savingPassword"),
-                signin: t("signin"),
               }}
               token={token}
             />

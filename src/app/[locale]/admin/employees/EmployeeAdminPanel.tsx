@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { canDeleteEmployee, type EmployeeRole } from "@/lib/employee-permissions";
+
 import adminStyles from "../Admin.module.css";
 import styles from "./Employees.module.css";
 
@@ -18,10 +20,14 @@ type Employee = {
   }[];
   name: string | null;
   resetStatus: "NEW" | "VIEWED" | "COMPLETED" | "EXPIRED" | "CANCELLED" | "FAILED" | null;
-  role: "ADMIN" | "MANAGER";
+  role: EmployeeRole;
 };
 
 type EmployeeAdminPanelProps = {
+  currentUser: {
+    id: string;
+    role: EmployeeRole;
+  };
   employees: Employee[];
   locale: string;
   resetLabels: {
@@ -39,13 +45,15 @@ type Message = {
 };
 
 const roleLabels = {
+  OWNER: "OWNER",
   ADMIN: "ADMIN",
   MANAGER: "MANAGER",
 };
 
-export function EmployeeAdminPanel({ employees, locale, resetLabels }: EmployeeAdminPanelProps) {
+export function EmployeeAdminPanel({ currentUser, employees, locale, resetLabels }: EmployeeAdminPanelProps) {
   const router = useRouter();
   const [message, setMessage] = useState<Message | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<Employee | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -103,18 +111,25 @@ export function EmployeeAdminPanel({ employees, locale, resetLabels }: EmployeeA
 
     setIsDeleting(true);
     setMessage(null);
-    const response = await fetch(`/api/admin/employees/${pendingDelete.id}`, { method: "DELETE" });
-    const payload = await response.json().catch(() => null);
-    setIsDeleting(false);
+    setDeleteError(null);
 
-    if (!response.ok) {
-      setMessage({ tone: "error", text: payload?.error ?? "Не вдалося видалити співробітника" });
-      return;
+    try {
+      const response = await fetch(`/api/admin/employees/${pendingDelete.id}`, { method: "DELETE" });
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        setDeleteError(payload?.error ?? "Не вдалося видалити співробітника");
+        return;
+      }
+
+      setPendingDelete(null);
+      setMessage({ tone: "success", text: "Співробітника видалено" });
+      router.refresh();
+    } catch {
+      setDeleteError("Не вдалося зв'язатися із сервером. Спробуйте ще раз.");
+    } finally {
+      setIsDeleting(false);
     }
-
-    setPendingDelete(null);
-    setMessage({ tone: "success", text: "Співробітника видалено" });
-    router.refresh();
   }
 
   async function resetPassword(employee: Employee) {
@@ -198,6 +213,7 @@ export function EmployeeAdminPanel({ employees, locale, resetLabels }: EmployeeA
           </thead>
           <tbody>
             {employees.map((employee) => {
+              const canDelete = canDeleteEmployee(currentUser, employee);
               const latestInvite = employee.invitations[0];
               const resetStatus = resetStatuses[employee.id];
               const employeeStatus =
@@ -225,17 +241,27 @@ export function EmployeeAdminPanel({ employees, locale, resetLabels }: EmployeeA
                     <div className={styles.employeeActions}>
                       <button
                         className={adminStyles.secondaryButton}
-                        disabled={isResetting === employee.id}
+                        disabled={employee.isOwner || isResetting === employee.id}
                         onClick={() => resetPassword(employee)}
+                        title={employee.isOwner ? "OWNER змінює пароль через email-відновлення" : undefined}
                         type="button"
                       >
                         {isResetting === employee.id ? "Створення..." : "Створити reset-посилання"}
                       </button>
                       <button
                         className={adminStyles.dangerButton}
-                        disabled={employee.isOwner}
-                        onClick={() => setPendingDelete(employee)}
-                        title={employee.isOwner ? "Owner-акаунт не можна видалити" : undefined}
+                        disabled={!canDelete}
+                        onClick={() => {
+                          setDeleteError(null);
+                          setPendingDelete(employee);
+                        }}
+                        title={
+                          employee.id === currentUser.id
+                            ? "Не можна видалити власний акаунт"
+                            : employee.role === "OWNER" && currentUser.role === "ADMIN"
+                              ? "ADMIN не може видалити OWNER"
+                              : undefined
+                        }
                         type="button"
                       >
                         Видалити
@@ -257,11 +283,19 @@ export function EmployeeAdminPanel({ employees, locale, resetLabels }: EmployeeA
               Ви точно хочете видалити цього співробітника? Ця дія видалить акаунт та всі пов&apos;язані з ним дані з бази
               даних.
             </p>
+            {deleteError ? (
+              <p aria-live="assertive" className={styles.error} role="alert">
+                {deleteError}
+              </p>
+            ) : null}
             <div className={styles.modalActions}>
               <button
                 className={adminStyles.secondaryButton}
                 disabled={isDeleting}
-                onClick={() => setPendingDelete(null)}
+                onClick={() => {
+                  setDeleteError(null);
+                  setPendingDelete(null);
+                }}
                 type="button"
               >
                 Скасувати

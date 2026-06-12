@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
 import { authOptions, getCurrentUser } from "@/lib/auth";
+import { isAdminRole } from "@/lib/owner-account";
 import { getActionablePasswordResetWhere } from "@/lib/password-reset-requests";
 import { prisma } from "@/lib/prisma";
 
@@ -42,14 +43,15 @@ export default async function AdminLayout({ children, params }: AdminLayoutProps
   }
 
   const user = await getCurrentUser();
-  if (!user || (user.role !== "ADMIN" && user.role !== "MANAGER")) {
+  if (!user || (!isAdminRole(user.role) && user.role !== "MANAGER")) {
     redirect(`/${locale}`);
   }
-  const links = (user.role === "ADMIN" ? [["", "Dashboard"], ...adminLinks] : managerLinks).map(
+  const hasAdminAccess = isAdminRole(user.role);
+  const links = (hasAdminAccess ? [["", "Dashboard"], ...adminLinks] : managerLinks).map(
     ([href, label]) => ({ href: `/${locale}/admin${href ? `/${href}` : ""}`, label }),
   );
   const passwordResetCount =
-    user.role === "ADMIN"
+    hasAdminAccess
       ? await prisma.passwordResetRequest.count({ where: getActionablePasswordResetWhere() })
       : 0;
 
@@ -57,7 +59,7 @@ export default async function AdminLayout({ children, params }: AdminLayoutProps
     <section className={styles.adminShell}>
       <p className={styles.eyebrow}>Адмінка</p>
       <h1 className={styles.heading}>AR Trans TK CMS</h1>
-      <AdminNav initialPasswordResetCount={passwordResetCount} isAdmin={user.role === "ADMIN"} links={links} />
+      <AdminNav initialPasswordResetCount={passwordResetCount} isAdmin={hasAdminAccess} links={links} />
       {children}
     </section>
   );

@@ -6,6 +6,7 @@ import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 import { prisma } from "@/lib/prisma";
+import { isAdminRole } from "@/lib/owner-account";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as NextAuthOptions["adapter"],
@@ -85,7 +86,7 @@ export async function getCurrentUser() {
 
 export async function requireAdmin() {
   const user = await getCurrentUser();
-  if (!user || user.role !== "ADMIN") {
+  if (!user || !isAdminRole(user.role)) {
     return null;
   }
 
@@ -94,7 +95,7 @@ export async function requireAdmin() {
 
 export async function requireStaff() {
   const user = await getCurrentUser();
-  if (!user || (user.role !== "ADMIN" && user.role !== "MANAGER")) {
+  if (!user || (!isAdminRole(user.role) && user.role !== "MANAGER")) {
     return null;
   }
 

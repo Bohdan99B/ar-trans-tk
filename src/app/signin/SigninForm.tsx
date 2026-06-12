@@ -2,7 +2,8 @@
 
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 import { getPostLoginPath } from "@/lib/auth-redirects";
 
@@ -19,18 +20,33 @@ type SigninFormProps = {
     signingIn: string;
     staffOnly: string;
   };
+  passwordResetSuccess?: string;
 };
 
 type SessionPayload = {
   user?: {
-    role?: "ADMIN" | "MANAGER";
+    role?: "OWNER" | "ADMIN" | "MANAGER";
   };
 };
 
-export function SigninForm({ callbackUrl, messages }: SigninFormProps) {
+export function SigninForm({ callbackUrl, messages, passwordResetSuccess }: SigninFormProps) {
   const router = useRouter();
+  const resetToastShown = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!passwordResetSuccess || resetToastShown.current) {
+      return;
+    }
+
+    resetToastShown.current = true;
+    toast.success(passwordResetSuccess);
+
+    const url = new URL(window.location.href);
+    url.searchParams.delete("passwordReset");
+    window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
+  }, [passwordResetSuccess]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
