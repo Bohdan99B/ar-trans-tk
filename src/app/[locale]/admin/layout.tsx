@@ -2,12 +2,12 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
 import { authOptions, getCurrentUser } from "@/lib/auth";
-import { isAdminRole } from "@/lib/owner-account";
-import { getActionablePasswordResetWhere } from "@/lib/password-reset-requests";
+import { isAdminRole } from "@/lib/auth/roles";
+import { getActionablePasswordResetWhere } from "@/lib/auth/password-reset-requests";
 import { prisma } from "@/lib/prisma";
 
 import styles from "../Site.module.css";
-import { AdminNav } from "./AdminNav";
+import { AdminNav } from "@/components/admin/AdminNav";
 
 const staffLinks = [["requests", "Заявки та питання"]];
 

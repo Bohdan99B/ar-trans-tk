@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { getAppBaseUrl } from "@/lib/app-url";
-import { sendMail } from "@/lib/mailer";
-import { logPasswordResetEvent } from "@/lib/password-reset-logging";
+import { getAppBaseUrl } from "@/lib/utils";
+import { sendMail } from "@/lib/mail";
+import { logPasswordResetEvent } from "@/lib/auth/password-reset-logging";
 import {
   createPasswordResetToken,
   getManagerResetRequestExpiresAt,
   getPasswordResetExpiresAt,
   hashPasswordResetToken,
   PASSWORD_RESET_TTL_MINUTES,
-} from "@/lib/password-reset";
+} from "@/lib/auth/password-reset";
 import { prisma } from "@/lib/prisma";
 
 const requestSchema = z.object({

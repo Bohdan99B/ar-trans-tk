@@ -1,7 +1,7 @@
 import { QuestionForm } from "@/components/forms/QuestionForm";
 import { FaqAccordion } from "@/components/sections/FaqAccordion";
 import { PageHero } from "@/components/sections/PageHero";
-import { getSiteFaqs } from "@/lib/site-content";
+import { getSiteFaqs } from "@/lib/content";
 
 import styles from "../Site.module.css";
 

@@ -4,8 +4,8 @@ import { FormEvent, useState } from "react";
 
 import siteStyles from "@/app/[locale]/Site.module.css";
 import buttonStyles from "@/components/ui/Buttons.module.css";
-import { FieldErrors, validateFormData } from "@/lib/form-validation";
-import { cooperationApplicationSchema } from "@/lib/validators";
+import { FieldErrors, validateFormData } from "@/lib/validations";
+import { cooperationApplicationSchema } from "@/lib/validations";
 
 import styles from "./Forms.module.css";
 

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth";
-import { logPasswordResetEvent } from "@/lib/password-reset-logging";
+import { logPasswordResetEvent } from "@/lib/auth/password-reset-logging";
 import { prisma } from "@/lib/prisma";
 
 type RouteProps = { params: Promise<{ id: string }> };

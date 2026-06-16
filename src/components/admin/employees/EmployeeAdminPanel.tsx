@@ -3,9 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { canDeleteEmployee, type EmployeeRole } from "@/lib/employee-permissions";
+import { canDeleteEmployee, type EmployeeRole } from "@/lib/auth/employee-permissions";
 
-import adminStyles from "../Admin.module.css";
+import adminStyles from "@/components/admin/Admin.module.css";
 import styles from "./Employees.module.css";
 
 type Employee = {

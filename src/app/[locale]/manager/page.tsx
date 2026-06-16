@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
 import { authOptions, getCurrentUser } from "@/lib/auth";
-import { isAdminRole } from "@/lib/owner-account";
+import { isAdminRole } from "@/lib/auth/roles";
 
 type ManagerPageProps = {
   params: Promise<{ locale: string }>;

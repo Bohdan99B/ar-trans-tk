@@ -4,7 +4,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { getPostLoginPath } from "@/lib/auth-redirects";
+import { getPostLoginPath } from "@/lib/auth/redirects";
 
 import styles from "./AcceptInvite.module.css";
 

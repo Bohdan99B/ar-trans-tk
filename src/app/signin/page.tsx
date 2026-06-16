@@ -6,7 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { Logo } from "@/components/brand/Logo";
 import { routing } from "@/i18n/routing";
 import { authOptions } from "@/lib/auth";
-import { getPostLoginPath } from "@/lib/auth-redirects";
+import { getPostLoginPath } from "@/lib/auth/redirects";
 
 import styles from "./Signin.module.css";
 import { SigninForm } from "./SigninForm";

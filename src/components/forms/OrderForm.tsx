@@ -2,8 +2,8 @@
 
 import { ChangeEvent, ClipboardEvent, FormEvent, KeyboardEvent, useMemo, useState } from "react";
 
-import { FieldErrors, validateFormData } from "@/lib/form-validation";
-import { orderRequestSchema } from "@/lib/validators";
+import { FieldErrors, validateFormData } from "@/lib/validations";
+import { orderRequestSchema } from "@/lib/validations";
 
 import styles from "./Forms.module.css";
 

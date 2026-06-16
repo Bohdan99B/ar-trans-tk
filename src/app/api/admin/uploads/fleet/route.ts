@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { requireStaff } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { uploadImage, UploadImageError } from "@/lib/uploadImage";
+import { uploadImage, UploadImageError } from "@/lib/cloudinary";
 
 export async function POST(request: Request) {
   const user = await requireStaff();

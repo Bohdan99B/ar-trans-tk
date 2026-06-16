@@ -2,8 +2,8 @@ import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { hashInviteToken } from "@/lib/employee-invitations";
-import { logPasswordResetEvent } from "@/lib/password-reset-logging";
+import { hashInviteToken } from "@/lib/auth/employee-invitations";
+import { logPasswordResetEvent } from "@/lib/auth/password-reset-logging";
 import { prisma } from "@/lib/prisma";
 
 const acceptInviteSchema = z.object({

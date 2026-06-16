@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
-import { statusCheckSchema } from "@/lib/validators";
+import { statusCheckSchema } from "@/lib/validations";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

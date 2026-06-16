@@ -3,9 +3,9 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-import { SubmitButton } from "../AdminControls";
-import styles from "../Admin.module.css";
-import { saveContentSettings, saveFaqContent, saveGeographyRoute, saveServiceContent } from "../actions";
+import { SubmitButton } from "@/components/admin/AdminControls";
+import styles from "@/components/admin/Admin.module.css";
+import { saveContentSettings, saveFaqContent, saveGeographyRoute, saveServiceContent } from "@/server/actions/admin";
 
 type PageProps = {
   params: Promise<{ locale: string }>;

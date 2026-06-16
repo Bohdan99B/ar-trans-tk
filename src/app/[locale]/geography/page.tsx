@@ -1,6 +1,6 @@
 import { PageHero } from "@/components/sections/PageHero";
 import { EuropeMap } from "@/components/sections/EuropeMap";
-import { getSiteRoutes } from "@/lib/site-content";
+import { getSiteRoutes } from "@/lib/content";
 
 import styles from "../Site.module.css";
 

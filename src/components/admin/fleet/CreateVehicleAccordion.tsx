@@ -1,6 +1,6 @@
 import { type ReactNode } from "react";
 
-import { AdminCreateAccordion } from "../AdminCreateAccordion";
+import { AdminCreateAccordion } from "@/components/admin/AdminCreateAccordion";
 
 export function CreateVehicleAccordion({ children }: { children: ReactNode }) {
   return (

@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 
-import { sendMail } from "@/lib/mailer";
+import { sendMail } from "@/lib/mail";
 import { prisma } from "@/lib/prisma";
 import { createRequestNumber, getNewRequestStatus } from "@/lib/requests";
-import { questionSchema } from "@/lib/validators";
+import { questionSchema } from "@/lib/validations";
 
 function getEmailErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Unknown email error";

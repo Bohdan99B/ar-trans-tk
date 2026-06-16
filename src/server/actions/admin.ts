@@ -6,8 +6,8 @@ import { z } from "zod";
 
 import { requireAdmin, requireStaff } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { deleteImage, uploadImage, UploadImageError, type UploadedImage } from "@/lib/uploadImage";
-import { adminContactSchema, adminOfficeContactSchema } from "@/lib/validators";
+import { deleteImage, uploadImage, UploadImageError, type UploadedImage } from "@/lib/cloudinary";
+import { adminContactSchema, adminOfficeContactSchema } from "@/lib/validations";
 
 const localeSchema = z.enum(["uk", "en"]);
 const idSchema = z.string().trim().min(1);

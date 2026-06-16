@@ -2,11 +2,11 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
 import { requireAdmin } from "@/lib/auth";
-import { isOwnerRole } from "@/lib/owner-account";
+import { isOwnerRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/prisma";
 
-import { EmployeeAdminPanel } from "./EmployeeAdminPanel";
-import { PasswordResetRequestsPanel } from "./PasswordResetRequestsPanel";
+import { EmployeeAdminPanel } from "@/components/admin/employees/EmployeeAdminPanel";
+import { PasswordResetRequestsPanel } from "@/components/admin/employees/PasswordResetRequestsPanel";
 
 type AdminEmployeesPageProps = {
   params: Promise<{ locale: string }>;

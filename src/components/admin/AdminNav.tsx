@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
-import styles from "../Site.module.css";
+import styles from "@/app/[locale]/Site.module.css";
 
 type AdminNavProps = {
   initialPasswordResetCount: number;

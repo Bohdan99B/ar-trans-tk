@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { PageHero } from "@/components/sections/PageHero";
 import { SectionIcon } from "@/components/sections/Icons";
-import { getSiteServices } from "@/lib/site-content";
+import { getSiteServices } from "@/lib/content";
 
 import styles from "../Site.module.css";
 

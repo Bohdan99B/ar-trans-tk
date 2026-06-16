@@ -1,7 +1,7 @@
 import { ContactCallbackForm } from "@/components/forms/ContactCallbackForm";
 import { OfficeMap } from "@/components/sections/OfficeMap";
 import { PageHero } from "@/components/sections/PageHero";
-import { getPublicContacts, type PublicContact } from "@/lib/site-content";
+import { getPublicContacts, type PublicContact } from "@/lib/content";
 
 import styles from "../Site.module.css";
 

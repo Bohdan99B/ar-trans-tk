@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { getCurrentUser } from "@/lib/auth";
 import { navItems } from "@/lib/content";
-import { isAdminRole } from "@/lib/owner-account";
+import { isAdminRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/prisma";
 
 import styles from "./Header.module.css";

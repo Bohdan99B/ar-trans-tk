@@ -6,7 +6,7 @@ import { FaqAccordion } from "@/components/sections/FaqAccordion";
 import { SectionIcon } from "@/components/sections/Icons";
 import { TemperatureDashboard } from "@/components/sections/TemperatureDashboard";
 import buttonStyles from "@/components/ui/Buttons.module.css";
-import { getSiteFaqs } from "@/lib/site-content";
+import { getSiteFaqs } from "@/lib/content";
 
 import styles from "../Site.module.css";
 

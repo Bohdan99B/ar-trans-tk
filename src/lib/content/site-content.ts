@@ -1,4 +1,4 @@
-import { faqs as defaultFaqs, routes as defaultRoutes, services as defaultServices } from "@/lib/content";
+import { faqs as defaultFaqs, routes as defaultRoutes, services as defaultServices } from "./static-content";
 import { prisma } from "@/lib/prisma";
 
 export const messengerOptions = ["Telegram", "Viber", "WhatsApp"] as const;

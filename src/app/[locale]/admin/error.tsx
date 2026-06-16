@@ -1,6 +1,6 @@
 "use client";
 
-import styles from "./Admin.module.css";
+import styles from "@/components/admin/Admin.module.css";
 
 export default function AdminError({ reset }: { reset: () => void }) {
   return (

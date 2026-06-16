@@ -2,7 +2,7 @@
 
 import { Children, type ReactNode, useMemo, useState } from "react";
 
-import styles from "../Admin.module.css";
+import styles from "@/components/admin/Admin.module.css";
 
 const PAGE_SIZE = 4;
 

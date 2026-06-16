@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 
 import { uploadCmsFile } from "@/lib/cloudinary";
-import { sendMail } from "@/lib/mailer";
+import { sendMail } from "@/lib/mail";
 import { prisma } from "@/lib/prisma";
-import { vacancyApplicationSchema } from "@/lib/validators";
+import { vacancyApplicationSchema } from "@/lib/validations";
 
 export async function POST(request: Request) {
   const data = await request.formData();

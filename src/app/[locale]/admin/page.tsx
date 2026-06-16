@@ -4,14 +4,14 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
 import { requireStaff } from "@/lib/auth";
-import { getActionablePasswordResetWhere } from "@/lib/password-reset-requests";
-import { isAdminRole } from "@/lib/owner-account";
+import { getActionablePasswordResetWhere } from "@/lib/auth/password-reset-requests";
+import { isAdminRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/prisma";
 import { ensureRequestStatuses } from "@/lib/requests";
 
-import styles from "../Site.module.css";
-import adminStyles from "./Admin.module.css";
-import { PasswordResetDashboardCard } from "./PasswordResetDashboardCard";
+import styles from "@/app/[locale]/Site.module.css";
+import adminStyles from "@/components/admin/Admin.module.css";
+import { PasswordResetDashboardCard } from "@/components/admin/PasswordResetDashboardCard";
 
 type AdminPageProps = {
   params: Promise<{ locale: string }>;

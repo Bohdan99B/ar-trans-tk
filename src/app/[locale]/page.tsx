@@ -8,7 +8,7 @@ import { SectionIcon } from "@/components/sections/Icons";
 import { ReviewsPreview } from "@/components/sections/ReviewsCarousel";
 import { TruckIllustration } from "@/components/sections/TruckIllustration";
 import { prisma } from "@/lib/prisma";
-import { getContentSettings, getPublicContacts, getSiteFaqs, getSiteRoutes, getSiteServices } from "@/lib/site-content";
+import { getContentSettings, getPublicContacts, getSiteFaqs, getSiteRoutes, getSiteServices } from "@/lib/content";
 
 import buttonStyles from "@/components/ui/Buttons.module.css";
 import styles from "./Site.module.css";

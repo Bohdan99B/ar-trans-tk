@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { requireAdmin } from "@/lib/auth";
-import { deleteImage, uploadImage, UploadImageError } from "@/lib/uploadImage";
+import { deleteImage, uploadImage, UploadImageError } from "@/lib/cloudinary";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {

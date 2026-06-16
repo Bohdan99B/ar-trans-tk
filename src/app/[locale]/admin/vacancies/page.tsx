@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
 
 import { requireStaff } from "@/lib/auth";
-import { isAdminRole } from "@/lib/owner-account";
+import { isAdminRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/prisma";
 
-import { VacanciesPanel } from "./VacanciesPanel";
+import { VacanciesPanel } from "@/components/admin/vacancies/VacanciesPanel";
 
 type PageProps = {
   params: Promise<{ locale: string }>;

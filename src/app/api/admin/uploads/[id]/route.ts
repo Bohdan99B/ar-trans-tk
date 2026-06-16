@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 
 import { requireStaff } from "@/lib/auth";
-import { isAdminRole } from "@/lib/owner-account";
+import { isAdminRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/prisma";
-import { deleteImage } from "@/lib/uploadImage";
+import { deleteImage } from "@/lib/cloudinary";
 
 type RouteParams = {
   params: Promise<{ id: string }>;

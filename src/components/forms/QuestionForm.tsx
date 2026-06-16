@@ -2,8 +2,8 @@
 
 import { FormEvent, useState } from "react";
 
-import { FieldErrors, validateFormData } from "@/lib/form-validation";
-import { questionSchema } from "@/lib/validators";
+import { FieldErrors, validateFormData } from "@/lib/validations";
+import { questionSchema } from "@/lib/validations";
 
 import styles from "./Forms.module.css";
 

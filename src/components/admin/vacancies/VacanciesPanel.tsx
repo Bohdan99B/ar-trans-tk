@@ -5,9 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { ConfirmSubmitButton, SubmitButton } from "../AdminControls";
-import styles from "../Admin.module.css";
-import { deleteVacancy, saveVacancy, saveVacancyInline, updateCooperationApplicationStatus } from "../actions";
+import { ConfirmSubmitButton, SubmitButton } from "@/components/admin/AdminControls";
+import styles from "@/components/admin/Admin.module.css";
+import { deleteVacancy, saveVacancy, saveVacancyInline, updateCooperationApplicationStatus } from "@/server/actions/admin";
 
 type ApplicationValue = {
   city: string;

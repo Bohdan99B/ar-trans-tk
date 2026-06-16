@@ -1,6 +1,6 @@
 import sharp from "sharp";
 
-import { deleteCloudinaryFile, uploadBuffer } from "@/lib/cloudinary";
+import { deleteCloudinaryFile, uploadBuffer } from "./client";
 
 export const ALLOWED_IMAGE_TYPES = [
   "image/jpeg",

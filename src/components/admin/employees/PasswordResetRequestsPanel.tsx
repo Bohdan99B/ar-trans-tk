@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import adminStyles from "../Admin.module.css";
+import adminStyles from "@/components/admin/Admin.module.css";
 import styles from "./PasswordResetRequests.module.css";
 
 export type PasswordResetMessages = {

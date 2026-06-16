@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { requireAdmin } from "@/lib/auth";
-import { logPasswordResetEvent } from "@/lib/password-reset-logging";
-import { getActionablePasswordResetWhere } from "@/lib/password-reset-requests";
+import { logPasswordResetEvent } from "@/lib/auth/password-reset-logging";
+import { getActionablePasswordResetWhere } from "@/lib/auth/password-reset-requests";
 import { prisma } from "@/lib/prisma";
 
 const activeStatuses = ["NEW", "VIEWED"] as const;

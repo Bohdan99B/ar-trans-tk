@@ -3,11 +3,11 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-import { SubmitButton } from "../AdminControls";
-import styles from "../Admin.module.css";
-import { deleteLogo, saveLogo } from "../actions";
-import { ImageUploadField } from "../ImageUploadField";
-import { SettingsContactsPanel } from "./SettingsContactsPanel";
+import { SubmitButton } from "@/components/admin/AdminControls";
+import styles from "@/components/admin/Admin.module.css";
+import { deleteLogo, saveLogo } from "@/server/actions/admin";
+import { ImageUploadField } from "@/components/admin/ImageUploadField";
+import { SettingsContactsPanel } from "@/components/admin/settings/SettingsContactsPanel";
 
 type PageProps = {
   params: Promise<{ locale: string }>;

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { requireAdmin } from "@/lib/auth";
-import { canDeleteEmployee } from "@/lib/employee-permissions";
+import { canDeleteEmployee } from "@/lib/auth/employee-permissions";
 import { prisma } from "@/lib/prisma";
 
 type EmployeeRouteProps = {

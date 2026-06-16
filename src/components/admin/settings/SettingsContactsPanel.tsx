@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 
-import { FieldErrors, getFieldErrors } from "@/lib/form-validation";
-import { adminContactSchema, adminOfficeContactSchema, maskAdminPhone } from "@/lib/validators";
+import { FieldErrors, getFieldErrors } from "@/lib/validations";
+import { adminContactSchema, adminOfficeContactSchema, maskAdminPhone } from "@/lib/validations";
 
-import { ConfirmSubmitButton, SubmitButton } from "../AdminControls";
-import styles from "../Admin.module.css";
-import { deleteManager, saveDirector, saveManager, saveOffice } from "../actions";
+import { ConfirmSubmitButton, SubmitButton } from "@/components/admin/AdminControls";
+import styles from "@/components/admin/Admin.module.css";
+import { deleteManager, saveDirector, saveManager, saveOffice } from "@/server/actions/admin";
 
 type ContactValue = {
   email: string;

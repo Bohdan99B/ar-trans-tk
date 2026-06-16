@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import { getPostLoginPath } from "@/lib/auth-redirects";
+import { getPostLoginPath } from "@/lib/auth/redirects";
 
 import styles from "./Signin.module.css";
 

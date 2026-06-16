@@ -3,12 +3,12 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-import { ConfirmSubmitButton, SubmitButton } from "../AdminControls";
-import { AdminCreateAccordion } from "../AdminCreateAccordion";
-import styles from "../Admin.module.css";
-import { deleteReview, saveReview } from "../actions";
-import { AutoResizeTextarea } from "./AutoResizeTextarea";
-import { ReviewsPanel } from "./ReviewsPanel";
+import { ConfirmSubmitButton, SubmitButton } from "@/components/admin/AdminControls";
+import { AdminCreateAccordion } from "@/components/admin/AdminCreateAccordion";
+import styles from "@/components/admin/Admin.module.css";
+import { deleteReview, saveReview } from "@/server/actions/admin";
+import { AutoResizeTextarea } from "@/components/admin/reviews/AutoResizeTextarea";
+import { ReviewsPanel } from "@/components/admin/reviews/ReviewsPanel";
 
 type PageProps = {
   params: Promise<{ locale: string }>;

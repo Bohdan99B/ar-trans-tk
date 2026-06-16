@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
-import styles from "../Site.module.css";
-import adminStyles from "./Admin.module.css";
+import styles from "@/app/[locale]/Site.module.css";
+import adminStyles from "@/components/admin/Admin.module.css";
 
 type PasswordResetDashboardCardProps = {
   action: string;

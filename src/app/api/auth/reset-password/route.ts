@@ -2,8 +2,8 @@ import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { hashPasswordResetToken } from "@/lib/password-reset";
-import { logPasswordResetEvent } from "@/lib/password-reset-logging";
+import { hashPasswordResetToken } from "@/lib/auth/password-reset";
+import { logPasswordResetEvent } from "@/lib/auth/password-reset-logging";
 import { prisma } from "@/lib/prisma";
 
 const resetSchema = z.object({

@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth";
-import { getAppBaseUrl } from "@/lib/app-url";
-import { createInviteToken, getInviteExpiresAt, hashInviteToken } from "@/lib/employee-invitations";
-import { logPasswordResetEvent } from "@/lib/password-reset-logging";
+import { getAppBaseUrl } from "@/lib/utils";
+import { createInviteToken, getInviteExpiresAt, hashInviteToken } from "@/lib/auth/employee-invitations";
+import { logPasswordResetEvent } from "@/lib/auth/password-reset-logging";
 import { prisma } from "@/lib/prisma";
 
 type RouteProps = { params: Promise<{ id: string }> };

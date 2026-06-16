@@ -1,15 +1,15 @@
 import { redirect } from "next/navigation";
 
 import { requireStaff } from "@/lib/auth";
-import { isAdminRole } from "@/lib/owner-account";
+import { isAdminRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/prisma";
 
-import { ConfirmSubmitButton, SubmitButton } from "../AdminControls";
-import styles from "../Admin.module.css";
-import { deleteVehicle, deleteVehiclePhoto, saveVehicle } from "../actions";
-import { ImageUploadField } from "../ImageUploadField";
-import { CreateVehicleAccordion } from "./CreateVehicleAccordion";
-import { FleetCardsPanel } from "./FleetCardsPanel";
+import { ConfirmSubmitButton, SubmitButton } from "@/components/admin/AdminControls";
+import styles from "@/components/admin/Admin.module.css";
+import { deleteVehicle, deleteVehiclePhoto, saveVehicle } from "@/server/actions/admin";
+import { ImageUploadField } from "@/components/admin/ImageUploadField";
+import { CreateVehicleAccordion } from "@/components/admin/fleet/CreateVehicleAccordion";
+import { FleetCardsPanel } from "@/components/admin/fleet/FleetCardsPanel";
 
 type PageProps = {
   params: Promise<{ locale: string }>;

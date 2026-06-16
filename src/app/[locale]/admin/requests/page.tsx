@@ -4,9 +4,9 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { ensureRequestStatuses } from "@/lib/requests";
 
-import { SubmitButton } from "../AdminControls";
-import styles from "../Admin.module.css";
-import { updateRequestStatus } from "../actions";
+import { SubmitButton } from "@/components/admin/AdminControls";
+import styles from "@/components/admin/Admin.module.css";
+import { updateRequestStatus } from "@/server/actions/admin";
 
 type RequestsPageProps = {
   params: Promise<{ locale: string }>;
