@@ -24,16 +24,28 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Не вдалося завантажити CV" }, { status: 503 });
     }
   }
-  await prisma.vacancyApplication.create({
+  const application = await prisma.vacancyApplication.create({
     data: {
       ...parsed.data,
       cvPublicId: uploaded?.public_id,
       cvUrl: uploaded?.secure_url,
     },
+    select: { id: true },
   });
   await sendMail({
     subject: `Нова заявка кандидата: ${vacancy.titleUk}`,
     text: `${parsed.data.name}\n${parsed.data.phone}\n${parsed.data.email ?? "-"}\n${parsed.data.comment ?? "-"}`,
-  }).catch(() => null);
+  }).then((result) => {
+    if (result.skipped) {
+      console.error("Vacancy application email notification skipped: Gmail SMTP is not configured.", {
+        applicationId: application.id,
+      });
+    }
+  }).catch((error) => {
+    console.error("Vacancy application email notification failed.", {
+      applicationId: application.id,
+      error,
+    });
+  });
   return NextResponse.json({ ok: true }, { status: 201 });
 }

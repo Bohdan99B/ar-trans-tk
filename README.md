@@ -30,6 +30,18 @@ PostgreSQL is available on `localhost:5433`.
 Setup environment variables
 DATABASE_URL=postgresql...
 
+Email notifications are sent through Gmail SMTP via Nodemailer. Configure a Gmail App Password on the Google account and use it here; do not use the regular account password:
+
+```env
+GMAIL_SMTP_HOST="smtp.gmail.com"
+GMAIL_SMTP_PORT="465"
+GMAIL_SMTP_SECURE="true"
+GMAIL_SMTP_USER="your-gmail-address@gmail.com"
+GMAIL_SMTP_APP_PASSWORD="your-google-app-password"
+MAIL_FROM="your-gmail-address@gmail.com"
+MAIL_TO="company-recipient@gmail.com"
+```
+
 ## Prisma migration
 
 In source of project:

@@ -1,7 +1,5 @@
 import nodemailer from "nodemailer";
 
-import { prisma } from "@/lib/prisma";
-
 type MailOptions = {
   subject: string;
   text: string;
@@ -10,56 +8,82 @@ type MailOptions = {
 
 type MailResult = { skipped: true } | { skipped: false };
 
-function getFromAddress(email: string) {
-  const name = process.env.SMTP_FROM_NAME ?? "AR Trans TK";
+function getEnv(name: string) {
+  const value = process.env[name]?.trim();
 
-  return `"${name.replaceAll('"', "'")}" <${email}>`;
+  return value || undefined;
 }
 
-async function getMailConfig() {
-  const values = await prisma.siteSetting.findMany({
-    where: { OR: [{ key: { startsWith: "smtp." } }, { key: "contact.recipientEmail" }] },
-  });
-  const settings = Object.fromEntries(values.map(({ key, value }) => [key, value]));
+function getFromAddress(email: string) {
+  if (email.includes("<") && email.includes(">")) {
+    return email;
+  }
 
-  return {
-    fromEmail: settings["smtp.from"] || process.env.SMTP_FROM,
-    host: settings["smtp.host"] || process.env.SMTP_HOST,
-    password: settings["smtp.password"] || process.env.SMTP_PASSWORD,
-    port: settings["smtp.port"] || process.env.SMTP_PORT || "587",
-    secure: (settings["smtp.secure"] || process.env.SMTP_SECURE) === "true",
-    to: settings["contact.recipientEmail"] || process.env.MANAGER_EMAIL,
-    user: settings["smtp.user"] || process.env.SMTP_USER,
-  };
+  return `"AR Trans TK" <${email}>`;
+}
+
+function getGmailTransportConfig() {
+  const host = getEnv("GMAIL_SMTP_HOST");
+  const portValue = getEnv("GMAIL_SMTP_PORT");
+  const secureValue = getEnv("GMAIL_SMTP_SECURE");
+  const user = getEnv("GMAIL_SMTP_USER");
+  const password = getEnv("GMAIL_SMTP_APP_PASSWORD");
+  const fromEmail = getEnv("MAIL_FROM");
+  const to = getEnv("MAIL_TO");
+  const port = Number(portValue);
+  const secure = secureValue === "true";
+
+  if (
+    host !== "smtp.gmail.com" ||
+    port !== 465 ||
+    secureValue !== "true" ||
+    !user ||
+    !password ||
+    !fromEmail ||
+    !to
+  ) {
+    console.error(
+      [
+        "Email delivery is not configured.",
+        "Set GMAIL_SMTP_HOST=smtp.gmail.com, GMAIL_SMTP_PORT=465, GMAIL_SMTP_SECURE=true, GMAIL_SMTP_USER,",
+        "GMAIL_SMTP_APP_PASSWORD, MAIL_FROM, and MAIL_TO in the server environment.",
+      ].join(" "),
+    );
+    return null;
+  }
+
+  return { fromEmail, host, password, port, secure, to, user };
 }
 
 export async function sendMail(options: MailOptions): Promise<MailResult> {
-  const config = await getMailConfig();
+  const config = getGmailTransportConfig();
 
-  if (!config.host || !config.fromEmail) {
+  if (!config) {
     return { skipped: true };
   }
 
   const transporter = nodemailer.createTransport({
-    auth:
-      config.user && config.password
-        ? {
-            pass: config.password,
-            user: config.user,
-          }
-        : undefined,
+    auth: {
+      pass: config.password,
+      user: config.user,
+    },
     host: config.host,
-    port: Number(config.port),
+    port: config.port,
     secure: config.secure,
   });
   const from = getFromAddress(config.fromEmail);
 
-  await transporter.sendMail({
-    from,
-    to: options.to ?? config.to ?? config.fromEmail,
-    subject: options.subject,
-    text: options.text,
-  });
+  try {
+    await transporter.sendMail({
+      from,
+      to: options.to ?? config.to,
+      subject: options.subject,
+      text: options.text,
+    });
+  } catch (error) {
+    console.error("Email delivery failed.", error);
+    throw error;
+  }
 
   return { skipped: false };
 }

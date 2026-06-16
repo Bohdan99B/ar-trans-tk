@@ -23,8 +23,20 @@ type ApplicationValue = {
   vacancyId: string | null;
 };
 
+type VacancyApplicationValue = {
+  comment: string | null;
+  createdAt: string;
+  cvUrl: string | null;
+  email: string | null;
+  id: string;
+  name: string;
+  phone: string;
+  vacancyId: string;
+};
+
 type VacancyValue = {
-  _count: { cooperationApplications: number };
+  _count: { applications: number; cooperationApplications: number };
+  applications: VacancyApplicationValue[];
   cooperationApplications: ApplicationValue[];
   createdAt: string;
   description: string;
@@ -164,9 +176,16 @@ export function VacanciesPanel({
                     </div>
                     <p className={styles.vacancyMeta}>{vacancy.location}{vacancy.salary ? ` · ${vacancy.salary}` : ""}</p>
                     <p className={styles.clampedText}>{vacancy.description}</p>
-                    <p className={styles.applicationCount}>Заявок на співпрацю: <strong>{vacancy._count.cooperationApplications}</strong></p>
-                    {vacancy.cooperationApplications.length ? (
+                    <p className={styles.applicationCount}>
+                      Відгуків на вакансію: <strong>{vacancy._count.applications}</strong>
+                      {" · "}
+                      Заявок на співпрацю: <strong>{vacancy._count.cooperationApplications}</strong>
+                    </p>
+                    {vacancy.applications.length || vacancy.cooperationApplications.length ? (
                       <ul className={styles.applicationPreview}>
+                        {vacancy.applications.slice(0, 3).map((application) => (
+                          <li key={application.id}>{application.name} <span>{application.phone}</span></li>
+                        ))}
                         {vacancy.cooperationApplications.slice(0, 3).map((application) => (
                           <li key={application.id}>{application.name} <span>{application.phone}</span></li>
                         ))}
@@ -207,8 +226,16 @@ export function VacanciesPanel({
                     <AnimatedPanel open={candidatesOpen}>
                       <section className={styles.candidates}>
                         <h3>Кандидати: {vacancy.titleUk}</h3>
-                        {vacancy.cooperationApplications.length === 0 ? <p className={styles.empty}>Заявок на цей напрям немає.</p> : (
+                        {vacancy.applications.length === 0 && vacancy.cooperationApplications.length === 0 ? <p className={styles.empty}>Заявок на цей напрям немає.</p> : (
                           <div className={styles.applicationList}>
+                            {vacancy.applications.map((application) => (
+                              <VacancyApplicationAccordion
+                                application={application}
+                                key={application.id}
+                                onToggle={() => setOpenCandidateId(openCandidateId === application.id ? undefined : application.id)}
+                                open={openCandidateId === application.id}
+                              />
+                            ))}
                             {vacancy.cooperationApplications.map((application) => (
                               <ApplicationAccordion
                                 application={application}
@@ -230,7 +257,7 @@ export function VacanciesPanel({
                           currentPage={vacancy.id === initialVacancyId ? candidatePage : 1}
                           href={(page) => hrefWithParams(locale, { candidatePage: page, generalPage, selectedVacancyId: vacancy.id, vacancyPage })}
                           label="Сторінки кандидатів"
-                          pageCount={candidatesOpen && vacancy.id === initialVacancyId ? candidatePageCount : Math.max(1, Math.ceil(vacancy._count.cooperationApplications / 6))}
+                          pageCount={candidatesOpen && vacancy.id === initialVacancyId ? candidatePageCount : Math.max(1, Math.ceil(Math.max(vacancy._count.applications, vacancy._count.cooperationApplications) / 6))}
                         />
                       </section>
                     </AnimatedPanel>
@@ -349,6 +376,34 @@ function AnimatedPanel({ children, open }: { children: React.ReactNode; open: bo
     <div aria-hidden={!open} className={styles.accordionBody} data-open={open} inert={!open ? true : undefined}>
       <div className={styles.accordionInner}>{children}</div>
     </div>
+  );
+}
+
+function VacancyApplicationAccordion({
+  application,
+  onToggle,
+  open,
+}: {
+  application: VacancyApplicationValue;
+  onToggle: () => void;
+  open: boolean;
+}) {
+  return (
+    <article className={styles.applicationAccordion}>
+      <button aria-expanded={open} className={styles.applicationSummary} onClick={onToggle} type="button">
+        <span><strong>{application.name}</strong><small>{application.phone}</small></span>
+        <span className={styles.statusTag}>Відгук на вакансію</span>
+        <b aria-hidden="true">{open ? "-" : "+"}</b>
+      </button>
+      <AnimatedPanel open={open}>
+        <div className={styles.applicationDetails}>
+          <p><strong>Електронна пошта:</strong> {application.email ?? "-"}</p>
+          <p className={styles.details}><strong>Коментар:</strong> {application.comment || "Коментар відсутній"}</p>
+          {application.cvUrl ? <p><strong>CV:</strong> <a href={application.cvUrl}>Відкрити файл</a></p> : null}
+          <p><strong>Дата:</strong> {applicationDateFormatter.format(new Date(application.createdAt))}</p>
+        </div>
+      </AnimatedPanel>
+    </article>
   );
 }
 

@@ -42,7 +42,11 @@ export default async function AdminVacanciesPage({ params, searchParams }: PageP
   const generalPage = Math.min(getPage(query.generalPage), generalPageCount);
   const vacancies = await prisma.vacancy.findMany({
     include: {
-      _count: { select: { cooperationApplications: true } },
+      _count: { select: { applications: true, cooperationApplications: true } },
+      applications: {
+        orderBy: { createdAt: "desc" },
+        take: PAGE_SIZE,
+      },
       cooperationApplications: {
         orderBy: { createdAt: "desc" },
         take: PAGE_SIZE,
@@ -57,16 +61,29 @@ export default async function AdminVacanciesPage({ params, searchParams }: PageP
     : undefined;
   const selectedVacancy = vacancies.find((vacancy) => vacancy.id === selectedVacancyId);
   const candidatePageCount = selectedVacancy
-    ? Math.max(1, Math.ceil(selectedVacancy._count.cooperationApplications / PAGE_SIZE))
+    ? Math.max(
+        1,
+        Math.ceil(Math.max(selectedVacancy._count.applications, selectedVacancy._count.cooperationApplications) / PAGE_SIZE),
+      )
     : 1;
   const candidatePage = Math.min(getPage(query.candidatePage), candidatePageCount);
   if (selectedVacancy && candidatePage > 1) {
-    selectedVacancy.cooperationApplications = await prisma.cooperationApplication.findMany({
-      orderBy: { createdAt: "desc" },
-      skip: (candidatePage - 1) * PAGE_SIZE,
-      take: PAGE_SIZE,
-      where: { vacancyId: selectedVacancy.id },
-    });
+    const [applications, cooperationApplications] = await Promise.all([
+      prisma.vacancyApplication.findMany({
+        orderBy: { createdAt: "desc" },
+        skip: (candidatePage - 1) * PAGE_SIZE,
+        take: PAGE_SIZE,
+        where: { vacancyId: selectedVacancy.id },
+      }),
+      prisma.cooperationApplication.findMany({
+        orderBy: { createdAt: "desc" },
+        skip: (candidatePage - 1) * PAGE_SIZE,
+        take: PAGE_SIZE,
+        where: { vacancyId: selectedVacancy.id },
+      }),
+    ]);
+    selectedVacancy.applications = applications;
+    selectedVacancy.cooperationApplications = cooperationApplications;
   }
   const generalApplications = await prisma.cooperationApplication.findMany({
     orderBy: { createdAt: "desc" },
@@ -94,6 +111,10 @@ export default async function AdminVacanciesPage({ params, searchParams }: PageP
       message={{ error: query.error, success: query.success }}
       vacancies={vacancies.map((vacancy) => ({
         ...vacancy,
+        applications: vacancy.applications.map((application) => ({
+          ...application,
+          createdAt: application.createdAt.toISOString(),
+        })),
         cooperationApplications: vacancy.cooperationApplications.map((application) => ({
           ...application,
           createdAt: application.createdAt.toISOString(),

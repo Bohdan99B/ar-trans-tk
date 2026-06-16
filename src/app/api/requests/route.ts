@@ -5,6 +5,10 @@ import { prisma } from "@/lib/prisma";
 import { createRequestNumber, getNewRequestStatus } from "@/lib/requests";
 import { orderRequestSchema } from "@/lib/validators";
 
+function getEmailErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Unknown email error";
+}
+
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const parsed = orderRequestSchema.safeParse(body);
@@ -60,14 +64,39 @@ export async function POST(request: Request) {
       await prisma.transportRequest.update({
         data: { emailSent: true },
         where: { id: transportRequest.id },
+      }).catch((error) => {
+        console.error("Failed to mark transport request email as sent.", {
+          error,
+          requestId: transportRequest.id,
+        });
+      });
+    } else {
+      await prisma.transportRequest.update({
+        data: { emailError: "Gmail SMTP не налаштовано; лист не відправлено." },
+        where: { id: transportRequest.id },
+      }).catch((error) => {
+        console.error("Failed to record skipped transport request email.", {
+          error,
+          requestId: transportRequest.id,
+        });
       });
     }
   } catch (error) {
+    const emailError = getEmailErrorMessage(error);
+    console.error("Transport request email notification failed.", {
+      error,
+      requestId: transportRequest.id,
+    });
     await prisma.transportRequest.update({
       data: {
-        emailError: error instanceof Error ? error.message : "Unknown email error",
+        emailError,
       },
       where: { id: transportRequest.id },
+    }).catch((updateError) => {
+      console.error("Failed to record transport request email error.", {
+        error: updateError,
+        requestId: transportRequest.id,
+      });
     });
   }
 

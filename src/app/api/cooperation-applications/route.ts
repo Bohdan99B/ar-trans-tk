@@ -4,6 +4,10 @@ import { sendMail } from "@/lib/mailer";
 import { prisma } from "@/lib/prisma";
 import { cooperationApplicationSchema } from "@/lib/validators";
 
+function getEmailErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Unknown email error";
+}
+
 export async function POST(request: Request) {
   const parsed = cooperationApplicationSchema.safeParse(await request.json().catch(() => null));
 
@@ -57,12 +61,37 @@ export async function POST(request: Request) {
       await prisma.cooperationApplication.update({
         data: { emailSent: true },
         where: { id: application.id },
+      }).catch((error) => {
+        console.error("Failed to mark cooperation application email as sent.", {
+          applicationId: application.id,
+          error,
+        });
+      });
+    } else {
+      await prisma.cooperationApplication.update({
+        data: { emailError: "Gmail SMTP не налаштовано; лист не відправлено." },
+        where: { id: application.id },
+      }).catch((error) => {
+        console.error("Failed to record skipped cooperation application email.", {
+          applicationId: application.id,
+          error,
+        });
       });
     }
   } catch (error) {
+    const emailError = getEmailErrorMessage(error);
+    console.error("Cooperation application email notification failed.", {
+      applicationId: application.id,
+      error,
+    });
     await prisma.cooperationApplication.update({
-      data: { emailError: error instanceof Error ? error.message : "Unknown email error" },
+      data: { emailError },
       where: { id: application.id },
+    }).catch((updateError) => {
+      console.error("Failed to record cooperation application email error.", {
+        applicationId: application.id,
+        error: updateError,
+      });
     });
   }
 
