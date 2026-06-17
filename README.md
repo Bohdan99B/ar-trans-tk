@@ -27,8 +27,16 @@ PostgreSQL is available on `localhost:5433`.
 
 ## Env
 
-Setup environment variables
-DATABASE_URL=postgresql...
+Setup environment variables. Use `.env.example` as a template.
+
+For production database hosting, keep two connection strings when the provider supports pooling:
+
+- `DATABASE_URL` - runtime application connection. On serverless hosts, prefer the pooled URL.
+- `DIRECT_URL` - direct database connection for Prisma CLI commands such as migrations.
+- `NEXTAUTH_URL`, `APP_URL`, and `NEXT_PUBLIC_SITE_URL` - public deployment URL.
+- `NEXTAUTH_SECRET` - long random server-only secret.
+
+Do not upload the local `.env` file to a deploy platform. Add production values manually in the platform's environment variable dashboard.
 
 Email notifications are sent through Gmail SMTP via Nodemailer. Configure a Gmail App Password on the Google account and use it here; do not use the regular account password:
 
@@ -49,6 +57,20 @@ In source of project:
 ```bash
 npx prisma migrate deploy
 npx prisma generate
+```
+
+For production, run migrations separately against the real production database before creating the first owner account. `prisma.config.ts` uses `DIRECT_URL` when it is present, falling back to `DATABASE_URL` only when `DIRECT_URL` is not set.
+
+Recommended Vercel build command:
+
+```bash
+npm run vercel-build
+```
+
+Run production migrations separately:
+
+```bash
+DIRECT_URL="postgresql://..." npx prisma migrate deploy
 ```
 
 ## Production: creating the first OWNER
