@@ -6,11 +6,12 @@ import { requireAdmin } from "@/lib/auth";
 import { getAppBaseUrl } from "@/lib/utils";
 import { createInviteToken, getInviteExpiresAt, hashInviteToken } from "@/lib/auth/employee-invitations";
 import { prisma } from "@/lib/prisma";
+import { requiredText } from "@/lib/validations";
 
 const createEmployeeSchema = z.object({
   email: z.string().trim().email("Некоректний email").toLowerCase(),
   locale: z.string().trim().regex(/^[a-z]{2}$/).optional().default("uk"),
-  name: z.string().trim().min(2, "Вкажіть ім'я"),
+  name: requiredText("Вкажіть ім’я співробітника.", 120),
   role: z.enum(["ADMIN", "MANAGER"]),
 });
 

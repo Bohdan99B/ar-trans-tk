@@ -10,9 +10,10 @@ export const validationMessages = {
 } as const;
 
 const namePattern = /^[A-Za-zА-Яа-яІіЇїЄєҐґ\s'’-]+$/u;
-const textPattern = /^[A-Za-zА-Яа-яІіЇїЄєҐґ0-9\s'’"“”.,-]+$/u;
-const locationPattern = /^[A-Za-zА-Яа-яІіЇїЄєҐґ0-9\s'’"“”.,()/-]+$/u;
 const adminPhonePattern = /^\+38 \(0\d{2}\) \d{3} \d{4}$/;
+const unsafeTextPattern = /[<>]|&(?:lt|gt);|<\/?\s*script\b/iu;
+const controlCharacterPattern = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/u;
+const unsafeTextMessage = "Не використовуйте HTML-теги або службові символи.";
 
 function emptyToUndefined(value: unknown) {
   return typeof value === "string" && value.trim() === "" ? undefined : value;
@@ -20,6 +21,10 @@ function emptyToUndefined(value: unknown) {
 
 function hasMeaningfulContent(value: string) {
   return /[\p{L}\p{N}]/u.test(value);
+}
+
+function isSafeHumanText(value: string) {
+  return !unsafeTextPattern.test(value) && !controlCharacterPattern.test(value);
 }
 
 export function isValidEmail(value: string) {
@@ -57,40 +62,44 @@ const requiredName = z.string()
   .min(2, validationMessages.name)
   .max(80, validationMessages.name)
   .regex(namePattern, validationMessages.name)
+  .refine(isSafeHumanText, unsafeTextMessage)
   .refine((value) => !/^\d+$/.test(value), validationMessages.name);
 
 const requiredCity = z.string()
   .trim()
   .min(2, "Вкажіть місто.")
   .max(80, "Вкажіть місто.")
-  .regex(namePattern, "Вкажіть місто.")
+  .refine(isSafeHumanText, unsafeTextMessage)
+  .refine(hasMeaningfulContent, "Вкажіть місто.")
   .refine((value) => !/^\d+$/.test(value), "Вкажіть місто.");
 
-const requiredText = (message: string, max = 100) => z.string()
+export const requiredText = (message: string, max = 100) => z.string()
   .trim()
   .min(2, message)
   .max(max, message)
-  .regex(textPattern, message)
+  .refine(isSafeHumanText, unsafeTextMessage)
   .refine(hasMeaningfulContent, message);
 
-const optionalText = (message: string, max = 100) => z.preprocess(
+export const optionalText = (message: string, max = 100) => z.preprocess(
   emptyToUndefined,
   requiredText(message, max).optional(),
 );
 
-const optionalTextarea = z.preprocess(
+export const optionalTextarea = z.preprocess(
   emptyToUndefined,
   z.string()
     .trim()
     .max(1000, "Коментар має містити не більше 1000 символів.")
+    .refine(isSafeHumanText, unsafeTextMessage)
     .refine(hasMeaningfulContent, "Коментар має містити змістовний текст.")
     .optional(),
 );
 
-const requiredTextarea = (message: string) => z.string()
+export const requiredTextarea = (message: string, max = 1000) => z.string()
   .trim()
   .min(5, message)
-  .max(1000, message)
+  .max(max, message)
+  .refine(isSafeHumanText, unsafeTextMessage)
   .refine(hasMeaningfulContent, message);
 
 const phone = z.string().trim().refine(isValidUkrainianPhone, validationMessages.phone);
@@ -125,14 +134,14 @@ const location = (message: string) => z.string()
   .trim()
   .min(2, message)
   .max(120, message)
-  .regex(locationPattern, message)
+  .refine(isSafeHumanText, unsafeTextMessage)
   .refine(hasMeaningfulContent, message);
 
 const temperatureMode = z.string()
   .trim()
   .min(1, "Вкажіть коректний температурний режим.")
   .max(80, "Вкажіть коректний температурний режим.")
-  .regex(/^[A-Za-zА-Яа-яІіЇїЄєҐґ0-9+\-°\s.,]+$/u, "Вкажіть коректний температурний режим.")
+  .refine(isSafeHumanText, unsafeTextMessage)
   .refine((value) => /\d/.test(value), "Вкажіть коректний температурний режим.");
 
 const weight = z.string()

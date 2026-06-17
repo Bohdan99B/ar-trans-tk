@@ -7,7 +7,14 @@ import { z } from "zod";
 import { requireAdmin, requireStaff } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { deleteImage, uploadImage, UploadImageError, type UploadedImage } from "@/lib/cloudinary";
-import { adminContactSchema, adminOfficeContactSchema } from "@/lib/validations";
+import {
+  adminContactSchema,
+  adminOfficeContactSchema,
+  optionalText,
+  optionalTextarea,
+  requiredText,
+  requiredTextarea,
+} from "@/lib/validations";
 
 const localeSchema = z.enum(["uk", "en"]);
 const idSchema = z.string().trim().min(1);
@@ -121,14 +128,19 @@ export async function updateCooperationApplicationStatus(data: FormData) {
 }
 
 const vehicleSchema = z.object({
-  brand: z.string().optional(),
-  description: z.string().optional(),
+  brand: optionalText("Вкажіть коректну марку транспорту.", 120),
+  description: optionalTextarea,
   isActive: z.boolean(),
   payloadTonnes: z.coerce.number().positive(),
   temperatureFrom: z.coerce.number(),
   temperatureTo: z.coerce.number(),
-  title: z.string().min(2, "Вкажіть реєстраційний номер"),
-  volume: z.string().optional(),
+  title: requiredText("Вкажіть реєстраційний номер.", 80),
+  volume: optionalText("Вкажіть коректний об’єм.", 80),
+});
+
+const managerVehicleSchema = vehicleSchema.pick({
+  description: true,
+  isActive: true,
 });
 
 export async function saveVehicle(data: FormData) {
@@ -143,10 +155,17 @@ export async function saveVehicle(data: FormData) {
     if (!id) {
       redirect(adminPath(locale, "fleet", "error", "Менеджер не може додавати транспорт"));
     }
+    const parsed = managerVehicleSchema.safeParse({
+      description: field(data, "description"),
+      isActive: data.get("isActive") === "on",
+    });
+    if (!parsed.success) {
+      redirect(adminPath(locale, "fleet", "error", "Перевірте опис транспорту"));
+    }
     await prisma.vehicle.update({
       data: {
-        description: field(data, "description"),
-        isActive: data.get("isActive") === "on",
+        description: parsed.data.description ?? null,
+        isActive: parsed.data.isActive,
       },
       where: { id },
     });
@@ -184,8 +203,14 @@ export async function saveVehicle(data: FormData) {
     ? await prisma.vehicle.findUnique({ select: { photoPublicId: true }, where: { id } })
     : null;
   const shouldRemovePhoto = data.get("removePhoto") === "on";
-  const update = {
+  const vehicleValues = {
     ...parsed.data,
+    brand: parsed.data.brand ?? null,
+    description: parsed.data.description ?? null,
+    volume: parsed.data.volume ?? null,
+  };
+  const update = {
+    ...vehicleValues,
     ...(uploaded ? { photoPublicId: uploaded.key, photoUrl: uploaded.url } : {}),
     ...(!uploaded && shouldRemovePhoto ? { photoPublicId: null, photoUrl: null } : {}),
   };
@@ -257,9 +282,9 @@ export async function deleteVehiclePhoto(data: FormData) {
 }
 
 const reviewSchema = z.object({
-  author: z.string().min(2, "Вкажіть ім'я"),
-  body: z.string().min(5, "Вкажіть текст відгуку"),
-  company: z.string().optional(),
+  author: requiredText("Вкажіть ім’я клієнта.", 120),
+  body: requiredTextarea("Вкажіть текст відгуку.", 2000),
+  company: optionalText("Вкажіть коректну назву компанії.", 160),
   moderationStatus: z.enum(["PENDING", "PUBLISHED", "HIDDEN"]),
 });
 
@@ -284,7 +309,11 @@ export async function saveReview(data: FormData) {
     redirect(reviewResultPath(data, locale, "error", "Перевірте поля відгуку"));
   }
   const id = field(data, "id");
-  const values = { ...parsed.data, isPublished: parsed.data.moderationStatus === "PUBLISHED" };
+  const values = {
+    ...parsed.data,
+    company: parsed.data.company ?? null,
+    isPublished: parsed.data.moderationStatus === "PUBLISHED",
+  };
   if (id) {
     await prisma.review.update({ data: values, where: { id } });
   } else {
@@ -309,13 +338,13 @@ export async function deleteReview(data: FormData) {
 }
 
 const vacancySchema = z.object({
-  description: z.string().min(5, "Вкажіть опис"),
-  location: z.string().min(2, "Вкажіть локацію"),
-  requirements: z.string().optional(),
-  salary: z.string().optional(),
+  description: requiredTextarea("Вкажіть опис вакансії.", 5000),
+  location: requiredText("Вкажіть локацію.", 160),
+  requirements: optionalTextarea,
+  salary: optionalText("Вкажіть коректні умови оплати.", 160),
   status: z.enum(["ACTIVE", "ARCHIVED"]),
-  titleEn: z.string().min(2, "Вкажіть назву англійською"),
-  titleUk: z.string().min(2, "Вкажіть назву"),
+  titleEn: requiredText("Вкажіть назву англійською.", 160),
+  titleUk: requiredText("Вкажіть назву.", 160),
 });
 
 function parseVacancy(data: FormData) {
@@ -340,7 +369,12 @@ export async function saveVacancy(data: FormData) {
     redirect(vacancyResultPath(data, locale, "error", "Перевірте поля вакансії"));
   }
   const id = field(data, "id");
-  const values = { ...parsed.data, isPublished: parsed.data.status === "ACTIVE" };
+  const values = {
+    ...parsed.data,
+    isPublished: parsed.data.status === "ACTIVE",
+    requirements: parsed.data.requirements ?? null,
+    salary: parsed.data.salary ?? null,
+  };
   if (id) {
     await prisma.vacancy.update({ data: values, where: { id } });
   } else {
@@ -369,7 +403,12 @@ export async function saveVacancyInline(
     return { error: "Вакансію не знайдено" };
   }
   const updated = await prisma.vacancy.update({
-    data: { ...parsed.data, isPublished: parsed.data.status === "ACTIVE" },
+    data: {
+      ...parsed.data,
+      isPublished: parsed.data.status === "ACTIVE",
+      requirements: parsed.data.requirements ?? null,
+      salary: parsed.data.salary ?? null,
+    },
     where: { id: id.data },
   });
   revalidateAdmin(locale, "vacancies");
@@ -634,14 +673,14 @@ export async function saveContentSettings(data: FormData) {
 }
 
 const serviceSchema = z.object({
-  bodyEn: z.string().min(2),
-  bodyUk: z.string().min(2),
+  bodyEn: requiredTextarea("Вкажіть опис послуги англійською.", 6000),
+  bodyUk: requiredTextarea("Вкажіть опис послуги українською.", 6000),
   isPublished: z.boolean(),
   slug: z.string().regex(/^[a-z0-9-]+$/, "URL-ідентифікатор має містити лише латиницю, цифри та дефіс"),
-  summaryEn: z.string().min(2),
-  summaryUk: z.string().min(2),
-  titleEn: z.string().min(2),
-  titleUk: z.string().min(2),
+  summaryEn: requiredText("Вкажіть короткий опис англійською.", 500),
+  summaryUk: requiredText("Вкажіть короткий опис українською.", 500),
+  titleEn: requiredText("Вкажіть назву англійською.", 160),
+  titleUk: requiredText("Вкажіть назву українською.", 160),
 });
 
 export async function saveServiceContent(data: FormData) {
@@ -682,11 +721,11 @@ export async function saveServiceContent(data: FormData) {
 }
 
 const routeSchema = z.object({
-  country: z.string().min(2),
-  destination: z.string().min(2),
-  direction: z.string().min(2),
+  country: requiredText("Вкажіть країну.", 120),
+  destination: requiredText("Вкажіть пункт призначення.", 160),
+  direction: requiredText("Вкажіть напрям.", 160),
   isActive: z.boolean(),
-  origin: z.string().min(2),
+  origin: requiredText("Вкажіть пункт відправлення.", 160),
 });
 
 export async function saveGeographyRoute(data: FormData) {
@@ -720,11 +759,11 @@ export async function saveGeographyRoute(data: FormData) {
 }
 
 const faqSchema = z.object({
-  answerEn: z.string().min(2),
-  answerUk: z.string().min(2),
+  answerEn: requiredTextarea("Вкажіть відповідь англійською.", 3000),
+  answerUk: requiredTextarea("Вкажіть відповідь українською.", 3000),
   isPublished: z.boolean(),
-  questionEn: z.string().min(2),
-  questionUk: z.string().min(2),
+  questionEn: requiredText("Вкажіть питання англійською.", 300),
+  questionUk: requiredText("Вкажіть питання українською.", 300),
   sortOrder: z.coerce.number().int(),
 });
 
